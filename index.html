@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Referral Tier Analytics</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg:   #f4f3ef;
+    --sur:  #ffffff;
+    --bd:   rgba(0,0,0,0.10);
+    --txt:  #1a1a18;
+    --mu:   #6b6b67;
+    --r:    10px;
+    --tc-platinum:#c084fc; --tc-gold:#f59e0b; --tc-silver:#94a3b8;
+    --tc-bronze:#b87333;   --tc-stones:#64748b; --tc-sticks:#475569;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{--bg:#1a1a18;--sur:#242420;--bd:rgba(255,255,255,0.10);--txt:#e8e6de;--mu:#9c9a92}
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;
+       background:var(--bg);color:var(--txt);min-height:100vh}
+
+  /* ── TOP BAR ─────────────────────────────────────── */
+  .topbar{background:var(--sur);border-bottom:0.5px solid var(--bd);
+          padding:12px 24px;display:flex;align-items:center;
+          justify-content:space-between;gap:12px;position:sticky;top:0;z-index:50}
+  .logo{font-size:15px;font-weight:500;display:flex;align-items:center;gap:8px}
+  .logo-dot{width:8px;height:8px;border-radius:50%;background:#c084fc;flex-shrink:0}
+  .meta-info{font-size:11px;color:var(--mu)}
+  .topbar-right{display:flex;align-items:center;gap:10px}
+  select,button{border:0.5px solid var(--bd);background:var(--sur);color:var(--txt);
+                padding:5px 12px;border-radius:7px;cursor:pointer;font-size:12px}
+  button:hover,select:hover{background:var(--bg)}
+  button.primary{background:#c084fc;border-color:#c084fc;color:#fff;font-weight:500}
+  button.primary:hover{background:#a855f7}
+
+  /* ── LAYOUT ──────────────────────────────────────── */
+  .page{max-width:1200px;margin:0 auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px}
+
+  /* ── METRIC CARDS ────────────────────────────────── */
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+  .met{background:var(--bg);border-radius:8px;padding:12px 14px}
+  .met-lbl{font-size:11px;color:var(--mu);margin-bottom:4px}
+  .met-val{font-size:24px;font-weight:500;letter-spacing:-.5px}
+  .met-sub{font-size:10px;color:var(--mu);margin-top:2px}
+
+  /* ── CARDS ───────────────────────────────────────── */
+  .card{background:var(--sur);border:0.5px solid var(--bd);border-radius:var(--r);padding:18px 20px}
+  .card-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:10px}
+  .card-t{font-size:13px;font-weight:500}
+  .card-s{font-size:11px;color:var(--mu);margin-top:2px}
+  .card-actions{display:flex;gap:6px;flex-shrink:0}
+
+  /* ── TIER LEGEND ─────────────────────────────────── */
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+  .lc{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--mu)}
+  .ldot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+  /* ── MOM BARS ────────────────────────────────────── */
+  .mom{display:flex;flex-direction:column;gap:8px}
+  .mom-row{display:flex;align-items:center;gap:10px}
+  .mom-lbl{font-size:11px;color:var(--mu);width:52px;text-align:right;flex-shrink:0}
+  .mom-bar{flex:1;height:28px;border-radius:6px;overflow:hidden;display:flex;background:var(--bg)}
+  .seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:10px;
+       color:rgba(255,255,255,.9);overflow:hidden;white-space:nowrap;transition:width .4s ease}
+  .mom-tot{font-size:11px;color:var(--mu);width:42px;text-align:left;flex-shrink:0}
+
+  /* ── TIER TABLE ──────────────────────────────────── */
+  .ttbl{width:100%;border-collapse:collapse;font-size:12px}
+  .ttbl th{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;
+           color:var(--mu);padding:6px 8px;text-align:left;border-bottom:0.5px solid var(--bd)}
+  .ttbl td{padding:7px 8px;border-bottom:0.5px solid var(--bd)}
+  .ttbl tr:last-child td{border-bottom:none}
+  .badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:10px;font-weight:500;color:#fff}
+
+  /* ── SSEID TABLE ─────────────────────────────────── */
+  .search-row{display:flex;gap:8px;margin-bottom:10px}
+  .search-row input,.search-row select{
+    flex:1;border:0.5px solid var(--bd);background:var(--sur);color:var(--txt);
+    padding:6px 10px;border-radius:7px;font-size:12px;outline:none}
+  .search-row input:focus,.search-row select:focus{border-color:#c084fc}
+  .dtbl-wrap{overflow-x:auto;max-height:380px;overflow-y:auto}
+  .dtbl{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+  .dtbl th{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;
+           color:var(--mu);padding:6px 8px;text-align:left;background:var(--sur);
+           position:sticky;top:0;border-bottom:0.5px solid var(--bd)}
+  .dtbl td{padding:6px 8px;border-bottom:0.5px solid var(--bd);
+           overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dtbl tr:last-child td{border-bottom:none}
+  .dtbl tr:hover td{background:var(--bg)}
+
+  /* ── EMPTY / LOADING ─────────────────────────────── */
+  .loading{display:flex;align-items:center;justify-content:center;padding:48px;
+           color:var(--mu);font-size:13px;gap:8px}
+  .spinner{width:16px;height:16px;border:2px solid var(--bd);
+           border-top-color:#c084fc;border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .err-box{background:#fcebeb;border:0.5px solid rgba(162,45,45,.3);color:#a32d2d;
+           border-radius:8px;padding:12px 16px;font-size:12px}
+
+  /* ── CITY CHART GRID ─────────────────────────────── */
+  .city-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+  .city-card{background:var(--sur);border:0.5px solid var(--bd);border-radius:var(--r);padding:14px 16px}
+  .city-name{font-size:12px;font-weight:500;margin-bottom:10px}
+  .city-bar{display:flex;height:18px;border-radius:4px;overflow:hidden;background:var(--bg);margin-bottom:6px}
+  .city-stat{display:flex;justify-content:space-between;font-size:10px;color:var(--mu)}
+
+  @media(max-width:640px){
+    .page{padding:12px 14px}
+    .topbar{padding:10px 14px}
+    .metrics{grid-template-columns:repeat(2,1fr)}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    Referral Tier Analytics
+  </div>
+  <div class="topbar-right">
+    <span class="meta-info" id="metaInfo">Loading…</span>
+    <select id="cityFilter" onchange="applyFilters()"><option value="">All cities</option></select>
+    <select id="tierFilter" onchange="applyFilters()">
+      <option value="">All tiers</option>
+      <option>Platinum</option><option>Gold</option><option>Silver</option>
+      <option>Bronze</option><option>Stones</option><option>Sticks</option>
+    </select>
+    <button class="primary" onclick="exportCSV()">↓ Export CSV</button>
+  </div>
+</div>
+
+<div class="page" id="page">
+  <div class="loading"><div class="spinner"></div>Loading dashboard data…</div>
+</div>
+
+<script>
+const TIER_ORDER = ["Platinum","Gold","Silver","Bronze","Stones","Sticks"];
+const TIER_COLORS = {
+  Platinum:"#c084fc",Gold:"#f59e0b",Silver:"#94a3b8",
+  Bronze:"#b87333",Stones:"#64748b",Sticks:"#475569"
+};
+const TIER_CONDITIONS = {
+  Platinum:"≥ 12 referral orders",Gold:"7–11 referral orders",
+  Silver:"3–6 referral orders",Bronze:"1–2 referral orders",
+  Stones:"≥ 1 lead, 0 orders",Sticks:"0 leads, 0 orders"
+};
+
+let DATA = { mom: null, sseid: null, meta: null };
+
+// ── FETCH ALL DATA ─────────────────────────────────────────────────────────
+async function loadData() {
+  try {
+    const [mom, sseid, meta] = await Promise.all([
+      fetch("data/tier_mom.json").then(r => r.json()),
+      fetch("data/tier_sseid.json").then(r => r.json()),
+      fetch("data/meta.json").then(r => r.json()),
+    ]);
+    DATA = { mom, sseid, meta };
+
+    // Populate city filter
+    const cities = [...new Set([
+      ...(mom.meta?.clusters || []),
+      ...(sseid.meta?.cities || []),
+    ])].sort();
+    const cf = document.getElementById("cityFilter");
+    cities.forEach(c => { const o = document.createElement("option"); o.value=c; o.textContent=c; cf.appendChild(o); });
+
+    // Meta info
+    const gi = meta.generated_at ? new Date(meta.generated_at).toLocaleString("en-IN",{timeZone:"Asia/Kolkata",hour12:true}) : "";
+    document.getElementById("metaInfo").textContent = `Updated ${gi} IST`;
+
+    applyFilters();
+  } catch(e) {
+    document.getElementById("page").innerHTML =
+      `<div class="err-box">Failed to load data. ${e.message}<br><br>
+       Make sure the ETL has run at least once and <code>data/tier_mom.json</code> exists.<br>
+       If running locally, serve this folder with a static server (e.g. <code>python -m http.server 8080</code>).</div>`;
+  }
+}
+
+// ── FILTERS ────────────────────────────────────────────────────────────────
+function applyFilters() {
+  const city = document.getElementById("cityFilter").value;
+  const tier = document.getElementById("tierFilter").value;
+  renderAll(city, tier);
+}
+
+// ── MAIN RENDER ────────────────────────────────────────────────────────────
+function renderAll(cityFilter, tierFilter) {
+  const { mom, sseid } = DATA;
+  if (!mom || !sseid) return;
+
+  const latestMonth = mom.months[mom.months.length - 1];
+  const latestByTier = latestMonth?.by_tier || {};
+
+  // Filter MoM data by city
+  function filterMomMonth(m) {
+    if (!cityFilter) return m.by_tier;
+    const key = `${cityFilter}|`;
+    const bt = {};
+    TIER_ORDER.forEach(t => {
+      bt[t] = m.by_cluster_tier?.[`${cityFilter}|${t}`] || 0;
+    });
+    return bt;
+  }
+
+  // Filter SSEID rows
+  let sseidRows = sseid.records || [];
+  if (cityFilter) sseidRows = sseidRows.filter(r => r.city === cityFilter);
+  if (tierFilter) sseidRows = sseidRows.filter(r => r.tier === tierFilter);
+  window._filteredRows = sseidRows;
+
+  // Compute metrics from latest month
+  const latestFiltered = filterMomMonth(latestMonth || {by_tier:{},by_cluster_tier:{}});
+  const total    = Object.values(latestFiltered).reduce((s,v) => s+v, 0);
+  const active   = TIER_ORDER.filter(t => t !== "Sticks").reduce((s,t) => s+(latestFiltered[t]||0), 0);
+  const orderers = ["Platinum","Gold","Silver","Bronze"].reduce((s,t) => s+(latestFiltered[t]||0), 0);
+  const engPct   = total ? Math.round(active/total*100) : 0;
+
+  document.getElementById("page").innerHTML = `
+  <div class="metrics">
+    <div class="met"><div class="met-lbl">Total assets</div>
+      <div class="met-val">${total.toLocaleString()}</div>
+      <div class="met-sub">${latestMonth?.label || "—"}</div></div>
+    <div class="met"><div class="met-lbl">Engaged (non-Sticks)</div>
+      <div class="met-val">${active.toLocaleString()}</div>
+      <div class="met-sub">${engPct}% of base</div></div>
+    <div class="met"><div class="met-lbl">Order referrers</div>
+      <div class="met-val">${orderers.toLocaleString()}</div>
+      <div class="met-sub">Bronze or above</div></div>
+    <div class="met"><div class="met-lbl">Months shown</div>
+      <div class="met-val">${mom.months.length}</div>
+      <div class="met-sub">${mom.months[0]?.label} – ${latestMonth?.label}</div></div>
+  </div>
+
+  ${mom.months.length ? `
+  <div class="card">
+    <div class="card-hd">
+      <div><div class="card-t">Month-over-month tier distribution</div>
+           <div class="card-s">Cumulative asset base · each bar = all projects commissioned to that date</div></div>
+    </div>
+    <div class="legend" id="leg"></div>
+    <div class="mom" id="momBars"></div>
+  </div>` : ""}
+
+  ${mom.months.length ? `
+  <div class="card">
+    <div class="card-hd">
+      <div><div class="card-t">Tier breakdown — ${latestMonth?.label}</div>
+           <div class="card-s">Count and share per tier${cityFilter ? " · "+cityFilter : ""}</div></div>
+    </div>
+    <table class="ttbl">
+      <thead><tr><th style="width:90px">Tier</th><th>Count</th><th>Share</th><th>Condition</th></tr></thead>
+      <tbody id="tierTbody"></tbody>
+    </table>
+  </div>` : ""}
+
+  ${sseid.records?.length ? `
+  <div class="card">
+    <div class="card-hd">
+      <div><div class="card-t">SSEID detail</div>
+           <div class="card-s">As of ${sseid.meta?.as_of_date} · <span id="sseidCount"></span> shown</div></div>
+    </div>
+    <div class="search-row">
+      <input type="text" id="srch" placeholder="Search SSEID or city…" oninput="filterTable()"/>
+      <select id="tfil" onchange="filterTable()">
+        <option value="">All tiers</option>
+        ${TIER_ORDER.map(t=>`<option value="${t}"${tierFilter===t?" selected":""}>${t}</option>`).join("")}
+      </select>
+    </div>
+    <div class="dtbl-wrap">
+      <table class="dtbl">
+        <thead><tr>
+          <th style="width:200px">SSEID</th>
+          <th style="width:130px">City</th>
+          <th style="width:70px">Leads</th>
+          <th style="width:70px">Orders</th>
+          <th style="width:90px">Tier</th>
+        </tr></thead>
+        <tbody id="sseidBody"></tbody>
+      </table>
+    </div>
+  </div>` : ""}
+
+  ${mom.meta?.clusters?.length > 1 ? `
+  <div class="card">
+    <div class="card-hd">
+      <div><div class="card-t">City breakdown — ${latestMonth?.label}</div>
+           <div class="card-s">Tier distribution per city</div></div>
+    </div>
+    <div class="city-grid" id="cityGrid"></div>
+  </div>` : ""}
+  `;
+
+  // Legend
+  const leg = document.getElementById("leg");
+  if (leg) TIER_ORDER.forEach(t => {
+    leg.innerHTML += `<span class="lc"><span class="ldot" style="background:${TIER_COLORS[t]}"></span>${t}</span>`;
+  });
+
+  // MoM bars
+  const momBars = document.getElementById("momBars");
+  if (momBars) {
+    mom.months.forEach(mo => {
+      const bt = filterMomMonth(mo);
+      const tot = Object.values(bt).reduce((s,v)=>s+v,0);
+      if (!tot) return;
+      const segs = TIER_ORDER
+        .map(t => ({ t, c: bt[t]||0, p: (bt[t]||0)/tot*100 }))
+        .filter(s => s.p > 0);
+      momBars.innerHTML += `<div class="mom-row">
+        <div class="mom-lbl">${mo.label}</div>
+        <div class="mom-bar">${segs.map(s =>
+          `<div class="seg" title="${s.t}: ${s.c.toLocaleString()}"
+               style="width:${s.p.toFixed(1)}%;background:${TIER_COLORS[s.t]}">${s.p > 5 ? s.c : ""}</div>`
+        ).join("")}</div>
+        <div class="mom-tot">${tot.toLocaleString()}</div>
+      </div>`;
+    });
+  }
+
+  // Tier table
+  const ttbody = document.getElementById("tierTbody");
+  if (ttbody) TIER_ORDER.forEach(t => {
+    const c = latestFiltered[t] || 0;
+    const sh = total ? (c/total*100).toFixed(1) : "0.0";
+    ttbody.innerHTML += `<tr>
+      <td><span class="badge" style="background:${TIER_COLORS[t]}">${t}</span></td>
+      <td>${c.toLocaleString()}</td><td>${sh}%</td>
+      <td style="color:var(--mu);font-size:11px">${TIER_CONDITIONS[t]}</td>
+    </tr>`;
+  });
+
+  // City grid
+  const cg = document.getElementById("cityGrid");
+  if (cg) {
+    const clusters = mom.meta.clusters || [];
+    clusters.forEach(city => {
+      const bt = {};
+      TIER_ORDER.forEach(t => { bt[t] = latestMonth?.by_cluster_tier?.[`${city}|${t}`] || 0; });
+      const tot = Object.values(bt).reduce((s,v)=>s+v,0);
+      if (!tot) return;
+      const segs = TIER_ORDER.filter(t=>bt[t]>0).map(t=>({ t, p: bt[t]/tot*100, c: bt[t] }));
+      const non = TIER_ORDER.filter(t=>t!=="Sticks").reduce((s,t)=>s+(bt[t]||0),0);
+      cg.innerHTML += `<div class="city-card">
+        <div class="city-name">${city} <span style="font-weight:400;color:var(--mu)">(${tot.toLocaleString()})</span></div>
+        <div class="city-bar">${segs.map(s=>`<div style="width:${s.p.toFixed(1)}%;background:${TIER_COLORS[s.t]}" title="${s.t}: ${s.c}"></div>`).join("")}</div>
+        <div class="city-stat">
+          <span>Engaged: ${Math.round(non/tot*100)}%</span>
+          <span>Sticks: ${(bt["Sticks"]||0).toLocaleString()}</span>
+        </div>
+      </div>`;
+    });
+  }
+
+  // SSEID table
+  window._currentRows = sseidRows;
+  filterTable();
+}
+
+function filterTable() {
+  const q  = (document.getElementById("srch")?.value || "").toLowerCase();
+  const tf = document.getElementById("tfil")?.value || "";
+  const rows = (window._currentRows || []).filter(r =>
+    (!q  || (r.sseid||"").toLowerCase().includes(q) || (r.city||"").toLowerCase().includes(q)) &&
+    (!tf || r.tier === tf)
+  );
+  const body = document.getElementById("sseidBody");
+  const cnt  = document.getElementById("sseidCount");
+  if (!body) return;
+  if (cnt) cnt.textContent = rows.length.toLocaleString()+" rows";
+  body.innerHTML = rows.slice(0, 1000).map(r => `<tr>
+    <td style="font-family:monospace;font-size:11px">${r.sseid || "—"}</td>
+    <td>${r.city || "—"}</td>
+    <td>${r.leads}</td>
+    <td>${r.orders}</td>
+    <td><span class="badge" style="background:${TIER_COLORS[r.tier]||"#888"}">${r.tier}</span></td>
+  </tr>`).join("") + (rows.length > 1000
+    ? `<tr><td colspan="5" style="text-align:center;color:var(--mu);padding:8px">
+         Showing 1,000 of ${rows.length.toLocaleString()} rows. Use filters or export CSV for full data.
+       </td></tr>` : "");
+}
+
+function exportCSV() {
+  const rows = window._filteredRows || window._currentRows || DATA.sseid?.records || [];
+  if (!rows.length) { alert("No data to export. Load the dashboard first."); return; }
+  const headers = ["SSEID","City","Leads Given","Orders Given","Tier"];
+  const csv = [headers, ...rows.map(r => [r.sseid, r.city, r.leads, r.orders, r.tier])]
+    .map(row => row.map(v => `"${(v||"").toString().replace(/"/g,'""')}"`).join(","))
+    .join("\n");
+  const a = document.createElement("a");
+  a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+  a.download = `referral_tiers_${DATA.meta?.latest_end_date || new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+loadData();
+</script>
+</body>
+</html>
