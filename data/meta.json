@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-05-31T11:19:59Z",
+  "generated_at": "2026-06-01T19:25:50Z",
   "months_fetched": 6,
-  "range_start": "Dec '25",
-  "range_end": "May '26",
-  "latest_end_date": "2026-05-31",
+  "range_start": "Jan '26",
+  "range_end": "Jun '26",
+  "latest_end_date": "2026-06-30",
   "agg_card_id": 3262,
   "sseid_card_id": 3263
 }
