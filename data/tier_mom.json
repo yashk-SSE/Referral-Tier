@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-06-03T16:06:07Z",
+    "generated_at": "2026-06-03T19:07:05Z",
     "months": 6,
     "clusters": [
       "Agra",
@@ -761,13 +761,13 @@
     {
       "label": "Jun '26",
       "end_date": "2026-06-30",
-      "total": 43310,
+      "total": 43311,
       "by_tier": {
         "Platinum": 4,
         "Gold": 51,
         "Silver": 1008,
         "Bronze": 9174,
-        "Stones": 12274,
+        "Stones": 12275,
         "Sticks": 20799
       },
       "by_cluster_tier": {
@@ -802,8 +802,8 @@
         "Bengaluru|Stones": 626,
         "Bhopal|Bronze": 809,
         "Bhopal|Silver": 79,
-        "Bhopal|Sticks": 1429,
-        "Bhopal|Stones": 1453,
+        "Bhopal|Sticks": 1428,
+        "Bhopal|Stones": 1454,
         "Chennai|Bronze": 156,
         "Chennai|Silver": 9,
         "Chennai|Sticks": 413,
@@ -885,7 +885,7 @@
         "Noida|Bronze": 146,
         "Noida|Gold": 1,
         "Noida|Silver": 9,
-        "Noida|Sticks": 433,
+        "Noida|Sticks": 434,
         "Noida|Stones": 160,
         "None|Sticks": 2,
         "None|Stones": 1,
