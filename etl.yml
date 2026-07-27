@@ -1,0 +1,60 @@
+name: Referral Tier ETL
+
+on:
+  # Runs daily at 4:30 AM IST (= 23:00 UTC previous day)
+  # and again at 10:30 AM IST (= 05:00 UTC) for a mid-day refresh
+  schedule:
+    - cron: '0 23 * * *'
+    - cron: '0 5  * * *'
+
+  # Run manually from GitHub → Actions tab anytime
+  workflow_dispatch:
+    inputs:
+      months:
+        description: 'How many months back to fetch (default 6)'
+        required: false
+        default: '6'
+      end_month:
+        description: 'Override end month as YYYY-MM (leave blank for current month)'
+        required: false
+        default: ''
+
+jobs:
+  etl:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed for git push
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install requests python-dotenv
+
+      - name: Run ETL
+        env:
+          METABASE_URL:           ${{ secrets.METABASE_URL }}
+          METABASE_API_KEY:       ${{ secrets.METABASE_API_KEY }}
+          METABASE_USERNAME:      ${{ secrets.METABASE_USERNAME }}
+          METABASE_PASSWORD:      ${{ secrets.METABASE_PASSWORD }}
+          METABASE_AGG_CARD_ID:   ${{ secrets.METABASE_AGG_CARD_ID }}
+          METABASE_SSEID_CARD_ID: ${{ secrets.METABASE_SSEID_CARD_ID }}
+          METABASE_HELDBASE_CARD_ID: ${{ secrets.METABASE_HELDBASE_CARD_ID }}
+          MONTHS:                 ${{ github.event.inputs.months || '6' }}
+          END_MONTH:              ${{ github.event.inputs.end_month || '' }}
+        run: python etl.py
+
+      - name: Commit data if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git diff --staged --quiet && echo "No changes to commit." || \
+            (git commit -m "data: refresh $(date -u +%Y-%m-%dT%H:%M:%SZ) [skip ci]" && git push)

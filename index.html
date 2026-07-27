@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Referral Tier Analytics</title>
+<link rel="icon" type="image/png" href="sse-logo.png"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   :root {
@@ -13,11 +14,12 @@
     --txt:  #1a1a18;
     --mu:   #6b6b67;
     --r:    10px;
+    /* Brand palette */
+    --brand-navy:#131ca2; --brand-blue:#00bdff; --brand-gold:#FFC100;
+    --accent: var(--brand-blue); --accent-hover: var(--brand-navy);
     --tc-platinum:#c084fc; --tc-gold:#f59e0b; --tc-silver:#94a3b8;
-    --tc-bronze:#b87333;   --tc-stones:#64748b; --tc-sticks:#475569;
-  }
-  @media(prefers-color-scheme:dark){
-    :root{--bg:#1a1a18;--sur:#242420;--bd:rgba(255,255,255,0.10);--txt:#e8e6de;--mu:#9c9a92}
+    --tc-bronze:#b87333;   --tc-stones:#78716c; --tc-sticks:#78350f;
+    --tc-metals: var(--brand-gold);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;
@@ -28,14 +30,19 @@
           padding:12px 24px;display:flex;align-items:center;
           justify-content:space-between;gap:12px;position:sticky;top:0;z-index:50}
   .logo{font-size:15px;font-weight:500;display:flex;align-items:center;gap:8px}
-  .logo-dot{width:8px;height:8px;border-radius:50%;background:#c084fc;flex-shrink:0}
+  .logo-img{height:24px;width:auto;flex-shrink:0}
   .meta-info{font-size:11px;color:var(--mu)}
   .topbar-right{display:flex;align-items:center;gap:10px}
   select,button{border:0.5px solid var(--bd);background:var(--sur);color:var(--txt);
                 padding:5px 12px;border-radius:7px;cursor:pointer;font-size:12px}
   button:hover,select:hover{background:var(--bg)}
-  button.primary{background:#c084fc;border-color:#c084fc;color:#fff;font-weight:500}
-  button.primary:hover{background:#a855f7}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500}
+  button.primary:hover{background:var(--accent-hover)}
+
+  /* ── VIEW-MODE TOGGLE ────────────────────────────── */
+  .seg-toggle{display:flex;border:0.5px solid var(--bd);border-radius:7px;overflow:hidden;flex-shrink:0}
+  .seg-toggle button{border:0;border-radius:0;padding:5px 10px;font-size:11px}
+  .seg-toggle button.on{background:var(--accent);color:#fff;font-weight:500}
 
   /* ── LAYOUT ──────────────────────────────────────── */
   .page{max-width:1200px;margin:0 auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px}
@@ -75,13 +82,22 @@
   .ttbl td{padding:7px 8px;border-bottom:0.5px solid var(--bd)}
   .ttbl tr:last-child td{border-bottom:none}
   .badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:10px;font-weight:500;color:#fff}
+  .pp-dec{color:#b91c1c}
+  .pp-inc{color:#15803d}
+  .pp-flat{color:var(--mu)}
+  .hbtbl td[title]{cursor:help;text-decoration:underline dotted;text-decoration-color:var(--bd);text-underline-offset:3px}
+  .hbtbl tr.summary-row td{font-weight:600;border-top:1.5px solid var(--txt)}
+  .pp-sub{font-size:10px;font-weight:400;opacity:.85}
+
+  /* ── TREND CHART ─────────────────────────────────── */
+  .chart-wrap{position:relative;height:260px}
 
   /* ── SSEID TABLE ─────────────────────────────────── */
   .search-row{display:flex;gap:8px;margin-bottom:10px}
   .search-row input,.search-row select{
     flex:1;border:0.5px solid var(--bd);background:var(--sur);color:var(--txt);
     padding:6px 10px;border-radius:7px;font-size:12px;outline:none}
-  .search-row input:focus,.search-row select:focus{border-color:#c084fc}
+  .search-row input:focus,.search-row select:focus{border-color:var(--accent)}
   .dtbl-wrap{overflow-x:auto;max-height:380px;overflow-y:auto}
   .dtbl{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
   .dtbl th{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;
@@ -96,7 +112,7 @@
   .loading{display:flex;align-items:center;justify-content:center;padding:48px;
            color:var(--mu);font-size:13px;gap:8px}
   .spinner{width:16px;height:16px;border:2px solid var(--bd);
-           border-top-color:#c084fc;border-radius:50%;animation:spin .8s linear infinite}
+           border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
   .err-box{background:#fcebeb;border:0.5px solid rgba(162,45,45,.3);color:#a32d2d;
            border-radius:8px;padding:12px 16px;font-size:12px}
@@ -119,11 +135,15 @@
 
 <div class="topbar">
   <div class="logo">
-    <div class="logo-dot"></div>
+    <img src="sse-logo.png" alt="SSE" class="logo-img"/>
     Referral Tier Analytics
   </div>
   <div class="topbar-right">
     <span class="meta-info" id="metaInfo">Loading…</span>
+    <div class="seg-toggle" id="viewToggle">
+      <button class="on" data-mode="full" onclick="setViewMode('full')">6-Tier</button>
+      <button data-mode="metals" onclick="setViewMode('metals')">Sticks/Stones/Metals</button>
+    </div>
     <select id="cityFilter" onchange="applyFilters()"><option value="">All cities</option></select>
     <select id="tierFilter" onchange="applyFilters()">
       <option value="">All tiers</option>
@@ -140,17 +160,50 @@
 
 <script>
 const TIER_ORDER = ["Platinum","Gold","Silver","Bronze","Stones","Sticks"];
+// Note: Stones/Sticks are shifted from the brief's canonical hex values here
+// (display-only) so they're distinguishable from Silver's blue-gray. etl.py's
+// TIER_COLORS (written into data/*.json meta) keeps the original values.
 const TIER_COLORS = {
   Platinum:"#c084fc",Gold:"#f59e0b",Silver:"#94a3b8",
-  Bronze:"#b87333",Stones:"#64748b",Sticks:"#475569"
+  Bronze:"#b87333",Stones:"#78716c",Sticks:"#78350f"
 };
 const TIER_CONDITIONS = {
   Platinum:"≥ 12 referral orders",Gold:"7–11 referral orders",
   Silver:"3–6 referral orders",Bronze:"1–2 referral orders",
   Stones:"≥ 1 lead, 0 orders",Sticks:"0 leads, 0 orders"
 };
+const METALS_TIERS = ["Bronze","Silver","Gold","Platinum"];
+const METALS_COLOR = "#FFC100"; // brand gold
 
 let DATA = { mom: null, sseid: null, meta: null };
+let viewMode = "full"; // "full" | "metals"
+let trendChart = null;
+
+// ── VIEW MODE (6-tier vs Sticks/Stones/Metals) ──────────────────────────────
+function activeTiers() {
+  return viewMode === "metals" ? ["Sticks","Stones","Metals"] : TIER_ORDER;
+}
+function activeColor(t) {
+  return t === "Metals" ? METALS_COLOR : TIER_COLORS[t];
+}
+// Brand gold (Metals) is too light for white badge text — use dark text on it
+function badgeTextColor(t) {
+  return t === "Metals" ? "#1a1a18" : "#fff";
+}
+// Collapses a {tier: count} map (6-tier keys) into the active view's buckets
+function bucketize(byTier) {
+  byTier = byTier || {};
+  if (viewMode !== "metals") return byTier;
+  const metals = METALS_TIERS.reduce((s,t) => s+(byTier[t]||0), 0);
+  return { Sticks: byTier["Sticks"]||0, Stones: byTier["Stones"]||0, Metals: metals };
+}
+function setViewMode(mode) {
+  viewMode = mode;
+  document.querySelectorAll("#viewToggle button").forEach(b => {
+    b.classList.toggle("on", b.dataset.mode === mode);
+  });
+  applyFilters();
+}
 
 // ── FETCH ALL DATA ─────────────────────────────────────────────────────────
 async function loadData() {
@@ -195,6 +248,8 @@ function renderAll(cityFilter, tierFilter) {
   const { mom, sseid } = DATA;
   if (!mom || !sseid) return;
 
+  if (trendChart) { trendChart.destroy(); trendChart = null; }
+
   const latestMonth = mom.months[mom.months.length - 1];
   const latestByTier = latestMonth?.by_tier || {};
 
@@ -214,6 +269,36 @@ function renderAll(cityFilter, tierFilter) {
   if (cityFilter) sseidRows = sseidRows.filter(r => r.city === cityFilter);
   if (tierFilter) sseidRows = sseidRows.filter(r => r.tier === tierFilter);
   window._filteredRows = sseidRows;
+
+  // Held-base movement (Section 4.1): same SSEID set re-tiered at prev_end and curr_end
+  function filterHeldBase(m) {
+    const hb = m?.held_base;
+    if (!hb) return null;
+    if (!cityFilter) {
+      return { prev: hb.by_tier_prev, curr: hb.by_tier_curr, base_size: hb.base_size };
+    }
+    const prev = {}, curr = {};
+    TIER_ORDER.forEach(t => {
+      prev[t] = hb.by_cluster_tier_prev?.[`${cityFilter}|${t}`] || 0;
+      curr[t] = hb.by_cluster_tier_curr?.[`${cityFilter}|${t}`] || 0;
+    });
+    return { prev, curr, base_size: Object.values(curr).reduce((s,v)=>s+v,0) };
+  }
+  const heldBaseMonths = mom.months.filter(m => m.held_base);
+  const latestHBMonth = heldBaseMonths[heldBaseMonths.length - 1];
+  const latestHB = latestHBMonth ? filterHeldBase(latestHBMonth) : null;
+  const prevHBLabel = latestHBMonth ? mom.months[mom.months.indexOf(latestHBMonth) - 1]?.label : "";
+  // Color is direction-only (green=increase, red=decrease) so it reads consistently
+  // across every row. Favorability (is this increase/decrease good news for this
+  // tier?) is a separate, tier-aware judgment used only in the tooltip text.
+  function dirClass(pp) {
+    return pp > 0.05 ? "pp-inc" : pp < -0.05 ? "pp-dec" : "pp-flat";
+  }
+  function favorability(tier, pp) {
+    if (Math.abs(pp) < 0.05) return "no real change";
+    const badWhenUp = (tier === "Sticks" || tier === "Stones");
+    return (badWhenUp ? pp > 0 : pp < 0) ? "decline" : "improvement";
+  }
 
   // Compute metrics from latest month
   const latestFiltered = filterMomMonth(latestMonth || {by_tier:{},by_cluster_tier:{}});
@@ -260,6 +345,30 @@ function renderAll(cityFilter, tierFilter) {
     </table>
   </div>` : ""}
 
+  ${heldBaseMonths.length ? `
+  <div class="card">
+    <div class="card-hd">
+      <div><div class="card-t">Held-base tier movement</div>
+           <div class="card-s">Base fixed to ${mom.months[0]?.label} throughout${cityFilter ? " · "+cityFilter : ""} — same ${mom.months[0]?.total?.toLocaleString()} SSEIDs re-tiered every month, so columns are directly comparable · pp in brackets = change vs. the prior column · <span style="color:#15803d">green</span>/<span style="color:#b91c1c">red</span> = tier grew/shrank that month (not good/bad — hover a cell to see whether that's favorable for this tier)</div></div>
+    </div>
+    <div class="dtbl-wrap" style="max-height:none">
+      <table class="ttbl hbtbl">
+        <thead><tr>
+          <th style="width:90px">Tier</th><th>Count</th>
+          ${heldBaseMonths.map(m => `<th>${m.label}</th>`).join("")}
+        </tr></thead>
+        <tbody id="heldBaseTbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd">
+      <div><div class="card-t">Held-base tier trend</div>
+           <div class="card-s">% of the ${mom.months[0]?.label}-fixed base per month${cityFilter ? " · "+cityFilter : ""} · one consistent base for the whole window, not re-based each month</div></div>
+    </div>
+    <div class="chart-wrap"><canvas id="trendCanvas"></canvas></div>
+  </div>` : ""}
+
   ${sseid.records?.length ? `
   <div class="card">
     <div class="card-hd">
@@ -299,25 +408,25 @@ function renderAll(cityFilter, tierFilter) {
 
   // Legend
   const leg = document.getElementById("leg");
-  if (leg) TIER_ORDER.forEach(t => {
-    leg.innerHTML += `<span class="lc"><span class="ldot" style="background:${TIER_COLORS[t]}"></span>${t}</span>`;
+  if (leg) activeTiers().forEach(t => {
+    leg.innerHTML += `<span class="lc"><span class="ldot" style="background:${activeColor(t)}"></span>${t}</span>`;
   });
 
   // MoM bars
   const momBars = document.getElementById("momBars");
   if (momBars) {
     mom.months.forEach(mo => {
-      const bt = filterMomMonth(mo);
+      const bt = bucketize(filterMomMonth(mo));
       const tot = Object.values(bt).reduce((s,v)=>s+v,0);
       if (!tot) return;
-      const segs = TIER_ORDER
+      const segs = activeTiers()
         .map(t => ({ t, c: bt[t]||0, p: (bt[t]||0)/tot*100 }))
         .filter(s => s.p > 0);
       momBars.innerHTML += `<div class="mom-row">
         <div class="mom-lbl">${mo.label}</div>
         <div class="mom-bar">${segs.map(s =>
           `<div class="seg" title="${s.t}: ${s.c.toLocaleString()}"
-               style="width:${s.p.toFixed(1)}%;background:${TIER_COLORS[s.t]}">${s.p > 5 ? s.c : ""}</div>`
+               style="width:${s.p.toFixed(1)}%;background:${activeColor(s.t)}">${s.p > 5 ? s.c : ""}</div>`
         ).join("")}</div>
         <div class="mom-tot">${tot.toLocaleString()}</div>
       </div>`;
@@ -325,14 +434,16 @@ function renderAll(cityFilter, tierFilter) {
   }
 
   // Tier table
+  const latestBucketed = bucketize(latestFiltered);
   const ttbody = document.getElementById("tierTbody");
-  if (ttbody) TIER_ORDER.forEach(t => {
-    const c = latestFiltered[t] || 0;
+  if (ttbody) activeTiers().forEach(t => {
+    const c = latestBucketed[t] || 0;
     const sh = total ? (c/total*100).toFixed(1) : "0.0";
+    const cond = t === "Metals" ? "Bronze + Silver + Gold + Platinum" : TIER_CONDITIONS[t];
     ttbody.innerHTML += `<tr>
-      <td><span class="badge" style="background:${TIER_COLORS[t]}">${t}</span></td>
+      <td><span class="badge" style="background:${activeColor(t)};color:${badgeTextColor(t)}">${t}</span></td>
       <td>${c.toLocaleString()}</td><td>${sh}%</td>
-      <td style="color:var(--mu);font-size:11px">${TIER_CONDITIONS[t]}</td>
+      <td style="color:var(--mu);font-size:11px">${cond}</td>
     </tr>`;
   });
 
@@ -341,20 +452,123 @@ function renderAll(cityFilter, tierFilter) {
   if (cg) {
     const clusters = mom.meta.clusters || [];
     clusters.forEach(city => {
-      const bt = {};
-      TIER_ORDER.forEach(t => { bt[t] = latestMonth?.by_cluster_tier?.[`${city}|${t}`] || 0; });
+      const raw = {};
+      TIER_ORDER.forEach(t => { raw[t] = latestMonth?.by_cluster_tier?.[`${city}|${t}`] || 0; });
+      const bt = bucketize(raw);
       const tot = Object.values(bt).reduce((s,v)=>s+v,0);
       if (!tot) return;
-      const segs = TIER_ORDER.filter(t=>bt[t]>0).map(t=>({ t, p: bt[t]/tot*100, c: bt[t] }));
-      const non = TIER_ORDER.filter(t=>t!=="Sticks").reduce((s,t)=>s+(bt[t]||0),0);
+      const segs = activeTiers().filter(t=>bt[t]>0).map(t=>({ t, p: bt[t]/tot*100, c: bt[t] }));
+      const non = activeTiers().filter(t=>t!=="Sticks").reduce((s,t)=>s+(bt[t]||0),0);
       cg.innerHTML += `<div class="city-card">
         <div class="city-name">${city} <span style="font-weight:400;color:var(--mu)">(${tot.toLocaleString()})</span></div>
-        <div class="city-bar">${segs.map(s=>`<div style="width:${s.p.toFixed(1)}%;background:${TIER_COLORS[s.t]}" title="${s.t}: ${s.c}"></div>`).join("")}</div>
+        <div class="city-bar">${segs.map(s=>`<div style="width:${s.p.toFixed(1)}%;background:${activeColor(s.t)}" title="${s.t}: ${s.c}"></div>`).join("")}</div>
         <div class="city-stat">
           <span>Engaged: ${Math.round(non/tot*100)}%</span>
           <span>Sticks: ${(bt["Sticks"]||0).toLocaleString()}</span>
         </div>
       </div>`;
+    });
+  }
+
+  // Every held-base month shares ONE fixed base (the earliest month in the
+  // window — see etl.py), so every column's % is on the same denominator.
+  // pp is therefore a plain sequential diff of consecutive anchor-based %'s:
+  // adjacent columns are directly comparable, unlike a base that rolled
+  // forward month to month.
+  const anchorMonth = mom.months[mom.months.indexOf(heldBaseMonths[0]) - 1];
+  const anchorRaw = filterMomMonth(anchorMonth);
+  const anchorTotal = Object.values(anchorRaw).reduce((s,v)=>s+v,0);
+  const anchorBucketed = bucketize(anchorRaw);
+  let prevCurrPct = {};
+  activeTiers().forEach(t => { prevCurrPct[t] = anchorTotal ? (anchorBucketed[t]||0)/anchorTotal*100 : 0; });
+
+  const pctByMonth = heldBaseMonths.map(m => {
+    const hb = filterHeldBase(m);
+    const currB = bucketize(hb.curr);
+    const pct = {};
+    activeTiers().forEach(t => {
+      const pctCurr = hb.base_size ? (currB[t]||0)/hb.base_size*100 : 0;
+      pct[t] = { curr: +pctCurr.toFixed(2), pp: +(pctCurr - prevCurrPct[t]).toFixed(2) };
+    });
+    prevCurrPct = Object.fromEntries(activeTiers().map(t => [t, pct[t].curr]));
+    return pct;
+  });
+
+  // Held-base tier movement table (one row per tier, one share+pp column per month)
+  const hbTbody = document.getElementById("heldBaseTbody");
+  if (hbTbody && latestHB) {
+    const latestCurrB = bucketize(latestHB.curr);
+    const base = latestHB.base_size;
+    // Each held-base month's own prior month label, for tooltips (e.g. Mar's prior is Feb)
+    const prevLabels = heldBaseMonths.map(m => mom.months[mom.months.indexOf(m) - 1]?.label);
+    const article = w => /^[aeiou]/i.test(w) ? "an" : "a";
+
+    activeTiers().forEach(t => {
+      const cCurr = latestCurrB[t] || 0;
+      const cells = pctByMonth.map((pct, i) => {
+        const p = pct[t];
+        const pp = p.pp;
+        const prevPct = +(p.curr - pp).toFixed(2);
+        const arrow = pp > 0.05 ? "▲" : pp < -0.05 ? "▼" : "–";
+        const dir = pp > 0.05 ? "up" : pp < -0.05 ? "down" : "flat";
+        const fav = favorability(t, pp);
+        const tip = `${t} was ${prevPct.toFixed(1)}% of the held base in ${prevLabels[i]}, `
+          + `${dir} to ${p.curr.toFixed(1)}% in ${heldBaseMonths[i].label} `
+          + `(${pp >= 0 ? "+" : ""}${pp.toFixed(1)} pp) — ${article(fav)} ${fav} for this tier.`;
+        return `<td class="${dirClass(pp)}" title="${tip}">${p.curr.toFixed(1)}% <span class="pp-sub">(${arrow} ${Math.abs(pp).toFixed(1)} pp)</span></td>`;
+      }).join("");
+      hbTbody.innerHTML += `<tr>
+        <td><span class="badge" style="background:${activeColor(t)};color:${badgeTextColor(t)}">${t}</span></td>
+        <td>${cCurr.toLocaleString()}</td>
+        ${cells}
+      </tr>`;
+    });
+
+    // Engaged row — 100% minus Sticks, i.e. same "Engaged" definition as the metrics card above
+    const latestSticksCurr = latestCurrB["Sticks"] || 0;
+    const engagedCount = base - latestSticksCurr;
+    const engagedCells = pctByMonth.map((pct, i) => {
+      const sticks = pct["Sticks"];
+      const engCurr = +(100 - sticks.curr).toFixed(2);
+      const engPp = +(-sticks.pp).toFixed(2);
+      const engPrev = +(engCurr - engPp).toFixed(2);
+      const arrow = engPp > 0.05 ? "▲" : engPp < -0.05 ? "▼" : "–";
+      const dir = engPp > 0.05 ? "up" : engPp < -0.05 ? "down" : "flat";
+      const tip = `Engaged (non-Sticks) was ${engPrev.toFixed(1)}% of the held base in ${prevLabels[i]}, `
+        + `${dir} to ${engCurr.toFixed(1)}% in ${heldBaseMonths[i].label} `
+        + `(${engPp >= 0 ? "+" : ""}${engPp.toFixed(1)} pp) — more engagement is always favorable.`;
+      return `<td class="${dirClass(engPp)}" title="${tip}">${engCurr.toFixed(1)}% <span class="pp-sub">(${arrow} ${Math.abs(engPp).toFixed(1)} pp)</span></td>`;
+    }).join("");
+    hbTbody.innerHTML += `<tr class="summary-row">
+      <td>Engaged</td><td>${engagedCount.toLocaleString()}</td>
+      ${engagedCells}
+    </tr>`;
+  }
+
+  // Held-base tier trend chart
+  const trendCanvas = document.getElementById("trendCanvas");
+  if (trendCanvas && heldBaseMonths.length) {
+    const labels = heldBaseMonths.map(m => m.label);
+    const datasets = activeTiers().map(t => ({
+      label: t,
+      data: pctByMonth.map(pct => pct[t].curr),
+      borderColor: activeColor(t),
+      backgroundColor: activeColor(t),
+      tension: 0.3,
+      pointRadius: 3,
+    }));
+    trendChart = new Chart(trendCanvas, {
+      type: "line",
+      data: { labels, datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        scales: {
+          y: { ticks: { callback: v => v + "%" }, grid: { color: "rgba(128,128,128,.15)" } },
+          x: { grid: { display: false } },
+        },
+        plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 11 } } } },
+      },
     });
   }
 

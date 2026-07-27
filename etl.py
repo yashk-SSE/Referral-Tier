@@ -12,27 +12,36 @@ Outputs written to data/:
 
 Environment variables (set in GitHub Secrets or .env):
   METABASE_URL            e.g. https://your.metabase.com
-  METABASE_USERNAME       your login email
-  METABASE_PASSWORD       your password
+  METABASE_API_KEY        preferred auth — a Metabase API key (Admin > Settings >
+                          Authentication > API keys). Skips username/password entirely.
+  METABASE_USERNAME       fallback auth — your login email (used only if no API key)
+  METABASE_PASSWORD       fallback auth — your password (used only if no API key)
   METABASE_AGG_CARD_ID    card ID of the aggregated question (cluster x tier x count)
   METABASE_SSEID_CARD_ID  card ID of the SSEID detail question
   MONTHS                  how many months back to fetch (default 6)
   END_MONTH               override end month as YYYY-MM (default = current month)
 """
 
-import os, json, requests
+import os, sys, json, requests
 from datetime import datetime, date, timezone, timedelta
 from calendar import monthrange
 from dotenv import load_dotenv
+
+# Windows consoles default to cp1252, which can't print the ✓/⚠ characters below
+if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
 
 load_dotenv()
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 METABASE_URL   = os.environ["METABASE_URL"].rstrip("/")
-USERNAME       = os.environ["METABASE_USERNAME"]
-PASSWORD       = os.environ["METABASE_PASSWORD"]
+API_KEY        = os.environ.get("METABASE_API_KEY", "").strip()
+USERNAME       = os.environ.get("METABASE_USERNAME", "")
+PASSWORD       = os.environ.get("METABASE_PASSWORD", "")
 AGG_CARD_ID    = int(os.environ.get("METABASE_AGG_CARD_ID",  "0"))
 SSEID_CARD_ID  = int(os.environ.get("METABASE_SSEID_CARD_ID", "0"))
+HELDBASE_CARD_ID = int(os.environ.get("METABASE_HELDBASE_CARD_ID", "0"))
 MONTHS         = int(os.environ.get("MONTHS", "6"))
 END_MONTH_STR  = os.environ.get("END_MONTH", "")   # YYYY-MM, optional override
 TIMEOUT_S      = 300
@@ -92,6 +101,11 @@ def build_month_range(months: int, end_month_str: str = "") -> list:
 
 # ── METABASE API ──────────────────────────────────────────────────────────────
 def get_session_token() -> str:
+    if not USERNAME or not PASSWORD:
+        raise RuntimeError(
+            "No METABASE_API_KEY set, and METABASE_USERNAME/METABASE_PASSWORD are "
+            "missing — set one auth method in .env."
+        )
     r = requests.post(
         f"{METABASE_URL}/api/session",
         json={"username": USERNAME, "password": PASSWORD},
@@ -101,7 +115,15 @@ def get_session_token() -> str:
     return r.json()["id"]
 
 
-def fetch_card_json(token: str, card_id: int, end_date: str) -> list:
+def get_auth_headers() -> dict:
+    """Prefers an API key (Admin > Settings > Authentication > API keys); falls
+    back to a session token from username/password login."""
+    if API_KEY:
+        return {"x-api-key": API_KEY}
+    return {"X-Metabase-Session": get_session_token()}
+
+
+def fetch_card_json(headers: dict, card_id: int, end_date: str) -> list:
     """
     Calls POST /api/card/{id}/query/json with an end_date template parameter.
     Falls back to a plain fetch (no params) if the question has no parameters.
@@ -116,7 +138,7 @@ def fetch_card_json(token: str, card_id: int, end_date: str) -> list:
 
     r = requests.post(
         f"{METABASE_URL}/api/card/{card_id}/query/json",
-        headers={"X-Metabase-Session": token},
+        headers=headers,
         json=body,
         timeout=TIMEOUT_S,
     )
@@ -126,11 +148,31 @@ def fetch_card_json(token: str, card_id: int, end_date: str) -> list:
         print(f"      ⚠  Card {card_id} has no {{{{end_date}}}} parameter — fetching without date filter.")
         r = requests.post(
             f"{METABASE_URL}/api/card/{card_id}/query/json",
-            headers={"X-Metabase-Session": token},
+            headers=headers,
             json={"ignore_cache": False},
             timeout=TIMEOUT_S,
         )
 
+    r.raise_for_status()
+    return r.json()
+
+
+def fetch_heldbase_card_json(headers: dict, card_id: int, prev_end: str, curr_end: str) -> list:
+    """
+    Calls POST /api/card/{id}/query/json with prev_end/curr_end template parameters
+    for the held-base movement question (SSEID tier at both dates, base fixed to prev_end).
+    """
+    params_payload = [
+        {"type": "date/single", "target": ["variable", ["template-tag", "prev_end"]], "value": prev_end},
+        {"type": "date/single", "target": ["variable", ["template-tag", "curr_end"]], "value": curr_end},
+    ]
+
+    r = requests.post(
+        f"{METABASE_URL}/api/card/{card_id}/query/json",
+        headers=headers,
+        json={"ignore_cache": False, "parameters": params_payload},
+        timeout=TIMEOUT_S,
+    )
     r.raise_for_status()
     return r.json()
 
@@ -194,12 +236,107 @@ def normalise_sseid_row(row: dict) -> dict | None:
     }
 
 
+def normalise_heldbase_row(row: dict) -> dict | None:
+    """
+    Normalises one row from the held-base movement card.
+    Expected columns: SSEID, City, Leads Prev, Orders Prev, Tier Prev,
+                       Leads Curr, Orders Curr, Tier Curr
+    """
+    keys = {k.lower(): k for k in row}
+
+    def find(*parts):
+        return next((keys[k] for k in keys if all(p in k for p in parts)), None)
+
+    sseid_key       = find("sseid")
+    city_key        = find("city")
+    leads_prev_key  = find("lead", "prev")
+    orders_prev_key = find("order", "prev")
+    tier_prev_key   = find("tier", "prev")
+    leads_curr_key  = find("lead", "curr")
+    orders_curr_key = find("order", "curr")
+    tier_curr_key   = find("tier", "curr")
+
+    if not sseid_key or not tier_prev_key or not tier_curr_key:
+        return None
+
+    def norm_tier(v):
+        v = str(v or "Sticks").strip()
+        return next((t for t in TIER_ORDER if t.lower() == v.lower()), "Sticks")
+
+    return {
+        "sseid":       str(row.get(sseid_key) or "").strip(),
+        "city":        str(row.get(city_key) or "Unknown").strip() if city_key else "Unknown",
+        "leads_prev":  int(row.get(leads_prev_key) or 0) if leads_prev_key else 0,
+        "orders_prev": int(row.get(orders_prev_key) or 0) if orders_prev_key else 0,
+        "tier_prev":   norm_tier(row.get(tier_prev_key)),
+        "leads_curr":  int(row.get(leads_curr_key) or 0) if leads_curr_key else 0,
+        "orders_curr": int(row.get(orders_curr_key) or 0) if orders_curr_key else 0,
+        "tier_curr":   norm_tier(row.get(tier_curr_key)),
+    }
+
+
+# ── TRANSFORM: HELD-BASE MOVEMENT ─────────────────────────────────────────────
+def build_held_base_summary(rows: list) -> dict:
+    """
+    rows: normalised held-base rows (one per SSEID in the base fixed at prev_end).
+    Returns counts/percentages/movement for that SSEID set at both dates.
+    """
+    base_size = len(rows)
+    by_tier_prev = {t: 0 for t in TIER_ORDER}
+    by_tier_curr = {t: 0 for t in TIER_ORDER}
+    by_cluster_tier_prev = {}
+    by_cluster_tier_curr = {}
+
+    for r in rows:
+        by_tier_prev[r["tier_prev"]] += 1
+        by_tier_curr[r["tier_curr"]] += 1
+        kp = f'{r["city"]}|{r["tier_prev"]}'
+        kc = f'{r["city"]}|{r["tier_curr"]}'
+        by_cluster_tier_prev[kp] = by_cluster_tier_prev.get(kp, 0) + 1
+        by_cluster_tier_curr[kc] = by_cluster_tier_curr.get(kc, 0) + 1
+
+    movement_pp = {}
+    for t in TIER_ORDER:
+        prev_pct = (by_tier_prev[t] / base_size * 100) if base_size else 0.0
+        curr_pct = (by_tier_curr[t] / base_size * 100) if base_size else 0.0
+        movement_pp[t] = round(curr_pct - prev_pct, 2)
+
+    return {
+        "base_size":            base_size,
+        "by_tier_prev":         by_tier_prev,
+        "by_tier_curr":         by_tier_curr,
+        "by_cluster_tier_prev": {k: v for k, v in by_cluster_tier_prev.items()},
+        "by_cluster_tier_curr": {k: v for k, v in by_cluster_tier_curr.items()},
+        "movement_pp":          movement_pp,
+    }
+
+
+def build_tier_heldbase_sseid(rows: list, prev_mo: dict, curr_mo: dict) -> dict:
+    cities = sorted({r["city"] for r in rows if r["city"] != "Unknown"})
+    return {
+        "meta": {
+            "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "prev_end":     prev_mo["end_date"],
+            "curr_end":     curr_mo["end_date"],
+            "prev_label":   prev_mo["label"],
+            "curr_label":   curr_mo["label"],
+            "total":        len(rows),
+            "cities":       cities,
+            "tiers":        TIER_ORDER,
+            "tier_colors":  TIER_COLORS,
+        },
+        "records": rows,
+    }
+
+
 # ── BUILD OUTPUT FILES ────────────────────────────────────────────────────────
-def build_tier_mom(month_agg_data: list) -> dict:
+def build_tier_mom(month_agg_data: list, held_base_by_end_date: dict | None = None) -> dict:
     """
     month_agg_data: [{month_label, end_date, rows: [{cluster, tier, cnt}]}]
+    held_base_by_end_date: {curr_end_date: held_base_summary}, optional
     Produces the structure the dashboard chart needs.
     """
+    held_base_by_end_date = held_base_by_end_date or {}
     # Collect all clusters across all months
     all_clusters = sorted({
         row["cluster"]
@@ -218,13 +355,16 @@ def build_tier_mom(month_agg_data: list) -> dict:
             key = (row["cluster"], row["tier"])
             by_cluster_tier[key] = by_cluster_tier.get(key, 0) + row["cnt"]
 
-        months_out.append({
+        month_out = {
             "label":          m["label"],
             "end_date":       m["end_date"],
             "total":          total,
             "by_tier":        by_tier,
             "by_cluster_tier": {f"{k[0]}|{k[1]}": v for k, v in by_cluster_tier.items()},
-        })
+        }
+        if m["end_date"] in held_base_by_end_date:
+            month_out["held_base"] = held_base_by_end_date[m["end_date"]]
+        months_out.append(month_out)
 
     return {
         "meta": {
@@ -258,21 +398,46 @@ def build_tier_sseid(rows: list, end_date: str) -> dict:
 def main():
     os.makedirs("data", exist_ok=True)
 
-    print("[1/5] Authenticating with Metabase...")
-    token = get_session_token()
-    print("      ✓ Token acquired")
+    print("[1/6] Authenticating with Metabase...")
+    headers = get_auth_headers()
+    print(f"      ✓ Using {'API key' if API_KEY else 'username/password session'}")
 
     months = build_month_range(MONTHS, END_MONTH_STR)
     latest_end = months[-1]["end_date"]
-    print(f"[2/5] Month range: {months[0]['label']} → {months[-1]['label']}  ({len(months)} months)")
+    print(f"[2/6] Month range: {months[0]['label']} → {months[-1]['label']}  ({len(months)} months)")
+
+    # ── Held-base movement: base fixed to the single earliest month in the
+    # window (not rolled forward month to month) — every column then shares
+    # the same denominator, so adjacent columns are directly comparable and
+    # base growth is excluded consistently across the whole window, not just
+    # pairwise. ──────────────────────────────────────────────────────────────
+    held_base_by_end_date = {}
+    latest_heldbase_rows, latest_pair = [], None
+    anchor_mo = months[0]
+    if HELDBASE_CARD_ID and len(months) >= 2:
+        print(f"[3/6] Fetching held-base movement (card {HELDBASE_CARD_ID}), "
+              f"anchored to {anchor_mo['label']}...")
+        for i in range(1, len(months)):
+            curr_mo = months[i]
+            print(f"      {anchor_mo['label']} → {curr_mo['label']} "
+                  f"(prev_end={anchor_mo['end_date']}, curr_end={curr_mo['end_date']})...")
+            raw = fetch_heldbase_card_json(headers, HELDBASE_CARD_ID, anchor_mo["end_date"], curr_mo["end_date"])
+            rows = [r for r in (normalise_heldbase_row(row) for row in raw) if r]
+            summary = build_held_base_summary(rows)
+            held_base_by_end_date[curr_mo["end_date"]] = summary
+            print(f"        → held base of {summary['base_size']:,} SSEIDs")
+            if i == len(months) - 1:
+                latest_heldbase_rows, latest_pair = rows, (anchor_mo, curr_mo)
+    else:
+        print("[3/6] METABASE_HELDBASE_CARD_ID not set (or fewer than 2 months) — skipping held-base fetch.")
 
     # ── Aggregated: one fetch per month ──────────────────────────────────────
     month_agg_data = []
     if AGG_CARD_ID:
-        print(f"[3/5] Fetching aggregated data (card {AGG_CARD_ID})...")
+        print(f"[4/6] Fetching aggregated data (card {AGG_CARD_ID})...")
         for mo in months:
             print(f"      Fetching {mo['label']} (end_date={mo['end_date']})...")
-            raw = fetch_card_json(token, AGG_CARD_ID, mo["end_date"])
+            raw = fetch_card_json(headers, AGG_CARD_ID, mo["end_date"])
             rows = [r for r in (normalise_agg_row(row) for row in raw) if r]
             print(f"        → {len(rows)} rows")
             month_agg_data.append({
@@ -280,13 +445,13 @@ def main():
                 "end_date": mo["end_date"],
                 "rows":     rows,
             })
-        tier_mom = build_tier_mom(month_agg_data)
+        tier_mom = build_tier_mom(month_agg_data, held_base_by_end_date)
         with open("data/tier_mom.json", "w") as f:
             json.dump(tier_mom, f, indent=2, default=str)
         latest_total = tier_mom["months"][-1]["total"] if tier_mom["months"] else 0
         print(f"      ✓ tier_mom.json written — {latest_total:,} assets in latest month")
     else:
-        print("[3/5] METABASE_AGG_CARD_ID not set — skipping aggregated fetch.")
+        print("[4/6] METABASE_AGG_CARD_ID not set — skipping aggregated fetch.")
         # Write empty placeholder so dashboard doesn't break
         with open("data/tier_mom.json", "w") as f:
             json.dump({"meta": {"generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -296,23 +461,38 @@ def main():
 
     # ── SSEID detail: latest month only ──────────────────────────────────────
     if SSEID_CARD_ID:
-        print(f"[4/5] Fetching SSEID detail (card {SSEID_CARD_ID}, end_date={latest_end})...")
-        raw_sseid = fetch_card_json(token, SSEID_CARD_ID, latest_end)
+        print(f"[5/6] Fetching SSEID detail (card {SSEID_CARD_ID}, end_date={latest_end})...")
+        raw_sseid = fetch_card_json(headers, SSEID_CARD_ID, latest_end)
         sseid_rows = [r for r in (normalise_sseid_row(row) for row in raw_sseid) if r]
         tier_sseid = build_tier_sseid(sseid_rows, latest_end)
         with open("data/tier_sseid.json", "w") as f:
             json.dump(tier_sseid, f, indent=2, default=str)
         print(f"      ✓ tier_sseid.json written — {len(sseid_rows):,} SSEID rows")
     else:
-        print("[4/5] METABASE_SSEID_CARD_ID not set — skipping SSEID fetch.")
+        print("[5/6] METABASE_SSEID_CARD_ID not set — skipping SSEID fetch.")
         with open("data/tier_sseid.json", "w") as f:
             json.dump({"meta": {"generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                                 "as_of_date": latest_end, "total": 0,
                                 "cities": [], "tiers": TIER_ORDER, "tier_colors": TIER_COLORS},
                        "records": []}, f, indent=2)
 
+    # ── Held-base SSEID detail: latest pair only ─────────────────────────────
+    if latest_pair:
+        prev_mo, curr_mo = latest_pair
+        tier_heldbase_sseid = build_tier_heldbase_sseid(latest_heldbase_rows, prev_mo, curr_mo)
+        with open("data/tier_heldbase_sseid.json", "w") as f:
+            json.dump(tier_heldbase_sseid, f, indent=2, default=str)
+        print(f"      ✓ tier_heldbase_sseid.json written — {len(latest_heldbase_rows):,} SSEID rows "
+              f"({prev_mo['label']} → {curr_mo['label']})")
+    else:
+        with open("data/tier_heldbase_sseid.json", "w") as f:
+            json.dump({"meta": {"generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                "prev_end": None, "curr_end": None, "prev_label": None, "curr_label": None,
+                                "total": 0, "cities": [], "tiers": TIER_ORDER, "tier_colors": TIER_COLORS},
+                       "records": []}, f, indent=2)
+
     # ── Meta file ─────────────────────────────────────────────────────────────
-    print("[5/5] Writing meta.json...")
+    print("[6/6] Writing meta.json...")
     meta = {
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "months_fetched": len(months),
@@ -321,6 +501,7 @@ def main():
         "latest_end_date": latest_end,
         "agg_card_id":    AGG_CARD_ID,
         "sseid_card_id":  SSEID_CARD_ID,
+        "heldbase_card_id": HELDBASE_CARD_ID,
     }
     with open("data/meta.json", "w") as f:
         json.dump(meta, f, indent=2)
