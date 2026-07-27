@@ -101,7 +101,7 @@
   .pp-inc{color:#15803d}
   .pp-flat{color:var(--mu)}
   .hbtbl td[title]{cursor:help;text-decoration:underline dotted;text-decoration-color:var(--bd);text-underline-offset:3px}
-  .hbtbl tr.summary-row td{font-weight:600;border-top:1.5px solid var(--txt)}
+  .ttbl tr.summary-row td{font-weight:600;border-top:1.5px solid var(--txt)}
   .ttbl tr.india-row td{font-weight:600;background:var(--bg);border-bottom:1.5px solid var(--txt)}
   .pp-sub{font-size:10px;font-weight:400;opacity:.85}
 
@@ -334,24 +334,32 @@ function renderAll(cityFilter, tierFilter) {
   if (tierFilter) sseidRows = sseidRows.filter(r => r.tier === tierFilter);
   window._filteredRows = sseidRows;
 
-  // Held-base movement (Section 4.1): same SSEID set re-tiered at prev_end and curr_end
-  function filterHeldBase(m) {
-    const hb = m?.held_base;
-    if (!hb) return null;
-    if (!cityFilter) {
-      return { prev: hb.by_tier_prev, curr: hb.by_tier_curr, base_size: hb.base_size };
-    }
-    const prev = {}, curr = {};
-    TIER_ORDER.forEach(t => {
-      prev[t] = hb.by_cluster_tier_prev?.[`${cityFilter}|${t}`] || 0;
-      curr[t] = hb.by_cluster_tier_curr?.[`${cityFilter}|${t}`] || 0;
-    });
-    return { prev, curr, base_size: Object.values(curr).reduce((s,v)=>s+v,0) };
+  // ── STANDARDIZED %-SHARE DEFINITION (used everywhere in this dashboard) ──
+  // share(tier, month M) = tier's count as of M's end (the full count, including
+  // any SSEIDs newly commissioned that month) ÷ the total asset base as of the
+  // END OF THE PRIOR CALENDAR MONTH (M-1). Every month is its own independent
+  // two-month comparison — this is NOT a running/anchored base.
+  // The very first month in the loaded window has no prior month, so it falls
+  // back to using its own total for that one month only.
+  // Exception: the MoM stacked-bar chart's segment WIDTHS stay on a plain
+  // current-month basis (count ÷ that same month's own total) because a
+  // stacked bar's segments must sum to 100% of its own bar to render
+  // correctly — using a different-month denominator there would make bars
+  // overflow/get silently clipped. Its printed % labels still use the
+  // standardized definition above; only the visual proportions differ.
+  function monthTotal(m) {
+    return Object.values(filterMomMonth(m)).reduce((s,v) => s+v, 0);
   }
-  const heldBaseMonths = mom.months.filter(m => m.held_base);
-  const latestHBMonth = heldBaseMonths[heldBaseMonths.length - 1];
-  const latestHB = latestHBMonth ? filterHeldBase(latestHBMonth) : null;
-  const prevHBLabel = latestHBMonth ? mom.months[mom.months.indexOf(latestHBMonth) - 1]?.label : "";
+  function shareByMonth(idx) {
+    const curr = bucketize(filterMomMonth(mom.months[idx]));
+    const priorTotal = idx > 0 ? monthTotal(mom.months[idx - 1]) : monthTotal(mom.months[idx]);
+    const out = {};
+    activeTiers().forEach(t => { out[t] = priorTotal ? +((curr[t]||0)/priorTotal*100).toFixed(2) : 0; });
+    return out;
+  }
+  const shareSeries = mom.months.map((_, idx) => shareByMonth(idx));
+  const movementMonths = mom.months.slice(1); // every month except the first, which has no prior
+
   // Color is direction-only (green=increase, red=decrease) so it reads consistently
   // across every row. Favorability (is this increase/decrease good news for this
   // tier?) is a separate, tier-aware judgment used only in the tooltip text.
@@ -364,12 +372,17 @@ function renderAll(cityFilter, tierFilter) {
     return (badWhenUp ? pp > 0 : pp < 0) ? "decline" : "improvement";
   }
 
-  // Compute metrics from latest month
+  // Compute metrics from latest month. "Total assets" deliberately stays the
+  // true current count (an operational fact, not a %-share stat) — everything
+  // else below uses the standardized prior-month-based share.
+  const latestIdx = mom.months.length - 1;
   const latestFiltered = filterMomMonth(latestMonth || {by_tier:{},by_cluster_tier:{}});
   const total    = Object.values(latestFiltered).reduce((s,v) => s+v, 0);
   const active   = TIER_ORDER.filter(t => t !== "Sticks").reduce((s,t) => s+(latestFiltered[t]||0), 0);
-  const orderers = ["Platinum","Gold","Silver","Bronze"].reduce((s,t) => s+(latestFiltered[t]||0), 0);
-  const engPct   = total ? Math.round(active/total*100) : 0;
+  const metalsCount = METALS_TIERS.reduce((s,t) => s+(latestFiltered[t]||0), 0);
+  const priorTotalForLatest = latestIdx > 0 ? monthTotal(mom.months[latestIdx - 1]) : total;
+  const priorMonthLabel = latestIdx > 0 ? mom.months[latestIdx - 1].label : latestMonth?.label;
+  const engPct   = priorTotalForLatest ? Math.round(active/priorTotalForLatest*100) : 0;
 
   const execHTML = `
   <div class="metrics">
@@ -378,20 +391,17 @@ function renderAll(cityFilter, tierFilter) {
       <div class="met-sub">${latestMonth?.label || "—"}</div></div>
     <div class="met"><div class="met-lbl">Engaged (non-Sticks)</div>
       <div class="met-val">${active.toLocaleString()}</div>
-      <div class="met-sub">${engPct}% of base</div></div>
-    <div class="met"><div class="met-lbl">Order referrers</div>
-      <div class="met-val">${orderers.toLocaleString()}</div>
-      <div class="met-sub">Bronze or above</div></div>
-    <div class="met"><div class="met-lbl">Months shown</div>
-      <div class="met-val">${mom.months.length}</div>
-      <div class="met-sub">${mom.months[0]?.label} – ${latestMonth?.label}</div></div>
+      <div class="met-sub">${engPct}% of ${priorMonthLabel}'s base</div></div>
+    <div class="met"><div class="met-lbl">Metals</div>
+      <div class="met-val">${metalsCount.toLocaleString()}</div>
+      <div class="met-sub">Bronze + Silver + Gold + Platinum</div></div>
   </div>
 
   ${mom.months.length ? `
   <div class="card">
     <div class="card-hd">
       <div><div class="card-t">Tier breakdown — ${latestMonth?.label}</div>
-           <div class="card-s">Count and share per tier${cityFilter ? " · "+cityFilter : ""}</div></div>
+           <div class="card-s">Count as of ${latestMonth?.label}${cityFilter ? " · "+cityFilter : ""} · Share = count ÷ ${priorMonthLabel}'s total asset base (the standardized %-share definition used throughout this dashboard)</div></div>
     </div>
     <table class="ttbl">
       <thead><tr><th style="width:90px">Tier</th><th>Count</th><th>Share</th><th>Condition</th></tr></thead>
@@ -405,32 +415,49 @@ function renderAll(cityFilter, tierFilter) {
   <div class="card">
     <div class="card-hd">
       <div><div class="card-t">Month-over-month tier distribution</div>
-           <div class="card-s">Cumulative asset base · each bar = all projects commissioned to that date</div></div>
+           <div class="card-s">Cumulative asset base · each bar = all projects commissioned to that date · segment width = that month's own composition, but the printed %/tooltip is the standardized share (count ÷ prior month's total) used everywhere else on this dashboard</div></div>
     </div>
     <div class="legend" id="leg"></div>
     <div class="mom" id="momBars"></div>
   </div>` : ""}
 
-  ${heldBaseMonths.length ? `
+  ${mom.months.length ? `
   <div class="card">
     <div class="card-hd">
-      <div><div class="card-t">Held-base tier movement</div>
-           <div class="card-s">Base fixed to ${mom.months[0]?.label} throughout${cityFilter ? " · "+cityFilter : ""} — same ${mom.months[0]?.total?.toLocaleString()} SSEIDs re-tiered every month, so columns are directly comparable · pp in brackets = change vs. the prior column · <span style="color:#15803d">green</span>/<span style="color:#b91c1c">red</span> = tier grew/shrank that month (not good/bad — hover a cell to see whether that's favorable for this tier)</div></div>
+      <div><div class="card-t">MoM asset base & tier counts</div>
+           <div class="card-s">Absolute count per tier, per month${cityFilter ? " · "+cityFilter : ""} — raw numbers, no %-share applied</div></div>
+    </div>
+    <div class="dtbl-wrap" style="max-height:none">
+      <table class="ttbl">
+        <thead><tr>
+          <th style="width:90px">Tier</th>
+          ${mom.months.map(m => `<th>${m.label}</th>`).join("")}
+        </tr></thead>
+        <tbody id="momCountsTbody"></tbody>
+      </table>
+    </div>
+  </div>` : ""}
+
+  ${movementMonths.length ? `
+  <div class="card">
+    <div class="card-hd">
+      <div><div class="card-t">Tier movement (MoM)</div>
+           <div class="card-s">Standardized %-share: each column's count is that month's full total, divided by the PRIOR month's total asset base${cityFilter ? " · "+cityFilter : ""} · pp in brackets = that same standardized % minus the prior column's · <span style="color:#15803d">green</span>/<span style="color:#b91c1c">red</span> = tier grew/shrank that month (not good/bad — hover a cell to see whether that's favorable for this tier)</div></div>
     </div>
     <div class="dtbl-wrap" style="max-height:none">
       <table class="ttbl hbtbl">
         <thead><tr>
           <th style="width:90px">Tier</th><th>Count</th>
-          ${heldBaseMonths.map(m => `<th>${m.label}</th>`).join("")}
+          ${movementMonths.map(m => `<th>${m.label}</th>`).join("")}
         </tr></thead>
-        <tbody id="heldBaseTbody"></tbody>
+        <tbody id="tierMovementTbody"></tbody>
       </table>
     </div>
   </div>
   <div class="card">
     <div class="card-hd">
-      <div><div class="card-t">Held-base tier trend</div>
-           <div class="card-s">% of the ${mom.months[0]?.label}-fixed base per month${cityFilter ? " · "+cityFilter : ""} · one consistent base for the whole window, not re-based each month</div></div>
+      <div><div class="card-t">Tier movement trend</div>
+           <div class="card-s">Standardized %-share per month${cityFilter ? " · "+cityFilter : ""} — each point is that month's count ÷ the prior month's total asset base</div></div>
     </div>
     <div class="chart-wrap"><canvas id="trendCanvas"></canvas></div>
   </div>` : ""}
@@ -441,7 +468,7 @@ function renderAll(cityFilter, tierFilter) {
   <div class="card">
     <div class="card-hd">
       <div><div class="card-t">City summary — ${latestMonth?.label}</div>
-           <div class="card-s">Count and share per tier, per city</div></div>
+           <div class="card-s">Count as of ${latestMonth?.label} · Share = count ÷ that same city's ${priorMonthLabel} total (standardized %-share)</div></div>
     </div>
     <div class="dtbl-wrap" style="max-height:none">
       <table class="ttbl">
@@ -456,7 +483,7 @@ function renderAll(cityFilter, tierFilter) {
   <div class="card">
     <div class="card-hd">
       <div><div class="card-t">City tier trend</div>
-           <div class="card-s">% of ${cityFilter || "all cities"}'s asset base per month · use the city filter above to change</div></div>
+           <div class="card-s">Standardized %-share for ${cityFilter || "all cities"} · each point = that month's count ÷ the prior month's total · use the city filter above to change</div></div>
     </div>
     <div class="chart-wrap"><canvas id="cityTrendCanvas"></canvas></div>
   </div>
@@ -508,23 +535,28 @@ function renderAll(cityFilter, tierFilter) {
     leg.innerHTML += `<span class="lc"><span class="ldot" style="background:${activeColor(t)}"></span>${t}</span>`;
   });
 
-  // MoM bars
+  // MoM bars — segment WIDTH stays on a plain current-month basis (required:
+  // a stacked bar's segments must sum to 100% of its own bar to render
+  // correctly). The printed label/tooltip use the standardized share instead
+  // (count ÷ prior month's total), so the number matches every other %-share
+  // on this dashboard even though it won't exactly match the visual width.
   const momBars = document.getElementById("momBars");
   if (momBars) {
-    mom.months.forEach(mo => {
+    mom.months.forEach((mo, idx) => {
       const bt = bucketize(filterMomMonth(mo));
       const tot = Object.values(bt).reduce((s,v)=>s+v,0);
       if (!tot) return;
+      const share = shareSeries[idx];
       const segs = activeTiers()
-        .map(t => ({ t, c: bt[t]||0, p: (bt[t]||0)/tot*100 }))
+        .map(t => ({ t, c: bt[t]||0, p: (bt[t]||0)/tot*100, sh: share[t] }))
         .filter(s => s.p > 0);
       momBars.innerHTML += `<div class="mom-row">
         <div class="mom-lbl">${mo.label}</div>
         <div class="mom-bar">${segs.map(s => {
-          const label = s.p > 10 ? `${s.c.toLocaleString()} · ${s.p.toFixed(1)}%`
-                      : s.p > 4  ? `${s.p.toFixed(1)}%`
+          const label = s.p > 10 ? `${s.c.toLocaleString()} · ${s.sh.toFixed(1)}%`
+                      : s.p > 4  ? `${s.sh.toFixed(1)}%`
                       : "";
-          return `<div class="seg" title="${s.t}: ${s.c.toLocaleString()} (${s.p.toFixed(1)}%)"
+          return `<div class="seg" title="${s.t}: ${s.c.toLocaleString()} (${s.sh.toFixed(1)}% share)"
                style="width:${s.p.toFixed(1)}%;background:${activeColor(s.t)}">${label}</div>`;
         }).join("")}</div>
         <div class="mom-tot">${tot.toLocaleString()}</div>
@@ -532,12 +564,30 @@ function renderAll(cityFilter, tierFilter) {
     });
   }
 
-  // Tier table
+  // MoM asset base & tier counts — plain absolute numbers, no %-share
+  const momCountsTbody = document.getElementById("momCountsTbody");
+  if (momCountsTbody) {
+    activeTiers().forEach(t => {
+      const cells = mom.months.map(mo => {
+        const bt = bucketize(filterMomMonth(mo));
+        return `<td>${(bt[t]||0).toLocaleString()}</td>`;
+      }).join("");
+      momCountsTbody.innerHTML += `<tr>
+        <td><span class="badge" style="background:${activeColor(t)};color:${badgeTextColor(t)}">${t}</span></td>
+        ${cells}
+      </tr>`;
+    });
+    const totalCells = mom.months.map(mo => `<td>${monthTotal(mo).toLocaleString()}</td>`).join("");
+    momCountsTbody.innerHTML += `<tr class="summary-row"><td>Total</td>${totalCells}</tr>`;
+  }
+
+  // Tier table — Share uses the standardized definition (see shareByMonth above)
   const latestBucketed = bucketize(latestFiltered);
+  const latestShare = shareSeries[latestIdx];
   const ttbody = document.getElementById("tierTbody");
   if (ttbody) activeTiers().forEach(t => {
     const c = latestBucketed[t] || 0;
-    const sh = total ? (c/total*100).toFixed(1) : "0.0";
+    const sh = latestShare[t].toFixed(1);
     const cond = t === "Metals" ? "Bronze + Silver + Gold + Platinum" : TIER_CONDITIONS[t];
     ttbody.innerHTML += `<tr>
       <td><span class="badge" style="background:${activeColor(t)};color:${badgeTextColor(t)}">${t}</span></td>
@@ -546,10 +596,22 @@ function renderAll(cityFilter, tierFilter) {
     </tr>`;
   });
 
-  // City grid + City summary table share the same per-city breakdown
+  // City grid + City summary table share the same per-city breakdown.
+  // Share % (table + India row) uses the standardized definition: that city's
+  // current count ÷ that SAME city's total as of the prior month. Bar segment
+  // WIDTHS in the visual grid stay on a plain current-month basis (same
+  // rendering-correctness reason as the MoM bars above); the "Engaged %" text
+  // stat under each card uses the standardized share.
   const cg = document.getElementById("cityGrid");
   const ctbody = document.getElementById("cityTbody");
   if (cg || ctbody) {
+    const priorMonthForCity = latestIdx > 0 ? mom.months[latestIdx - 1] : null;
+    function priorCityTotal(city, fallback) {
+      if (!priorMonthForCity) return fallback;
+      const t = TIER_ORDER.reduce((s,t) => s + (priorMonthForCity.by_cluster_tier?.[`${city}|${t}`] || 0), 0);
+      return t || fallback;
+    }
+
     // India row — true nationwide total from latestMonth.by_tier directly (NOT
     // the per-city rows summed, since those exclude any "Unknown" cluster rows,
     // and NOT cityFilter-dependent, so it always matches the Executive Summary
@@ -559,7 +621,7 @@ function renderAll(cityFilter, tierFilter) {
       const indiaTotal = Object.values(latestMonth?.by_tier || {}).reduce((s,v)=>s+v,0);
       const indiaCells = activeTiers().map(t => {
         const c = indiaBt[t] || 0;
-        const sh = indiaTotal ? (c/indiaTotal*100).toFixed(1) : "0.0";
+        const sh = priorTotalForLatest ? (c/priorTotalForLatest*100).toFixed(1) : "0.0";
         return `<td>${c.toLocaleString()} <span class="pp-sub">(${sh}%)</span></td>`;
       }).join("");
       ctbody.innerHTML += `<tr class="india-row"><td>India</td><td>${indiaTotal.toLocaleString()}</td>${indiaCells}</tr>`;
@@ -572,15 +634,16 @@ function renderAll(cityFilter, tierFilter) {
       const bt = bucketize(raw);
       const tot = Object.values(bt).reduce((s,v)=>s+v,0);
       if (!tot) return;
+      const priorTot = priorCityTotal(city, tot);
 
       if (cg) {
         const segs = activeTiers().filter(t=>bt[t]>0).map(t=>({ t, p: bt[t]/tot*100, c: bt[t] }));
-        const non = activeTiers().filter(t=>t!=="Sticks").reduce((s,t)=>s+(bt[t]||0),0);
+        const nonStandardized = activeTiers().filter(t=>t!=="Sticks").reduce((s,t)=>s+(bt[t]||0),0);
         cg.innerHTML += `<div class="city-card">
           <div class="city-name">${city} <span style="font-weight:400;color:var(--mu)">(${tot.toLocaleString()})</span></div>
           <div class="city-bar">${segs.map(s=>`<div style="width:${s.p.toFixed(1)}%;background:${activeColor(s.t)}" title="${s.t}: ${s.c}"></div>`).join("")}</div>
           <div class="city-stat">
-            <span>Engaged: ${Math.round(non/tot*100)}%</span>
+            <span>Engaged: ${Math.round(nonStandardized/priorTot*100)}%</span>
             <span>Sticks: ${(bt["Sticks"]||0).toLocaleString()}</span>
           </div>
         </div>`;
@@ -589,7 +652,7 @@ function renderAll(cityFilter, tierFilter) {
       if (ctbody) {
         const cells = activeTiers().map(t => {
           const c = bt[t] || 0;
-          const sh = tot ? (c/tot*100).toFixed(1) : "0.0";
+          const sh = priorTot ? (c/priorTot*100).toFixed(1) : "0.0";
           return `<td>${c.toLocaleString()} <span class="pp-sub">(${sh}%)</span></td>`;
         }).join("");
         ctbody.innerHTML += `<tr><td>${city}</td><td>${tot.toLocaleString()}</td>${cells}</tr>`;
@@ -597,19 +660,15 @@ function renderAll(cityFilter, tierFilter) {
     });
   }
 
-  // City tier trend chart — plain month-over-month % (not held-base anchored),
-  // respects the city filter so it shows the trend for whichever city is
-  // selected (or all cities combined if none is).
+  // City tier trend chart — standardized %-share (shareSeries already respects
+  // the city filter via filterMomMonth), so it shows the trend for whichever
+  // city is selected (or all cities combined if none is).
   const cityTrendCanvas = document.getElementById("cityTrendCanvas");
   if (cityTrendCanvas && mom.months.length) {
     const labels = mom.months.map(m => m.label);
     const datasets = activeTiers().map(t => ({
       label: t,
-      data: mom.months.map(m => {
-        const bt = bucketize(filterMomMonth(m));
-        const tot = Object.values(bt).reduce((s,v)=>s+v,0);
-        return tot ? +((bt[t]||0)/tot*100).toFixed(2) : 0;
-      }),
+      data: shareSeries.map(share => share[t]),
       borderColor: activeColor(t),
       backgroundColor: activeColor(t),
       tension: 0.3,
@@ -630,88 +689,74 @@ function renderAll(cityFilter, tierFilter) {
     });
   }
 
-  // Every held-base month shares ONE fixed base (the earliest month in the
-  // window — see etl.py), so every column's % is on the same denominator.
-  // pp is therefore a plain sequential diff of consecutive anchor-based %'s:
-  // adjacent columns are directly comparable, unlike a base that rolled
-  // forward month to month.
-  const anchorMonth = mom.months[mom.months.indexOf(heldBaseMonths[0]) - 1];
-  const anchorRaw = filterMomMonth(anchorMonth);
-  const anchorTotal = Object.values(anchorRaw).reduce((s,v)=>s+v,0);
-  const anchorBucketed = bucketize(anchorRaw);
-  let prevCurrPct = {};
-  activeTiers().forEach(t => { prevCurrPct[t] = anchorTotal ? (anchorBucketed[t]||0)/anchorTotal*100 : 0; });
+  // Engaged (non-Sticks) as its own standardized share series — NOT simply
+  // "100 − Sticks%", because these standardized %'s don't sum to 100% within
+  // a month (the numerator and denominator come from different months' totals
+  // whenever the base is growing).
+  function engagedShareByMonth(idx) {
+    const curr = bucketize(filterMomMonth(mom.months[idx]));
+    const currTotal = monthTotal(mom.months[idx]);
+    const engagedCurr = currTotal - (curr["Sticks"] || 0);
+    const priorTotal = idx > 0 ? monthTotal(mom.months[idx - 1]) : currTotal;
+    return priorTotal ? +(engagedCurr/priorTotal*100).toFixed(2) : 0;
+  }
+  const engagedShareSeries = mom.months.map((_, idx) => engagedShareByMonth(idx));
 
-  const pctByMonth = heldBaseMonths.map(m => {
-    const hb = filterHeldBase(m);
-    const currB = bucketize(hb.curr);
-    const pct = {};
-    activeTiers().forEach(t => {
-      const pctCurr = hb.base_size ? (currB[t]||0)/hb.base_size*100 : 0;
-      pct[t] = { curr: +pctCurr.toFixed(2), pp: +(pctCurr - prevCurrPct[t]).toFixed(2) };
-    });
-    prevCurrPct = Object.fromEntries(activeTiers().map(t => [t, pct[t].curr]));
-    return pct;
-  });
-
-  // Held-base tier movement table (one row per tier, one share+pp column per month)
-  const hbTbody = document.getElementById("heldBaseTbody");
-  if (hbTbody && latestHB) {
-    const latestCurrB = bucketize(latestHB.curr);
-    const base = latestHB.base_size;
-    // Each held-base month's own prior month label, for tooltips (e.g. Mar's prior is Feb)
-    const prevLabels = heldBaseMonths.map(m => mom.months[mom.months.indexOf(m) - 1]?.label);
+  // Tier movement table (one row per tier, one standardized-share+pp column per month)
+  const tmTbody = document.getElementById("tierMovementTbody");
+  if (tmTbody && movementMonths.length) {
+    // Each movement month's own prior month label, for tooltips (e.g. Mar's prior is Feb)
+    const prevLabels = movementMonths.map(m => mom.months[mom.months.indexOf(m) - 1]?.label);
     const article = w => /^[aeiou]/i.test(w) ? "an" : "a";
 
     activeTiers().forEach(t => {
-      const cCurr = latestCurrB[t] || 0;
-      const cells = pctByMonth.map((pct, i) => {
-        const p = pct[t];
-        const pp = p.pp;
-        const prevPct = +(p.curr - pp).toFixed(2);
+      const cCurr = latestBucketed[t] || 0;
+      const cells = movementMonths.map((mo, i) => {
+        const idx = mom.months.indexOf(mo);
+        const curr = shareSeries[idx][t];
+        const prev = shareSeries[idx - 1][t];
+        const pp = +(curr - prev).toFixed(2);
         const arrow = pp > 0.05 ? "▲" : pp < -0.05 ? "▼" : "–";
         const dir = pp > 0.05 ? "up" : pp < -0.05 ? "down" : "flat";
         const fav = favorability(t, pp);
-        const tip = `${t} was ${prevPct.toFixed(1)}% of the held base in ${prevLabels[i]}, `
-          + `${dir} to ${p.curr.toFixed(1)}% in ${heldBaseMonths[i].label} `
+        const tip = `${t}'s standardized share was ${prev.toFixed(1)}% in ${prevLabels[i]}, `
+          + `${dir} to ${curr.toFixed(1)}% in ${mo.label} `
           + `(${pp >= 0 ? "+" : ""}${pp.toFixed(1)} pp) — ${article(fav)} ${fav} for this tier.`;
-        return `<td class="${dirClass(pp)}" title="${tip}">${p.curr.toFixed(1)}% <span class="pp-sub">(${arrow} ${Math.abs(pp).toFixed(1)} pp)</span></td>`;
+        return `<td class="${dirClass(pp)}" title="${tip}">${curr.toFixed(1)}% <span class="pp-sub">(${arrow} ${Math.abs(pp).toFixed(1)} pp)</span></td>`;
       }).join("");
-      hbTbody.innerHTML += `<tr>
+      tmTbody.innerHTML += `<tr>
         <td><span class="badge" style="background:${activeColor(t)};color:${badgeTextColor(t)}">${t}</span></td>
         <td>${cCurr.toLocaleString()}</td>
         ${cells}
       </tr>`;
     });
 
-    // Engaged row — 100% minus Sticks, i.e. same "Engaged" definition as the metrics card above
-    const latestSticksCurr = latestCurrB["Sticks"] || 0;
-    const engagedCount = base - latestSticksCurr;
-    const engagedCells = pctByMonth.map((pct, i) => {
-      const sticks = pct["Sticks"];
-      const engCurr = +(100 - sticks.curr).toFixed(2);
-      const engPp = +(-sticks.pp).toFixed(2);
-      const engPrev = +(engCurr - engPp).toFixed(2);
-      const arrow = engPp > 0.05 ? "▲" : engPp < -0.05 ? "▼" : "–";
-      const dir = engPp > 0.05 ? "up" : engPp < -0.05 ? "down" : "flat";
-      const tip = `Engaged (non-Sticks) was ${engPrev.toFixed(1)}% of the held base in ${prevLabels[i]}, `
-        + `${dir} to ${engCurr.toFixed(1)}% in ${heldBaseMonths[i].label} `
-        + `(${engPp >= 0 ? "+" : ""}${engPp.toFixed(1)} pp) — more engagement is always favorable.`;
-      return `<td class="${dirClass(engPp)}" title="${tip}">${engCurr.toFixed(1)}% <span class="pp-sub">(${arrow} ${Math.abs(engPp).toFixed(1)} pp)</span></td>`;
+    // Engaged row — see engagedShareByMonth above for why this isn't "100 − Sticks%"
+    const engagedCells = movementMonths.map((mo, i) => {
+      const idx = mom.months.indexOf(mo);
+      const curr = engagedShareSeries[idx];
+      const prev = engagedShareSeries[idx - 1];
+      const pp = +(curr - prev).toFixed(2);
+      const arrow = pp > 0.05 ? "▲" : pp < -0.05 ? "▼" : "–";
+      const dir = pp > 0.05 ? "up" : pp < -0.05 ? "down" : "flat";
+      const tip = `Engaged (non-Sticks)'s standardized share was ${prev.toFixed(1)}% in ${prevLabels[i]}, `
+        + `${dir} to ${curr.toFixed(1)}% in ${mo.label} `
+        + `(${pp >= 0 ? "+" : ""}${pp.toFixed(1)} pp) — more engagement is always favorable.`;
+      return `<td class="${dirClass(pp)}" title="${tip}">${curr.toFixed(1)}% <span class="pp-sub">(${arrow} ${Math.abs(pp).toFixed(1)} pp)</span></td>`;
     }).join("");
-    hbTbody.innerHTML += `<tr class="summary-row">
-      <td>Engaged</td><td>${engagedCount.toLocaleString()}</td>
+    tmTbody.innerHTML += `<tr class="summary-row">
+      <td>Engaged</td><td>${active.toLocaleString()}</td>
       ${engagedCells}
     </tr>`;
   }
 
-  // Held-base tier trend chart
+  // Tier movement trend chart
   const trendCanvas = document.getElementById("trendCanvas");
-  if (trendCanvas && heldBaseMonths.length) {
-    const labels = heldBaseMonths.map(m => m.label);
+  if (trendCanvas && movementMonths.length) {
+    const labels = movementMonths.map(m => m.label);
     const datasets = activeTiers().map(t => ({
       label: t,
-      data: pctByMonth.map(pct => pct[t].curr),
+      data: movementMonths.map(mo => shareSeries[mom.months.indexOf(mo)][t]),
       borderColor: activeColor(t),
       backgroundColor: activeColor(t),
       tension: 0.3,
