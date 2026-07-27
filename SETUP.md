@@ -155,6 +155,94 @@ ORDER BY "Orders Given" DESC NULLS LAST, "Leads Given" DESC NULLS LAST
 4. Save → name it **"Referral Tier — SSEID Detail"**
 5. Note the card ID from the URL → this is your SSEID_CARD_ID
 
+### Question C — Held-base movement (SSEID tier at two dates)
+
+Powers the month-over-month "held-base" tier movement view, which fixes the
+asset base to the prior month so a tier's % can't shift just because the
+base grew.
+
+1. New → SQL query → same database
+2. Paste:
+
+```sql
+WITH
+asset_base AS (
+  SELECT
+    p."sseid",
+    p."prospectId",
+    p."site_address_cluster" AS cluster
+  FROM public.project p
+  WHERE p."commissioning_date" IS NOT NULL
+    AND (CAST(p."commissioning_date" AS timestamp)
+         AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kolkata')::date <= {{prev_end}}
+),
+lead_max AS (
+  SELECT
+    "prospectId",
+    MAX((CAST("order_closure_datetime" AS timestamp)
+         AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kolkata')::date) AS max_order_date
+  FROM public.lead
+  GROUP BY "prospectId"
+),
+referral_counts_prev AS (
+  SELECT
+    r."referredBy" AS referrer_prospectid,
+    COUNT(*) AS lead_count,
+    SUM(CASE WHEN l.max_order_date IS NOT NULL AND l.max_order_date <= {{prev_end}} THEN 1 ELSE 0 END) AS order_count
+  FROM public.referrals r
+  LEFT JOIN lead_max l ON r."prospectId" = l."prospectId"
+  WHERE (CAST(r."createdAt" AS timestamp)
+         AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kolkata')::date <= {{prev_end}}
+    AND (r."type" IN ('existing customer', 'sse employee', 'solar square') OR r."type" IS NULL)
+  GROUP BY r."referredBy"
+),
+referral_counts_curr AS (
+  SELECT
+    r."referredBy" AS referrer_prospectid,
+    COUNT(*) AS lead_count,
+    SUM(CASE WHEN l.max_order_date IS NOT NULL AND l.max_order_date <= {{curr_end}} THEN 1 ELSE 0 END) AS order_count
+  FROM public.referrals r
+  LEFT JOIN lead_max l ON r."prospectId" = l."prospectId"
+  WHERE (CAST(r."createdAt" AS timestamp)
+         AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Kolkata')::date <= {{curr_end}}
+    AND (r."type" IN ('existing customer', 'sse employee', 'solar square') OR r."type" IS NULL)
+  GROUP BY r."referredBy"
+)
+SELECT
+  a."sseid"                          AS "SSEID",
+  a.cluster                          AS "City",
+  COALESCE(rcp.lead_count,  0)       AS "Leads Prev",
+  COALESCE(rcp.order_count, 0)       AS "Orders Prev",
+  CASE
+    WHEN COALESCE(rcp.order_count, 0) >= 12 THEN 'Platinum'
+    WHEN COALESCE(rcp.order_count, 0) >= 7  THEN 'Gold'
+    WHEN COALESCE(rcp.order_count, 0) >= 3  THEN 'Silver'
+    WHEN COALESCE(rcp.order_count, 0) >= 1  THEN 'Bronze'
+    WHEN COALESCE(rcp.lead_count,  0) >= 1  THEN 'Stones'
+    ELSE 'Sticks'
+  END                                 AS "Tier Prev",
+  COALESCE(rcc.lead_count,  0)       AS "Leads Curr",
+  COALESCE(rcc.order_count, 0)       AS "Orders Curr",
+  CASE
+    WHEN COALESCE(rcc.order_count, 0) >= 12 THEN 'Platinum'
+    WHEN COALESCE(rcc.order_count, 0) >= 7  THEN 'Gold'
+    WHEN COALESCE(rcc.order_count, 0) >= 3  THEN 'Silver'
+    WHEN COALESCE(rcc.order_count, 0) >= 1  THEN 'Bronze'
+    WHEN COALESCE(rcc.lead_count,  0) >= 1  THEN 'Stones'
+    ELSE 'Sticks'
+  END                                 AS "Tier Curr"
+FROM asset_base a
+LEFT JOIN referral_counts_prev rcp ON rcp.referrer_prospectid = a."prospectId"
+LEFT JOIN referral_counts_curr rcc ON rcc.referrer_prospectid = a."prospectId"
+ORDER BY "SSEID"
+```
+
+3. Click the `{{ }}` variable icon — you should see **two** variables,
+   `prev_end` and `curr_end`. Set both to type **Date**, with defaults like
+   `prev_end=2026-06-30`, `curr_end=2026-07-31`.
+4. Save → name it **"Referral Tier — Held-Base Movement"**
+5. Note the card ID from the URL → this is your HELDBASE_CARD_ID
+
 ---
 
 ## Step 2 — Create a GitHub repository
@@ -215,10 +303,15 @@ never visible in logs.
 | Secret name              | Value                                      |
 |-------------------------|--------------------------------------------|
 | `METABASE_URL`          | `https://your.metabase.com` (no trailing /) |
-| `METABASE_USERNAME`     | your Metabase email                        |
-| `METABASE_PASSWORD`     | your Metabase password                     |
+| `METABASE_API_KEY`      | preferred — an API key from Admin > Settings > Authentication > API keys. Leave `METABASE_USERNAME`/`METABASE_PASSWORD` blank if you use this. |
+| `METABASE_USERNAME`     | fallback — your Metabase email (only needed if not using an API key) |
+| `METABASE_PASSWORD`     | fallback — your Metabase password (only needed if not using an API key) |
 | `METABASE_AGG_CARD_ID`  | the number from Step 1 Question A          |
 | `METABASE_SSEID_CARD_ID`| the number from Step 1 Question B          |
+| `METABASE_HELDBASE_CARD_ID`| the number from Step 1 Question C       |
+
+An API key needs read access to the collection these three questions live in —
+that's enough, no admin permissions required.
 
 ---
 
