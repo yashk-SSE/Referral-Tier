@@ -20,6 +20,7 @@
     --tc-platinum:#c084fc; --tc-gold:#f59e0b; --tc-silver:#94a3b8;
     --tc-bronze:#b87333;   --tc-stones:#78716c; --tc-sticks:#78350f;
     --tc-metals: var(--brand-gold);
+    --topbar-h: 57px; /* fallback; JS measures the real height on load/resize */
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;
@@ -44,8 +45,22 @@
   .seg-toggle button{border:0;border-radius:0;padding:5px 10px;font-size:11px}
   .seg-toggle button.on{background:var(--accent);color:#fff;font-weight:500}
 
+  /* ── APP SHELL (sidebar + tab content) ───────────── */
+  .app-shell{max-width:1280px;margin:0 auto;display:flex;align-items:flex-start}
+  .sidebar{position:sticky;top:var(--topbar-h);flex-shrink:0;width:200px;
+           padding:20px 12px;display:flex;flex-direction:column;gap:2px;
+           max-height:calc(100vh - var(--topbar-h));overflow-y:auto}
+  .nav-item{padding:9px 14px;border-radius:7px;font-size:13px;color:var(--txt);
+            cursor:pointer;user-select:none;white-space:nowrap}
+  .nav-item:hover{background:var(--bg)}
+  .nav-item.active{background:var(--accent);color:#fff;font-weight:500}
+  .main{flex:1;min-width:0}
+  .content-header{position:sticky;top:var(--topbar-h);z-index:40;background:var(--bg);
+                  padding:14px 24px 12px;font-size:15px;font-weight:600;
+                  border-bottom:0.5px solid var(--bd)}
+
   /* ── LAYOUT ──────────────────────────────────────── */
-  .page{max-width:1200px;margin:0 auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px}
+  .page{max-width:1080px;padding:20px 24px;display:flex;flex-direction:column;gap:16px}
 
   /* ── METRIC CARDS ────────────────────────────────── */
   .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
@@ -87,6 +102,7 @@
   .pp-flat{color:var(--mu)}
   .hbtbl td[title]{cursor:help;text-decoration:underline dotted;text-decoration-color:var(--bd);text-underline-offset:3px}
   .hbtbl tr.summary-row td{font-weight:600;border-top:1.5px solid var(--txt)}
+  .ttbl tr.india-row td{font-weight:600;background:var(--bg);border-bottom:1.5px solid var(--txt)}
   .pp-sub{font-size:10px;font-weight:400;opacity:.85}
 
   /* ── TREND CHART ─────────────────────────────────── */
@@ -124,6 +140,12 @@
   .city-bar{display:flex;height:18px;border-radius:4px;overflow:hidden;background:var(--bg);margin-bottom:6px}
   .city-stat{display:flex;justify-content:space-between;font-size:10px;color:var(--mu)}
 
+  @media(max-width:900px){
+    .app-shell{flex-direction:column}
+    .sidebar{position:static;width:100%;max-height:none;flex-direction:row;
+             flex-wrap:wrap;padding:12px 24px 0}
+    .content-header{top:0}
+  }
   @media(max-width:640px){
     .page{padding:12px 14px}
     .topbar{padding:10px 14px}
@@ -154,8 +176,14 @@
   </div>
 </div>
 
-<div class="page" id="page">
-  <div class="loading"><div class="spinner"></div>Loading dashboard data…</div>
+<div class="app-shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <div class="main">
+    <div class="content-header" id="contentHeader"></div>
+    <div class="page" id="page">
+      <div class="loading"><div class="spinner"></div>Loading dashboard data…</div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -178,6 +206,7 @@ const METALS_COLOR = "#FFC100"; // brand gold
 let DATA = { mom: null, sseid: null, meta: null };
 let viewMode = "full"; // "full" | "metals"
 let trendChart = null;
+let cityTrendChart = null;
 
 // ── VIEW MODE (6-tier vs Sticks/Stones/Metals) ──────────────────────────────
 function activeTiers() {
@@ -204,6 +233,40 @@ function setViewMode(mode) {
   });
   applyFilters();
 }
+
+// ── TABS (left nav) ──────────────────────────────────────────────────────────
+// Add new tabs here — each needs a matching `case` in renderAll()'s tab-content switch.
+const TABS = [
+  { id: "exec",   label: "Executive Summary" },
+  { id: "trends", label: "Trends & MoM" },
+  { id: "city",   label: "City Summary" },
+  { id: "sseid",  label: "SSEID Detail" },
+];
+let activeTab = TABS[0].id;
+
+function renderSidebar() {
+  const sb = document.getElementById("sidebar");
+  if (!sb) return;
+  sb.innerHTML = TABS.map(t =>
+    `<div class="nav-item${t.id === activeTab ? " active" : ""}" onclick="setActiveTab('${t.id}')">${t.label}</div>`
+  ).join("");
+  const hdr = document.getElementById("contentHeader");
+  if (hdr) hdr.textContent = TABS.find(t => t.id === activeTab)?.label || "";
+}
+function setActiveTab(id) {
+  activeTab = id;
+  renderSidebar();
+  applyFilters();
+}
+
+// Keeps the sidebar/content-header sticky offset in sync with the topbar's real height
+function syncTopbarHeight() {
+  const tb = document.querySelector(".topbar");
+  if (tb) document.documentElement.style.setProperty("--topbar-h", tb.offsetHeight + "px");
+}
+window.addEventListener("resize", syncTopbarHeight);
+renderSidebar();
+syncTopbarHeight();
 
 // ── FETCH ALL DATA ─────────────────────────────────────────────────────────
 async function loadData() {
@@ -249,6 +312,7 @@ function renderAll(cityFilter, tierFilter) {
   if (!mom || !sseid) return;
 
   if (trendChart) { trendChart.destroy(); trendChart = null; }
+  if (cityTrendChart) { cityTrendChart.destroy(); cityTrendChart = null; }
 
   const latestMonth = mom.months[mom.months.length - 1];
   const latestByTier = latestMonth?.by_tier || {};
@@ -307,7 +371,7 @@ function renderAll(cityFilter, tierFilter) {
   const orderers = ["Platinum","Gold","Silver","Bronze"].reduce((s,t) => s+(latestFiltered[t]||0), 0);
   const engPct   = total ? Math.round(active/total*100) : 0;
 
-  document.getElementById("page").innerHTML = `
+  const execHTML = `
   <div class="metrics">
     <div class="met"><div class="met-lbl">Total assets</div>
       <div class="met-val">${total.toLocaleString()}</div>
@@ -326,16 +390,6 @@ function renderAll(cityFilter, tierFilter) {
   ${mom.months.length ? `
   <div class="card">
     <div class="card-hd">
-      <div><div class="card-t">Month-over-month tier distribution</div>
-           <div class="card-s">Cumulative asset base · each bar = all projects commissioned to that date</div></div>
-    </div>
-    <div class="legend" id="leg"></div>
-    <div class="mom" id="momBars"></div>
-  </div>` : ""}
-
-  ${mom.months.length ? `
-  <div class="card">
-    <div class="card-hd">
       <div><div class="card-t">Tier breakdown — ${latestMonth?.label}</div>
            <div class="card-s">Count and share per tier${cityFilter ? " · "+cityFilter : ""}</div></div>
     </div>
@@ -343,6 +397,18 @@ function renderAll(cityFilter, tierFilter) {
       <thead><tr><th style="width:90px">Tier</th><th>Count</th><th>Share</th><th>Condition</th></tr></thead>
       <tbody id="tierTbody"></tbody>
     </table>
+  </div>` : ""}
+  `;
+
+  const trendsHTML = `
+  ${mom.months.length ? `
+  <div class="card">
+    <div class="card-hd">
+      <div><div class="card-t">Month-over-month tier distribution</div>
+           <div class="card-s">Cumulative asset base · each bar = all projects commissioned to that date</div></div>
+    </div>
+    <div class="legend" id="leg"></div>
+    <div class="mom" id="momBars"></div>
   </div>` : ""}
 
   ${heldBaseMonths.length ? `
@@ -368,7 +434,42 @@ function renderAll(cityFilter, tierFilter) {
     </div>
     <div class="chart-wrap"><canvas id="trendCanvas"></canvas></div>
   </div>` : ""}
+  `;
 
+  const cityHTML = `
+  ${mom.meta?.clusters?.length ? `
+  <div class="card">
+    <div class="card-hd">
+      <div><div class="card-t">City summary — ${latestMonth?.label}</div>
+           <div class="card-s">Count and share per tier, per city</div></div>
+    </div>
+    <div class="dtbl-wrap" style="max-height:none">
+      <table class="ttbl">
+        <thead><tr>
+          <th>City</th><th>Total</th>
+          ${activeTiers().map(t => `<th>${t}</th>`).join("")}
+        </tr></thead>
+        <tbody id="cityTbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd">
+      <div><div class="card-t">City tier trend</div>
+           <div class="card-s">% of ${cityFilter || "all cities"}'s asset base per month · use the city filter above to change</div></div>
+    </div>
+    <div class="chart-wrap"><canvas id="cityTrendCanvas"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-hd">
+      <div><div class="card-t">City breakdown — ${latestMonth?.label}</div>
+           <div class="card-s">Tier distribution per city</div></div>
+    </div>
+    <div class="city-grid" id="cityGrid"></div>
+  </div>` : `<div class="card">No city breakdown available.</div>`}
+  `;
+
+  const sseidHTML = `
   ${sseid.records?.length ? `
   <div class="card">
     <div class="card-hd">
@@ -394,17 +495,12 @@ function renderAll(cityFilter, tierFilter) {
         <tbody id="sseidBody"></tbody>
       </table>
     </div>
-  </div>` : ""}
-
-  ${mom.meta?.clusters?.length > 1 ? `
-  <div class="card">
-    <div class="card-hd">
-      <div><div class="card-t">City breakdown — ${latestMonth?.label}</div>
-           <div class="card-s">Tier distribution per city</div></div>
-    </div>
-    <div class="city-grid" id="cityGrid"></div>
-  </div>` : ""}
+  </div>` : `<div class="card">No SSEID detail available.</div>`}
   `;
+
+  document.getElementById("page").innerHTML =
+    ({ exec: execHTML, trends: trendsHTML, city: cityHTML, sseid: sseidHTML })[activeTab]
+    || `<div class="err-box">Unknown tab "${activeTab}".</div>`;
 
   // Legend
   const leg = document.getElementById("leg");
@@ -424,10 +520,13 @@ function renderAll(cityFilter, tierFilter) {
         .filter(s => s.p > 0);
       momBars.innerHTML += `<div class="mom-row">
         <div class="mom-lbl">${mo.label}</div>
-        <div class="mom-bar">${segs.map(s =>
-          `<div class="seg" title="${s.t}: ${s.c.toLocaleString()}"
-               style="width:${s.p.toFixed(1)}%;background:${activeColor(s.t)}">${s.p > 5 ? s.c : ""}</div>`
-        ).join("")}</div>
+        <div class="mom-bar">${segs.map(s => {
+          const label = s.p > 10 ? `${s.c.toLocaleString()} · ${s.p.toFixed(1)}%`
+                      : s.p > 4  ? `${s.p.toFixed(1)}%`
+                      : "";
+          return `<div class="seg" title="${s.t}: ${s.c.toLocaleString()} (${s.p.toFixed(1)}%)"
+               style="width:${s.p.toFixed(1)}%;background:${activeColor(s.t)}">${label}</div>`;
+        }).join("")}</div>
         <div class="mom-tot">${tot.toLocaleString()}</div>
       </div>`;
     });
@@ -447,9 +546,25 @@ function renderAll(cityFilter, tierFilter) {
     </tr>`;
   });
 
-  // City grid
+  // City grid + City summary table share the same per-city breakdown
   const cg = document.getElementById("cityGrid");
-  if (cg) {
+  const ctbody = document.getElementById("cityTbody");
+  if (cg || ctbody) {
+    // India row — true nationwide total from latestMonth.by_tier directly (NOT
+    // the per-city rows summed, since those exclude any "Unknown" cluster rows,
+    // and NOT cityFilter-dependent, so it always matches the Executive Summary
+    // tier breakdown numbers exactly).
+    if (ctbody) {
+      const indiaBt = bucketize(latestMonth?.by_tier || {});
+      const indiaTotal = Object.values(latestMonth?.by_tier || {}).reduce((s,v)=>s+v,0);
+      const indiaCells = activeTiers().map(t => {
+        const c = indiaBt[t] || 0;
+        const sh = indiaTotal ? (c/indiaTotal*100).toFixed(1) : "0.0";
+        return `<td>${c.toLocaleString()} <span class="pp-sub">(${sh}%)</span></td>`;
+      }).join("");
+      ctbody.innerHTML += `<tr class="india-row"><td>India</td><td>${indiaTotal.toLocaleString()}</td>${indiaCells}</tr>`;
+    }
+
     const clusters = mom.meta.clusters || [];
     clusters.forEach(city => {
       const raw = {};
@@ -457,16 +572,61 @@ function renderAll(cityFilter, tierFilter) {
       const bt = bucketize(raw);
       const tot = Object.values(bt).reduce((s,v)=>s+v,0);
       if (!tot) return;
-      const segs = activeTiers().filter(t=>bt[t]>0).map(t=>({ t, p: bt[t]/tot*100, c: bt[t] }));
-      const non = activeTiers().filter(t=>t!=="Sticks").reduce((s,t)=>s+(bt[t]||0),0);
-      cg.innerHTML += `<div class="city-card">
-        <div class="city-name">${city} <span style="font-weight:400;color:var(--mu)">(${tot.toLocaleString()})</span></div>
-        <div class="city-bar">${segs.map(s=>`<div style="width:${s.p.toFixed(1)}%;background:${activeColor(s.t)}" title="${s.t}: ${s.c}"></div>`).join("")}</div>
-        <div class="city-stat">
-          <span>Engaged: ${Math.round(non/tot*100)}%</span>
-          <span>Sticks: ${(bt["Sticks"]||0).toLocaleString()}</span>
-        </div>
-      </div>`;
+
+      if (cg) {
+        const segs = activeTiers().filter(t=>bt[t]>0).map(t=>({ t, p: bt[t]/tot*100, c: bt[t] }));
+        const non = activeTiers().filter(t=>t!=="Sticks").reduce((s,t)=>s+(bt[t]||0),0);
+        cg.innerHTML += `<div class="city-card">
+          <div class="city-name">${city} <span style="font-weight:400;color:var(--mu)">(${tot.toLocaleString()})</span></div>
+          <div class="city-bar">${segs.map(s=>`<div style="width:${s.p.toFixed(1)}%;background:${activeColor(s.t)}" title="${s.t}: ${s.c}"></div>`).join("")}</div>
+          <div class="city-stat">
+            <span>Engaged: ${Math.round(non/tot*100)}%</span>
+            <span>Sticks: ${(bt["Sticks"]||0).toLocaleString()}</span>
+          </div>
+        </div>`;
+      }
+
+      if (ctbody) {
+        const cells = activeTiers().map(t => {
+          const c = bt[t] || 0;
+          const sh = tot ? (c/tot*100).toFixed(1) : "0.0";
+          return `<td>${c.toLocaleString()} <span class="pp-sub">(${sh}%)</span></td>`;
+        }).join("");
+        ctbody.innerHTML += `<tr><td>${city}</td><td>${tot.toLocaleString()}</td>${cells}</tr>`;
+      }
+    });
+  }
+
+  // City tier trend chart — plain month-over-month % (not held-base anchored),
+  // respects the city filter so it shows the trend for whichever city is
+  // selected (or all cities combined if none is).
+  const cityTrendCanvas = document.getElementById("cityTrendCanvas");
+  if (cityTrendCanvas && mom.months.length) {
+    const labels = mom.months.map(m => m.label);
+    const datasets = activeTiers().map(t => ({
+      label: t,
+      data: mom.months.map(m => {
+        const bt = bucketize(filterMomMonth(m));
+        const tot = Object.values(bt).reduce((s,v)=>s+v,0);
+        return tot ? +((bt[t]||0)/tot*100).toFixed(2) : 0;
+      }),
+      borderColor: activeColor(t),
+      backgroundColor: activeColor(t),
+      tension: 0.3,
+      pointRadius: 3,
+    }));
+    cityTrendChart = new Chart(cityTrendCanvas, {
+      type: "line",
+      data: { labels, datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        scales: {
+          y: { ticks: { callback: v => v + "%" }, grid: { color: "rgba(128,128,128,.15)" } },
+          x: { grid: { display: false } },
+        },
+        plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 11 } } } },
+      },
     });
   }
 
