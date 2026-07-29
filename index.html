@@ -203,7 +203,7 @@ const TIER_CONDITIONS = {
 const METALS_TIERS = ["Bronze","Silver","Gold","Platinum"];
 const METALS_COLOR = "#FFC100"; // brand gold
 
-let DATA = { mom: null, sseid: null, meta: null };
+let DATA = { mom: null, sseid: null, meta: null, heldbase: null };
 let viewMode = "full"; // "full" | "metals"
 let trendChart = null;
 let cityTrendChart = null;
@@ -271,12 +271,13 @@ syncTopbarHeight();
 // ── FETCH ALL DATA ─────────────────────────────────────────────────────────
 async function loadData() {
   try {
-    const [mom, sseid, meta] = await Promise.all([
+    const [mom, sseid, meta, heldbase] = await Promise.all([
       fetch("data/tier_mom.json").then(r => r.json()),
       fetch("data/tier_sseid.json").then(r => r.json()),
       fetch("data/meta.json").then(r => r.json()),
+      fetch("data/tier_heldbase_sseid.json").then(r => r.json()).catch(() => ({ meta: {}, records: [] })),
     ]);
-    DATA = { mom, sseid, meta };
+    DATA = { mom, sseid, meta, heldbase };
 
     // Populate city filter
     const cities = [...new Set([
@@ -308,24 +309,25 @@ function applyFilters() {
 
 // ── MAIN RENDER ────────────────────────────────────────────────────────────
 function renderAll(cityFilter, tierFilter) {
-  const { mom, sseid } = DATA;
+  const { mom, sseid, heldbase } = DATA;
   if (!mom || !sseid) return;
 
   if (trendChart) { trendChart.destroy(); trendChart = null; }
   if (cityTrendChart) { cityTrendChart.destroy(); cityTrendChart = null; }
 
   const latestMonth = mom.months[mom.months.length - 1];
-  const latestByTier = latestMonth?.by_tier || {};
 
   // Filter MoM data by city
   function filterMomMonth(m) {
     if (!cityFilter) return m.by_tier;
-    const key = `${cityFilter}|`;
     const bt = {};
     TIER_ORDER.forEach(t => {
       bt[t] = m.by_cluster_tier?.[`${cityFilter}|${t}`] || 0;
     });
     return bt;
+  }
+  function monthTotal(m) {
+    return Object.values(filterMomMonth(m)).reduce((s,v) => s+v, 0);
   }
 
   // Filter SSEID rows
@@ -334,31 +336,79 @@ function renderAll(cityFilter, tierFilter) {
   if (tierFilter) sseidRows = sseidRows.filter(r => r.tier === tierFilter);
   window._filteredRows = sseidRows;
 
-  // ── STANDARDIZED %-SHARE DEFINITION (used everywhere in this dashboard) ──
-  // share(tier, month M) = tier's count as of M's end (the full count, including
-  // any SSEIDs newly commissioned that month) ÷ the total asset base as of the
-  // END OF THE PRIOR CALENDAR MONTH (M-1). Every month is its own independent
-  // two-month comparison — this is NOT a running/anchored base.
-  // The very first month in the loaded window has no prior month, so it falls
-  // back to using its own total for that one month only.
-  // Exception: the MoM stacked-bar chart's segment WIDTHS stay on a plain
-  // current-month basis (count ÷ that same month's own total) because a
-  // stacked bar's segments must sum to 100% of its own bar to render
-  // correctly — using a different-month denominator there would make bars
-  // overflow/get silently clipped. Its printed % labels still use the
-  // standardized definition above; only the visual proportions differ.
-  function monthTotal(m) {
-    return Object.values(filterMomMonth(m)).reduce((s,v) => s+v, 0);
+  // ── COHORT-BASED TIER METHODOLOGY (used everywhere in this dashboard) ──
+  // "Current month" reporting never includes SSEIDs commissioned during that
+  // same month. For month M, the base/cohort = every SSEID commissioned by
+  // the END of month M-1 (fixed — it does not grow during M). Tier is
+  // computed for that exact same cohort at two points: once as of M-1's end
+  // (the baseline) and once as of M's end (current) — so numerator and
+  // denominator are always the SAME fixed population, and %-share always
+  // sums to 100% within a month. SSEIDs commissioned DURING month M are
+  // excluded entirely from M's tier reporting; they first enter reporting
+  // the FOLLOWING month, once M becomes the prior month for a new cohort.
+  // They're tracked meanwhile as "New to base" (see the metric card below).
+  function filterHeldBase(m) {
+    const hb = m?.held_base;
+    if (!hb) return null;
+    if (!cityFilter) {
+      return { prev: hb.by_tier_prev, curr: hb.by_tier_curr, base_size: hb.base_size };
+    }
+    const prev = {}, curr = {};
+    TIER_ORDER.forEach(t => {
+      prev[t] = hb.by_cluster_tier_prev?.[`${cityFilter}|${t}`] || 0;
+      curr[t] = hb.by_cluster_tier_curr?.[`${cityFilter}|${t}`] || 0;
+    });
+    return { prev, curr, base_size: Object.values(curr).reduce((s,v)=>s+v,0) };
   }
-  function shareByMonth(idx) {
-    const curr = bucketize(filterMomMonth(mom.months[idx]));
-    const priorTotal = idx > 0 ? monthTotal(mom.months[idx - 1]) : monthTotal(mom.months[idx]);
-    const out = {};
-    activeTiers().forEach(t => { out[t] = priorTotal ? +((curr[t]||0)/priorTotal*100).toFixed(2) : 0; });
-    return out;
+  const cohortMonths = mom.months.filter(m => m.held_base); // every month except the first, which has no prior to cohort against
+  const latestCohortMonth = cohortMonths[cohortMonths.length - 1];
+  const latestCohort = latestCohortMonth ? filterHeldBase(latestCohortMonth) : null;
+  const priorMonthLabel = latestCohortMonth ? mom.months[mom.months.indexOf(latestCohortMonth) - 1]?.label : latestMonth?.label;
+
+  // {prev%, curr%, pp} per tier, for every cohort month — prev and curr both
+  // divide into that SAME month's base_size, so it's always apples-to-apples.
+  const pctByMonth = cohortMonths.map(m => {
+    const hb = filterHeldBase(m);
+    const prevB = bucketize(hb.prev), currB = bucketize(hb.curr);
+    const pct = {};
+    activeTiers().forEach(t => {
+      const p = hb.base_size ? (prevB[t]||0)/hb.base_size*100 : 0;
+      const c = hb.base_size ? (currB[t]||0)/hb.base_size*100 : 0;
+      pct[t] = { prev: +p.toFixed(2), curr: +c.toFixed(2), pp: +(c-p).toFixed(2) };
+    });
+    return pct;
+  });
+
+  // This month's leads/orders PROGRESS for the latest cohort — from the
+  // SSEID-level held-base detail file (only available for the latest pair,
+  // Jun→Jul in a 6-month window). Grouped by tier_prev (the baseline tier
+  // established at the START of this month), so you can see e.g. "of the
+  // June-30 Sticks, how much have THEY given so far in July" — directly
+  // answering "how is this month performing so far."
+  const hbRecords = heldbase?.records || [];
+  const hbCityFiltered = cityFilter ? hbRecords.filter(r => r.city === cityFilter) : hbRecords;
+  const hbTierFiltered = tierFilter ? hbRecords.filter(r => r.tier_prev === tierFilter) : hbRecords;
+  // `sameFn`, when given, counts how many rows in each group still satisfy it
+  // (used to show "Still Sticks" vs "Moved up" — tiers only ever move UP
+  // within a month, since referral counts never decrease, so any SSEID whose
+  // tier_curr differs from its tier_prev has strictly improved).
+  function aggregateProgress(rows, keyFn, sameFn) {
+    const byKey = {};
+    rows.forEach(r => {
+      const k = keyFn(r);
+      if (!byKey[k]) byKey[k] = { count: 0, leadsPrev: 0, leadsCurr: 0, ordersPrev: 0, ordersCurr: 0, stillSame: 0 };
+      const g = byKey[k];
+      g.count++;
+      g.leadsPrev += r.leads_prev; g.leadsCurr += r.leads_curr;
+      g.ordersPrev += r.orders_prev; g.ordersCurr += r.orders_curr;
+      if (sameFn && sameFn(r, k)) g.stillSame++;
+    });
+    return byKey;
   }
-  const shareSeries = mom.months.map((_, idx) => shareByMonth(idx));
-  const movementMonths = mom.months.slice(1); // every month except the first, which has no prior
+  const progressByTier = aggregateProgress(hbCityFiltered, r => r.tier_prev, (r,k) => r.tier_curr === k);
+  const progressByCity = aggregateProgress(hbTierFiltered, r => r.city);
+  const hbLabel = heldbase?.meta?.curr_label || latestCohortMonth?.label || "";
+  const hbPrevLabel = heldbase?.meta?.prev_label || priorMonthLabel || "";
 
   // Color is direction-only (green=increase, red=decrease) so it reads consistently
   // across every row. Favorability (is this increase/decrease good news for this
@@ -372,83 +422,84 @@ function renderAll(cityFilter, tierFilter) {
     return (badWhenUp ? pp > 0 : pp < 0) ? "decline" : "improvement";
   }
 
-  // Compute metrics from latest month. "Total assets" deliberately stays the
-  // true current count (an operational fact, not a %-share stat) — everything
-  // else below uses the standardized prior-month-based share.
-  const latestIdx = mom.months.length - 1;
-  const latestFiltered = filterMomMonth(latestMonth || {by_tier:{},by_cluster_tier:{}});
-  const total    = Object.values(latestFiltered).reduce((s,v) => s+v, 0);
-  const active   = TIER_ORDER.filter(t => t !== "Sticks").reduce((s,t) => s+(latestFiltered[t]||0), 0);
-  const metalsCount = METALS_TIERS.reduce((s,t) => s+(latestFiltered[t]||0), 0);
-  const priorTotalForLatest = latestIdx > 0 ? monthTotal(mom.months[latestIdx - 1]) : total;
-  const priorMonthLabel = latestIdx > 0 ? mom.months[latestIdx - 1].label : latestMonth?.label;
-  const engPct   = priorTotalForLatest ? Math.round(active/priorTotalForLatest*100) : 0;
+  // Headline metrics come from the latest COHORT, not the true current total
+  // (which would include SSEIDs commissioned this month — tracked separately
+  // as "New to base" instead of being folded into tier numbers).
+  const latestCurrB = latestCohort ? bucketize(latestCohort.curr) : {};
+  const total = latestCohort ? latestCohort.base_size : 0;
+  const active = TIER_ORDER.filter(t => t !== "Sticks").reduce((s,t) => s+(latestCurrB[t]||0), 0);
+  const metalsCount = METALS_TIERS.reduce((s,t) => s+(latestCurrB[t]||0), 0);
+  const engPct = total ? Math.round(active/total*100) : 0;
+  const newToBase = latestCohort ? Math.max(0, monthTotal(latestMonth) - total) : 0;
 
   const execHTML = `
   <div class="metrics">
     <div class="met"><div class="met-lbl">Total assets</div>
       <div class="met-val">${total.toLocaleString()}</div>
-      <div class="met-sub">${latestMonth?.label || "—"}</div></div>
+      <div class="met-sub">Commissioned by ${priorMonthLabel}, tracked to ${latestCohortMonth?.label || latestMonth?.label}</div></div>
     <div class="met"><div class="met-lbl">Engaged (non-Sticks)</div>
       <div class="met-val">${active.toLocaleString()}</div>
-      <div class="met-sub">${engPct}% of ${priorMonthLabel}'s base</div></div>
+      <div class="met-sub">${engPct}% of base</div></div>
     <div class="met"><div class="met-lbl">Metals</div>
       <div class="met-val">${metalsCount.toLocaleString()}</div>
       <div class="met-sub">Bronze + Silver + Gold + Platinum</div></div>
+    <div class="met"><div class="met-lbl">New to base</div>
+      <div class="met-val">${newToBase.toLocaleString()}</div>
+      <div class="met-sub">Commissioned in ${latestMonth?.label}, not yet tier-reported</div></div>
   </div>
 
-  ${mom.months.length ? `
+  ${latestCohort ? `
   <div class="card">
     <div class="card-hd">
-      <div><div class="card-t">Tier breakdown — ${latestMonth?.label}</div>
-           <div class="card-s">Count as of ${latestMonth?.label}${cityFilter ? " · "+cityFilter : ""} · Share = count ÷ ${priorMonthLabel}'s total asset base (the standardized %-share definition used throughout this dashboard)</div></div>
+      <div><div class="card-t">Tier breakdown — ${latestCohortMonth?.label}</div>
+           <div class="card-s">Cohort: ${total.toLocaleString()} SSEIDs commissioned by ${priorMonthLabel}${cityFilter ? " · "+cityFilter : ""} · Count/Share = that same cohort's CURRENT tier, as of ${latestCohortMonth?.label} (Share always sums to 100%) — this can differ from the ${priorMonthLabel} BASELINE tier shown in Trends & MoM's "Tier-wise progress", since some SSEIDs moved up during the month (see that table's "Moved up" column)</div></div>
     </div>
     <table class="ttbl">
       <thead><tr><th style="width:90px">Tier</th><th>Count</th><th>Share</th><th>Condition</th></tr></thead>
       <tbody id="tierTbody"></tbody>
     </table>
-  </div>` : ""}
+  </div>` : `<div class="card">Need at least 2 months loaded to compute a cohort-based tier breakdown.</div>`}
   `;
 
   const trendsHTML = `
-  ${mom.months.length ? `
+  ${cohortMonths.length ? `
   <div class="card">
     <div class="card-hd">
       <div><div class="card-t">Month-over-month tier distribution</div>
-           <div class="card-s">Cumulative asset base · each bar = all projects commissioned to that date · segment width = that month's own composition, but the printed %/tooltip is the standardized share (count ÷ prior month's total) used everywhere else on this dashboard</div></div>
+           <div class="card-s">Each bar = the cohort commissioned by the PRIOR month's end, re-tiered as of that month${cityFilter ? " · "+cityFilter : ""} · segments always sum to 100% of that cohort (SSEIDs added during the month itself aren't in it yet)</div></div>
     </div>
     <div class="legend" id="leg"></div>
     <div class="mom" id="momBars"></div>
   </div>` : ""}
 
-  ${mom.months.length ? `
+  ${cohortMonths.length ? `
   <div class="card">
     <div class="card-hd">
       <div><div class="card-t">MoM asset base & tier counts</div>
-           <div class="card-s">Absolute count per tier, per month${cityFilter ? " · "+cityFilter : ""} — raw numbers, no %-share applied</div></div>
+           <div class="card-s">Absolute count per tier, per cohort month${cityFilter ? " · "+cityFilter : ""} · "New" = commissioned that month, not yet tier-reported (folds into the cohort the following month)</div></div>
     </div>
     <div class="dtbl-wrap" style="max-height:none">
       <table class="ttbl">
         <thead><tr>
           <th style="width:90px">Tier</th>
-          ${mom.months.map(m => `<th>${m.label}</th>`).join("")}
+          ${cohortMonths.map(m => `<th>${m.label}</th>`).join("")}
         </tr></thead>
         <tbody id="momCountsTbody"></tbody>
       </table>
     </div>
   </div>` : ""}
 
-  ${movementMonths.length ? `
+  ${cohortMonths.length ? `
   <div class="card">
     <div class="card-hd">
       <div><div class="card-t">Tier movement (MoM)</div>
-           <div class="card-s">Standardized %-share: each column's count is that month's full total, divided by the PRIOR month's total asset base${cityFilter ? " · "+cityFilter : ""} · pp in brackets = that same standardized % minus the prior column's · <span style="color:#15803d">green</span>/<span style="color:#b91c1c">red</span> = tier grew/shrank that month (not good/bad — hover a cell to see whether that's favorable for this tier)</div></div>
+           <div class="card-s">Cohort fixed to the prior month's end, re-tiered at the current month${cityFilter ? " · "+cityFilter : ""} · pp in brackets = current share minus that SAME cohort's baseline share · <span style="color:#15803d">green</span>/<span style="color:#b91c1c">red</span> = tier grew/shrank (not good/bad — hover a cell to see whether that's favorable for this tier)</div></div>
     </div>
     <div class="dtbl-wrap" style="max-height:none">
       <table class="ttbl hbtbl">
         <thead><tr>
           <th style="width:90px">Tier</th><th>Count</th>
-          ${movementMonths.map(m => `<th>${m.label}</th>`).join("")}
+          ${cohortMonths.map(m => `<th>${m.label}</th>`).join("")}
         </tr></thead>
         <tbody id="tierMovementTbody"></tbody>
       </table>
@@ -457,18 +508,37 @@ function renderAll(cityFilter, tierFilter) {
   <div class="card">
     <div class="card-hd">
       <div><div class="card-t">Tier movement trend</div>
-           <div class="card-s">Standardized %-share per month${cityFilter ? " · "+cityFilter : ""} — each point is that month's count ÷ the prior month's total asset base</div></div>
+           <div class="card-s">Cohort-based %-share per month${cityFilter ? " · "+cityFilter : ""} — each point is that month's cohort (prior month's base), re-tiered as of that month's end</div></div>
     </div>
     <div class="chart-wrap"><canvas id="trendCanvas"></canvas></div>
+  </div>` : ""}
+
+  ${hbRecords.length ? `
+  <div class="card">
+    <div class="card-hd">
+      <div><div class="card-t">Tier-wise progress this month</div>
+           <div class="card-s">Baseline tier = as of ${hbPrevLabel}${cityFilter ? " · "+cityFilter : ""} · leads/orders given = ${hbLabel} total minus ${hbPrevLabel} total, for that same baseline cohort · "Still"/"Moved up" reconciles this against the CURRENT tier shown in Executive Summary (tiers only ever move up within a month, never down)</div></div>
+    </div>
+    <div class="dtbl-wrap" style="max-height:none">
+      <table class="ttbl">
+        <thead><tr>
+          <th style="width:90px">Baseline tier</th><th>Count</th>
+          <th>Leads Till ${hbPrevLabel}</th><th>Leads in ${hbLabel}</th><th>Leads given</th>
+          <th>Orders Till ${hbPrevLabel}</th><th>Orders in ${hbLabel}</th><th>Orders given</th>
+          <th>Still ${hbPrevLabel} tier</th><th>Moved up by ${hbLabel}</th>
+        </tr></thead>
+        <tbody id="tierProgressTbody"></tbody>
+      </table>
+    </div>
   </div>` : ""}
   `;
 
   const cityHTML = `
-  ${mom.meta?.clusters?.length ? `
+  ${mom.meta?.clusters?.length && latestCohort ? `
   <div class="card">
     <div class="card-hd">
-      <div><div class="card-t">City summary — ${latestMonth?.label}</div>
-           <div class="card-s">Count as of ${latestMonth?.label} · Share = count ÷ that same city's ${priorMonthLabel} total (standardized %-share)</div></div>
+      <div><div class="card-t">City summary — ${latestCohortMonth?.label}</div>
+           <div class="card-s">Cohort commissioned by ${priorMonthLabel}, re-tiered as of ${latestCohortMonth?.label} · Share = count ÷ that same city's cohort total</div></div>
     </div>
     <div class="dtbl-wrap" style="max-height:none">
       <table class="ttbl">
@@ -483,17 +553,34 @@ function renderAll(cityFilter, tierFilter) {
   <div class="card">
     <div class="card-hd">
       <div><div class="card-t">City tier trend</div>
-           <div class="card-s">Standardized %-share for ${cityFilter || "all cities"} · each point = that month's count ÷ the prior month's total · use the city filter above to change</div></div>
+           <div class="card-s">Cohort-based %-share for ${cityFilter || "all cities"} · each point = that month's cohort, re-tiered as of that month · use the city filter above to change</div></div>
     </div>
     <div class="chart-wrap"><canvas id="cityTrendCanvas"></canvas></div>
   </div>
   <div class="card">
     <div class="card-hd">
-      <div><div class="card-t">City breakdown — ${latestMonth?.label}</div>
-           <div class="card-s">Tier distribution per city</div></div>
+      <div><div class="card-t">City breakdown — ${latestCohortMonth?.label}</div>
+           <div class="card-s">Tier distribution per city, cohort-based</div></div>
     </div>
     <div class="city-grid" id="cityGrid"></div>
-  </div>` : `<div class="card">No city breakdown available.</div>`}
+  </div>
+  ${hbRecords.length ? `
+  <div class="card">
+    <div class="card-hd">
+      <div><div class="card-t">City-wise progress this month</div>
+           <div class="card-s">Leads/orders given by ${hbLabel} = ${hbLabel} total minus ${hbPrevLabel} total, for this month's baseline cohort${tierFilter ? " · "+tierFilter+" only" : ""}</div></div>
+    </div>
+    <div class="dtbl-wrap" style="max-height:none">
+      <table class="ttbl">
+        <thead><tr>
+          <th>City</th><th>Count</th>
+          <th>Leads Till ${hbPrevLabel}</th><th>Leads in ${hbLabel}</th><th>Leads given</th>
+          <th>Orders Till ${hbPrevLabel}</th><th>Orders in ${hbLabel}</th><th>Orders given</th>
+        </tr></thead>
+        <tbody id="cityProgressTbody"></tbody>
+      </table>
+    </div>
+  </div>` : ""}` : `<div class="card">No cohort-based city breakdown available yet (need at least 2 months loaded).</div>`}
   `;
 
   const sseidHTML = `
@@ -535,115 +622,108 @@ function renderAll(cityFilter, tierFilter) {
     leg.innerHTML += `<span class="lc"><span class="ldot" style="background:${activeColor(t)}"></span>${t}</span>`;
   });
 
-  // MoM bars — segment WIDTH stays on a plain current-month basis (required:
-  // a stacked bar's segments must sum to 100% of its own bar to render
-  // correctly). The printed label/tooltip use the standardized share instead
-  // (count ÷ prior month's total), so the number matches every other %-share
-  // on this dashboard even though it won't exactly match the visual width.
+  // MoM bars — cohort-based: each bar's segments come from that month's own
+  // held_base.curr, out of that SAME cohort's base_size. Widths and printed
+  // %'s now agree exactly (both from the same fixed population), unlike the
+  // previous ratio-based approach.
   const momBars = document.getElementById("momBars");
   if (momBars) {
-    mom.months.forEach((mo, idx) => {
-      const bt = bucketize(filterMomMonth(mo));
-      const tot = Object.values(bt).reduce((s,v)=>s+v,0);
-      if (!tot) return;
-      const share = shareSeries[idx];
+    cohortMonths.forEach((mo, i) => {
+      const hb = filterHeldBase(mo);
+      const currB = bucketize(hb.curr);
+      const pct = pctByMonth[i];
+      if (!hb.base_size) return;
       const segs = activeTiers()
-        .map(t => ({ t, c: bt[t]||0, p: (bt[t]||0)/tot*100, sh: share[t] }))
+        .map(t => ({ t, c: currB[t]||0, p: pct[t].curr }))
         .filter(s => s.p > 0);
       momBars.innerHTML += `<div class="mom-row">
         <div class="mom-lbl">${mo.label}</div>
         <div class="mom-bar">${segs.map(s => {
-          const label = s.p > 10 ? `${s.c.toLocaleString()} · ${s.sh.toFixed(1)}%`
-                      : s.p > 4  ? `${s.sh.toFixed(1)}%`
+          const label = s.p > 10 ? `${s.c.toLocaleString()} · ${s.p.toFixed(1)}%`
+                      : s.p > 4  ? `${s.p.toFixed(1)}%`
                       : "";
-          return `<div class="seg" title="${s.t}: ${s.c.toLocaleString()} (${s.sh.toFixed(1)}% share)"
+          return `<div class="seg" title="${s.t}: ${s.c.toLocaleString()} (${s.p.toFixed(1)}%)"
                style="width:${s.p.toFixed(1)}%;background:${activeColor(s.t)}">${label}</div>`;
         }).join("")}</div>
-        <div class="mom-tot">${tot.toLocaleString()}</div>
+        <div class="mom-tot">${hb.base_size.toLocaleString()}</div>
       </div>`;
     });
   }
 
-  // MoM asset base & tier counts — plain absolute numbers, no %-share
+  // MoM asset base & tier counts — cohort-tracked counts, plus a "New" row
+  // for SSEIDs commissioned that month but not yet tier-reported.
   const momCountsTbody = document.getElementById("momCountsTbody");
   if (momCountsTbody) {
     activeTiers().forEach(t => {
-      const cells = mom.months.map(mo => {
-        const bt = bucketize(filterMomMonth(mo));
-        return `<td>${(bt[t]||0).toLocaleString()}</td>`;
+      const cells = cohortMonths.map(mo => {
+        const currB = bucketize(filterHeldBase(mo).curr);
+        return `<td>${(currB[t]||0).toLocaleString()}</td>`;
       }).join("");
       momCountsTbody.innerHTML += `<tr>
         <td><span class="badge" style="background:${activeColor(t)};color:${badgeTextColor(t)}">${t}</span></td>
         ${cells}
       </tr>`;
     });
-    const totalCells = mom.months.map(mo => `<td>${monthTotal(mo).toLocaleString()}</td>`).join("");
-    momCountsTbody.innerHTML += `<tr class="summary-row"><td>Total</td>${totalCells}</tr>`;
+    const totalCells = cohortMonths.map(mo => `<td>${filterHeldBase(mo).base_size.toLocaleString()}</td>`).join("");
+    momCountsTbody.innerHTML += `<tr class="summary-row"><td>Total (cohort)</td>${totalCells}</tr>`;
+    const newCells = cohortMonths.map(mo => {
+      const newCount = Math.max(0, monthTotal(mo) - filterHeldBase(mo).base_size);
+      return `<td>${newCount.toLocaleString()}</td>`;
+    }).join("");
+    momCountsTbody.innerHTML += `<tr><td style="color:var(--mu);font-size:11px">New (untiered)</td>${newCells}</tr>`;
   }
 
-  // Tier table — Share uses the standardized definition (see shareByMonth above)
-  const latestBucketed = bucketize(latestFiltered);
-  const latestShare = shareSeries[latestIdx];
+  // Tier table — cohort-based Count/Share (see latestCurrB/total above)
   const ttbody = document.getElementById("tierTbody");
-  if (ttbody) activeTiers().forEach(t => {
-    const c = latestBucketed[t] || 0;
-    const sh = latestShare[t].toFixed(1);
-    const cond = t === "Metals" ? "Bronze + Silver + Gold + Platinum" : TIER_CONDITIONS[t];
-    ttbody.innerHTML += `<tr>
-      <td><span class="badge" style="background:${activeColor(t)};color:${badgeTextColor(t)}">${t}</span></td>
-      <td>${c.toLocaleString()}</td><td>${sh}%</td>
-      <td style="color:var(--mu);font-size:11px">${cond}</td>
-    </tr>`;
-  });
+  if (ttbody && latestCohort) {
+    const latestPct = pctByMonth[pctByMonth.length - 1];
+    activeTiers().forEach(t => {
+      const c = latestCurrB[t] || 0;
+      const sh = latestPct[t].curr.toFixed(1);
+      const cond = t === "Metals" ? "Bronze + Silver + Gold + Platinum" : TIER_CONDITIONS[t];
+      ttbody.innerHTML += `<tr>
+        <td><span class="badge" style="background:${activeColor(t)};color:${badgeTextColor(t)}">${t}</span></td>
+        <td>${c.toLocaleString()}</td><td>${sh}%</td>
+        <td style="color:var(--mu);font-size:11px">${cond}</td>
+      </tr>`;
+    });
+  }
 
-  // City grid + City summary table share the same per-city breakdown.
-  // Share % (table + India row) uses the standardized definition: that city's
-  // current count ÷ that SAME city's total as of the prior month. Bar segment
-  // WIDTHS in the visual grid stay on a plain current-month basis (same
-  // rendering-correctness reason as the MoM bars above); the "Engaged %" text
-  // stat under each card uses the standardized share.
+  // City grid + City summary table — both driven by the latest cohort's
+  // per-city breakdown (by_cluster_tier_curr), so numerator and denominator
+  // are always the SAME fixed per-city population and segments sum to 100%.
   const cg = document.getElementById("cityGrid");
   const ctbody = document.getElementById("cityTbody");
-  if (cg || ctbody) {
-    const priorMonthForCity = latestIdx > 0 ? mom.months[latestIdx - 1] : null;
-    function priorCityTotal(city, fallback) {
-      if (!priorMonthForCity) return fallback;
-      const t = TIER_ORDER.reduce((s,t) => s + (priorMonthForCity.by_cluster_tier?.[`${city}|${t}`] || 0), 0);
-      return t || fallback;
-    }
+  if ((cg || ctbody) && latestCohortMonth) {
+    const hb = latestCohortMonth.held_base;
 
-    // India row — true nationwide total from latestMonth.by_tier directly (NOT
-    // the per-city rows summed, since those exclude any "Unknown" cluster rows,
-    // and NOT cityFilter-dependent, so it always matches the Executive Summary
-    // tier breakdown numbers exactly).
+    // India row — nationwide cohort total, reusing latestCurrB/total from above
+    // (always matches the Executive Summary tier breakdown exactly).
     if (ctbody) {
-      const indiaBt = bucketize(latestMonth?.by_tier || {});
-      const indiaTotal = Object.values(latestMonth?.by_tier || {}).reduce((s,v)=>s+v,0);
       const indiaCells = activeTiers().map(t => {
-        const c = indiaBt[t] || 0;
-        const sh = priorTotalForLatest ? (c/priorTotalForLatest*100).toFixed(1) : "0.0";
+        const c = latestCurrB[t] || 0;
+        const sh = total ? (c/total*100).toFixed(1) : "0.0";
         return `<td>${c.toLocaleString()} <span class="pp-sub">(${sh}%)</span></td>`;
       }).join("");
-      ctbody.innerHTML += `<tr class="india-row"><td>India</td><td>${indiaTotal.toLocaleString()}</td>${indiaCells}</tr>`;
+      ctbody.innerHTML += `<tr class="india-row"><td>India</td><td>${total.toLocaleString()}</td>${indiaCells}</tr>`;
     }
 
     const clusters = mom.meta.clusters || [];
     clusters.forEach(city => {
       const raw = {};
-      TIER_ORDER.forEach(t => { raw[t] = latestMonth?.by_cluster_tier?.[`${city}|${t}`] || 0; });
+      TIER_ORDER.forEach(t => { raw[t] = hb.by_cluster_tier_curr?.[`${city}|${t}`] || 0; });
       const bt = bucketize(raw);
       const tot = Object.values(bt).reduce((s,v)=>s+v,0);
       if (!tot) return;
-      const priorTot = priorCityTotal(city, tot);
 
       if (cg) {
         const segs = activeTiers().filter(t=>bt[t]>0).map(t=>({ t, p: bt[t]/tot*100, c: bt[t] }));
-        const nonStandardized = activeTiers().filter(t=>t!=="Sticks").reduce((s,t)=>s+(bt[t]||0),0);
+        const non = activeTiers().filter(t=>t!=="Sticks").reduce((s,t)=>s+(bt[t]||0),0);
         cg.innerHTML += `<div class="city-card">
           <div class="city-name">${city} <span style="font-weight:400;color:var(--mu)">(${tot.toLocaleString()})</span></div>
           <div class="city-bar">${segs.map(s=>`<div style="width:${s.p.toFixed(1)}%;background:${activeColor(s.t)}" title="${s.t}: ${s.c}"></div>`).join("")}</div>
           <div class="city-stat">
-            <span>Engaged: ${Math.round(nonStandardized/priorTot*100)}%</span>
+            <span>Engaged: ${Math.round(non/tot*100)}%</span>
             <span>Sticks: ${(bt["Sticks"]||0).toLocaleString()}</span>
           </div>
         </div>`;
@@ -652,7 +732,7 @@ function renderAll(cityFilter, tierFilter) {
       if (ctbody) {
         const cells = activeTiers().map(t => {
           const c = bt[t] || 0;
-          const sh = priorTot ? (c/priorTot*100).toFixed(1) : "0.0";
+          const sh = tot ? (c/tot*100).toFixed(1) : "0.0";
           return `<td>${c.toLocaleString()} <span class="pp-sub">(${sh}%)</span></td>`;
         }).join("");
         ctbody.innerHTML += `<tr><td>${city}</td><td>${tot.toLocaleString()}</td>${cells}</tr>`;
@@ -660,15 +740,15 @@ function renderAll(cityFilter, tierFilter) {
     });
   }
 
-  // City tier trend chart — standardized %-share (shareSeries already respects
-  // the city filter via filterMomMonth), so it shows the trend for whichever
+  // City tier trend chart — cohort-based %-share (pctByMonth already respects
+  // the city filter via filterHeldBase), so it shows the trend for whichever
   // city is selected (or all cities combined if none is).
   const cityTrendCanvas = document.getElementById("cityTrendCanvas");
-  if (cityTrendCanvas && mom.months.length) {
-    const labels = mom.months.map(m => m.label);
+  if (cityTrendCanvas && cohortMonths.length) {
+    const labels = cohortMonths.map(m => m.label);
     const datasets = activeTiers().map(t => ({
       label: t,
-      data: shareSeries.map(share => share[t]),
+      data: pctByMonth.map(pct => pct[t].curr),
       borderColor: activeColor(t),
       backgroundColor: activeColor(t),
       tension: 0.3,
@@ -689,40 +769,24 @@ function renderAll(cityFilter, tierFilter) {
     });
   }
 
-  // Engaged (non-Sticks) as its own standardized share series — NOT simply
-  // "100 − Sticks%", because these standardized %'s don't sum to 100% within
-  // a month (the numerator and denominator come from different months' totals
-  // whenever the base is growing).
-  function engagedShareByMonth(idx) {
-    const curr = bucketize(filterMomMonth(mom.months[idx]));
-    const currTotal = monthTotal(mom.months[idx]);
-    const engagedCurr = currTotal - (curr["Sticks"] || 0);
-    const priorTotal = idx > 0 ? monthTotal(mom.months[idx - 1]) : currTotal;
-    return priorTotal ? +(engagedCurr/priorTotal*100).toFixed(2) : 0;
-  }
-  const engagedShareSeries = mom.months.map((_, idx) => engagedShareByMonth(idx));
-
-  // Tier movement table (one row per tier, one standardized-share+pp column per month)
+  // Tier movement table — cohort-based; prev/curr/pp all come from the SAME
+  // pctByMonth entry (self-contained per month), so no cross-month lookups needed.
   const tmTbody = document.getElementById("tierMovementTbody");
-  if (tmTbody && movementMonths.length) {
-    // Each movement month's own prior month label, for tooltips (e.g. Mar's prior is Feb)
-    const prevLabels = movementMonths.map(m => mom.months[mom.months.indexOf(m) - 1]?.label);
+  if (tmTbody && cohortMonths.length) {
+    const prevLabels = cohortMonths.map(m => mom.months[mom.months.indexOf(m) - 1]?.label);
     const article = w => /^[aeiou]/i.test(w) ? "an" : "a";
 
     activeTiers().forEach(t => {
-      const cCurr = latestBucketed[t] || 0;
-      const cells = movementMonths.map((mo, i) => {
-        const idx = mom.months.indexOf(mo);
-        const curr = shareSeries[idx][t];
-        const prev = shareSeries[idx - 1][t];
-        const pp = +(curr - prev).toFixed(2);
-        const arrow = pp > 0.05 ? "▲" : pp < -0.05 ? "▼" : "–";
-        const dir = pp > 0.05 ? "up" : pp < -0.05 ? "down" : "flat";
-        const fav = favorability(t, pp);
-        const tip = `${t}'s standardized share was ${prev.toFixed(1)}% in ${prevLabels[i]}, `
-          + `${dir} to ${curr.toFixed(1)}% in ${mo.label} `
-          + `(${pp >= 0 ? "+" : ""}${pp.toFixed(1)} pp) — ${article(fav)} ${fav} for this tier.`;
-        return `<td class="${dirClass(pp)}" title="${tip}">${curr.toFixed(1)}% <span class="pp-sub">(${arrow} ${Math.abs(pp).toFixed(1)} pp)</span></td>`;
+      const cCurr = latestCurrB[t] || 0;
+      const cells = pctByMonth.map((pct, i) => {
+        const p = pct[t];
+        const arrow = p.pp > 0.05 ? "▲" : p.pp < -0.05 ? "▼" : "–";
+        const dir = p.pp > 0.05 ? "up" : p.pp < -0.05 ? "down" : "flat";
+        const fav = favorability(t, p.pp);
+        const tip = `${t} was ${p.prev.toFixed(1)}% of the cohort in ${prevLabels[i]}, `
+          + `${dir} to ${p.curr.toFixed(1)}% in ${cohortMonths[i].label} `
+          + `(${p.pp >= 0 ? "+" : ""}${p.pp.toFixed(1)} pp) — ${article(fav)} ${fav} for this tier.`;
+        return `<td class="${dirClass(p.pp)}" title="${tip}">${p.curr.toFixed(1)}% <span class="pp-sub">(${arrow} ${Math.abs(p.pp).toFixed(1)} pp)</span></td>`;
       }).join("");
       tmTbody.innerHTML += `<tr>
         <td><span class="badge" style="background:${activeColor(t)};color:${badgeTextColor(t)}">${t}</span></td>
@@ -731,18 +795,20 @@ function renderAll(cityFilter, tierFilter) {
       </tr>`;
     });
 
-    // Engaged row — see engagedShareByMonth above for why this isn't "100 − Sticks%"
-    const engagedCells = movementMonths.map((mo, i) => {
-      const idx = mom.months.indexOf(mo);
-      const curr = engagedShareSeries[idx];
-      const prev = engagedShareSeries[idx - 1];
-      const pp = +(curr - prev).toFixed(2);
-      const arrow = pp > 0.05 ? "▲" : pp < -0.05 ? "▼" : "–";
-      const dir = pp > 0.05 ? "up" : pp < -0.05 ? "down" : "flat";
-      const tip = `Engaged (non-Sticks)'s standardized share was ${prev.toFixed(1)}% in ${prevLabels[i]}, `
-        + `${dir} to ${curr.toFixed(1)}% in ${mo.label} `
-        + `(${pp >= 0 ? "+" : ""}${pp.toFixed(1)} pp) — more engagement is always favorable.`;
-      return `<td class="${dirClass(pp)}" title="${tip}">${curr.toFixed(1)}% <span class="pp-sub">(${arrow} ${Math.abs(pp).toFixed(1)} pp)</span></td>`;
+    // Engaged row — valid as "100 − Sticks%" again here (unlike the previous
+    // ratio-based approach), because within a cohort month every tier's %
+    // genuinely does sum to 100% of that one fixed population.
+    const engagedCells = pctByMonth.map((pct, i) => {
+      const sticks = pct["Sticks"];
+      const engCurr = +(100 - sticks.curr).toFixed(2);
+      const engPrev = +(100 - sticks.prev).toFixed(2);
+      const engPp = +(engCurr - engPrev).toFixed(2);
+      const arrow = engPp > 0.05 ? "▲" : engPp < -0.05 ? "▼" : "–";
+      const dir = engPp > 0.05 ? "up" : engPp < -0.05 ? "down" : "flat";
+      const tip = `Engaged (non-Sticks) was ${engPrev.toFixed(1)}% of the cohort in ${prevLabels[i]}, `
+        + `${dir} to ${engCurr.toFixed(1)}% in ${cohortMonths[i].label} `
+        + `(${engPp >= 0 ? "+" : ""}${engPp.toFixed(1)} pp) — more engagement is always favorable.`;
+      return `<td class="${dirClass(engPp)}" title="${tip}">${engCurr.toFixed(1)}% <span class="pp-sub">(${arrow} ${Math.abs(engPp).toFixed(1)} pp)</span></td>`;
     }).join("");
     tmTbody.innerHTML += `<tr class="summary-row">
       <td>Engaged</td><td>${active.toLocaleString()}</td>
@@ -752,11 +818,11 @@ function renderAll(cityFilter, tierFilter) {
 
   // Tier movement trend chart
   const trendCanvas = document.getElementById("trendCanvas");
-  if (trendCanvas && movementMonths.length) {
-    const labels = movementMonths.map(m => m.label);
+  if (trendCanvas && cohortMonths.length) {
+    const labels = cohortMonths.map(m => m.label);
     const datasets = activeTiers().map(t => ({
       label: t,
-      data: movementMonths.map(mo => shareSeries[mom.months.indexOf(mo)][t]),
+      data: pctByMonth.map(pct => pct[t].curr),
       borderColor: activeColor(t),
       backgroundColor: activeColor(t),
       tension: 0.3,
@@ -774,6 +840,48 @@ function renderAll(cityFilter, tierFilter) {
         },
         plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 11 } } } },
       },
+    });
+  }
+
+  // Tier-wise progress this month — from SSEID-level held-base detail,
+  // grouped by baseline tier (tier_prev). "Given" = curr minus prev, i.e.
+  // what that baseline cohort has done DURING this month specifically.
+  const tierProgressTbody = document.getElementById("tierProgressTbody");
+  if (tierProgressTbody) {
+    TIER_ORDER.forEach(t => {
+      const g = progressByTier[t];
+      if (!g) return;
+      const leadsGiven = g.leadsCurr - g.leadsPrev;
+      const ordersGiven = g.ordersCurr - g.ordersPrev;
+      const movedUp = g.count - g.stillSame;
+      tierProgressTbody.innerHTML += `<tr>
+        <td><span class="badge" style="background:${TIER_COLORS[t]};color:${badgeTextColor(t)}">${t}</span></td>
+        <td>${g.count.toLocaleString()}</td>
+        <td>${g.leadsPrev.toLocaleString()}</td><td>${g.leadsCurr.toLocaleString()}</td>
+        <td class="${dirClass(leadsGiven)}">${leadsGiven >= 0 ? "+" : ""}${leadsGiven.toLocaleString()}</td>
+        <td>${g.ordersPrev.toLocaleString()}</td><td>${g.ordersCurr.toLocaleString()}</td>
+        <td class="${dirClass(ordersGiven)}">${ordersGiven >= 0 ? "+" : ""}${ordersGiven.toLocaleString()}</td>
+        <td>${g.stillSame.toLocaleString()}</td>
+        <td class="${movedUp > 0 ? "pp-inc" : "pp-flat"}" title="${movedUp.toLocaleString()} SSEID(s) that were ${t} as of ${hbPrevLabel} gave enough leads/orders during ${hbLabel} to move to a higher tier">${movedUp.toLocaleString()}</td>
+      </tr>`;
+    });
+  }
+
+  // City-wise progress this month — same held-base detail, grouped by city.
+  const cityProgressTbody = document.getElementById("cityProgressTbody");
+  if (cityProgressTbody) {
+    Object.keys(progressByCity).sort().forEach(city => {
+      const g = progressByCity[city];
+      const leadsGiven = g.leadsCurr - g.leadsPrev;
+      const ordersGiven = g.ordersCurr - g.ordersPrev;
+      cityProgressTbody.innerHTML += `<tr>
+        <td>${city}</td>
+        <td>${g.count.toLocaleString()}</td>
+        <td>${g.leadsPrev.toLocaleString()}</td><td>${g.leadsCurr.toLocaleString()}</td>
+        <td class="${dirClass(leadsGiven)}">${leadsGiven >= 0 ? "+" : ""}${leadsGiven.toLocaleString()}</td>
+        <td>${g.ordersPrev.toLocaleString()}</td><td>${g.ordersCurr.toLocaleString()}</td>
+        <td class="${dirClass(ordersGiven)}">${ordersGiven >= 0 ? "+" : ""}${ordersGiven.toLocaleString()}</td>
+      </tr>`;
     });
   }
 

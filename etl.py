@@ -406,28 +406,27 @@ def main():
     latest_end = months[-1]["end_date"]
     print(f"[2/6] Month range: {months[0]['label']} → {months[-1]['label']}  ({len(months)} months)")
 
-    # ── Held-base movement: base fixed to the single earliest month in the
-    # window (not rolled forward month to month) — every column then shares
-    # the same denominator, so adjacent columns are directly comparable and
-    # base growth is excluded consistently across the whole window, not just
-    # pairwise. ──────────────────────────────────────────────────────────────
+    # ── Held-base movement: base fixed to the PRIOR month, rolling forward
+    # each month (not a single distant anchor). For month M: base = all SSEIDs
+    # commissioned by M-1's end; tier computed for that same fixed set at both
+    # M-1's end (baseline) and M's end (current). SSEIDs newly commissioned
+    # during M are excluded from M's cohort entirely — they first appear as
+    # part of the base starting the following month's report. ───────────────
     held_base_by_end_date = {}
     latest_heldbase_rows, latest_pair = [], None
-    anchor_mo = months[0]
     if HELDBASE_CARD_ID and len(months) >= 2:
-        print(f"[3/6] Fetching held-base movement (card {HELDBASE_CARD_ID}), "
-              f"anchored to {anchor_mo['label']}...")
+        print(f"[3/6] Fetching held-base movement (card {HELDBASE_CARD_ID})...")
         for i in range(1, len(months)):
-            curr_mo = months[i]
-            print(f"      {anchor_mo['label']} → {curr_mo['label']} "
-                  f"(prev_end={anchor_mo['end_date']}, curr_end={curr_mo['end_date']})...")
-            raw = fetch_heldbase_card_json(headers, HELDBASE_CARD_ID, anchor_mo["end_date"], curr_mo["end_date"])
+            prev_mo, curr_mo = months[i - 1], months[i]
+            print(f"      {prev_mo['label']} → {curr_mo['label']} "
+                  f"(prev_end={prev_mo['end_date']}, curr_end={curr_mo['end_date']})...")
+            raw = fetch_heldbase_card_json(headers, HELDBASE_CARD_ID, prev_mo["end_date"], curr_mo["end_date"])
             rows = [r for r in (normalise_heldbase_row(row) for row in raw) if r]
             summary = build_held_base_summary(rows)
             held_base_by_end_date[curr_mo["end_date"]] = summary
             print(f"        → held base of {summary['base_size']:,} SSEIDs")
             if i == len(months) - 1:
-                latest_heldbase_rows, latest_pair = rows, (anchor_mo, curr_mo)
+                latest_heldbase_rows, latest_pair = rows, (prev_mo, curr_mo)
     else:
         print("[3/6] METABASE_HELDBASE_CARD_ID not set (or fewer than 2 months) — skipping held-base fetch.")
 
