@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-29T07:45:42Z",
+    "generated_at": "2026-07-30T00:01:18Z",
     "prev_end": "2026-06-30",
     "curr_end": "2026-07-31",
     "prev_label": "Jun '26",
@@ -22987,7 +22987,7 @@
       "leads_prev": 8,
       "orders_prev": 5,
       "tier_prev": "Silver",
-      "leads_curr": 8,
+      "leads_curr": 9,
       "orders_curr": 5,
       "tier_curr": "Silver"
     },
@@ -23587,7 +23587,7 @@
       "leads_prev": 3,
       "orders_prev": 2,
       "tier_prev": "Bronze",
-      "leads_curr": 4,
+      "leads_curr": 5,
       "orders_curr": 2,
       "tier_curr": "Bronze"
     },
@@ -34527,7 +34527,7 @@
       "leads_prev": 3,
       "orders_prev": 1,
       "tier_prev": "Bronze",
-      "leads_curr": 3,
+      "leads_curr": 4,
       "orders_curr": 1,
       "tier_curr": "Bronze"
     },
@@ -48137,7 +48137,7 @@
       "leads_prev": 1,
       "orders_prev": 1,
       "tier_prev": "Bronze",
-      "leads_curr": 1,
+      "leads_curr": 2,
       "orders_curr": 1,
       "tier_curr": "Bronze"
     },
@@ -63087,7 +63087,7 @@
       "leads_prev": 1,
       "orders_prev": 0,
       "tier_prev": "Stones",
-      "leads_curr": 1,
+      "leads_curr": 2,
       "orders_curr": 0,
       "tier_curr": "Stones"
     },
@@ -67758,8 +67758,8 @@
       "orders_prev": 0,
       "tier_prev": "Stones",
       "leads_curr": 4,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMH13221",
@@ -74747,7 +74747,7 @@
       "leads_prev": 7,
       "orders_prev": 1,
       "tier_prev": "Bronze",
-      "leads_curr": 7,
+      "leads_curr": 8,
       "orders_curr": 1,
       "tier_curr": "Bronze"
     },
@@ -86327,8 +86327,8 @@
       "leads_prev": 1,
       "orders_prev": 1,
       "tier_prev": "Bronze",
-      "leads_curr": 1,
-      "orders_curr": 1,
+      "leads_curr": 2,
+      "orders_curr": 2,
       "tier_curr": "Bronze"
     },
     {
@@ -86447,8 +86447,8 @@
       "leads_prev": 4,
       "orders_prev": 2,
       "tier_prev": "Bronze",
-      "leads_curr": 6,
-      "orders_curr": 4,
+      "leads_curr": 7,
+      "orders_curr": 5,
       "tier_curr": "Silver"
     },
     {
@@ -92017,9 +92017,9 @@
       "leads_prev": 1,
       "orders_prev": 0,
       "tier_prev": "Stones",
-      "leads_curr": 1,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "leads_curr": 2,
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMH16296",
@@ -98597,9 +98597,9 @@
       "leads_prev": 0,
       "orders_prev": 0,
       "tier_prev": "Sticks",
-      "leads_curr": 0,
-      "orders_curr": 0,
-      "tier_curr": "Sticks"
+      "leads_curr": 1,
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMH17164",
@@ -109527,9 +109527,9 @@
       "leads_prev": 0,
       "orders_prev": 0,
       "tier_prev": "Sticks",
-      "leads_curr": 0,
+      "leads_curr": 1,
       "orders_curr": 0,
-      "tier_curr": "Sticks"
+      "tier_curr": "Stones"
     },
     {
       "sseid": "RSSEMH18714",
@@ -110967,7 +110967,7 @@
       "leads_prev": 3,
       "orders_prev": 0,
       "tier_prev": "Stones",
-      "leads_curr": 3,
+      "leads_curr": 4,
       "orders_curr": 0,
       "tier_curr": "Stones"
     },
@@ -114848,8 +114848,8 @@
       "orders_prev": 0,
       "tier_prev": "Sticks",
       "leads_curr": 1,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMH19481",
@@ -126218,8 +126218,8 @@
       "orders_prev": 0,
       "tier_prev": "Sticks",
       "leads_curr": 1,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMH21210",
@@ -137697,9 +137697,9 @@
       "leads_prev": 0,
       "orders_prev": 0,
       "tier_prev": "Sticks",
-      "leads_curr": 0,
-      "orders_curr": 0,
-      "tier_curr": "Sticks"
+      "leads_curr": 1,
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMH22831",
@@ -144287,7 +144287,7 @@
       "leads_prev": 2,
       "orders_prev": 0,
       "tier_prev": "Stones",
-      "leads_curr": 2,
+      "leads_curr": 3,
       "orders_curr": 1,
       "tier_curr": "Bronze"
     },
@@ -150257,7 +150257,7 @@
       "leads_prev": 1,
       "orders_prev": 0,
       "tier_prev": "Stones",
-      "leads_curr": 1,
+      "leads_curr": 2,
       "orders_curr": 0,
       "tier_curr": "Stones"
     },
@@ -159448,8 +159448,8 @@
       "orders_prev": 0,
       "tier_prev": "Stones",
       "leads_curr": 2,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMH2784",
@@ -161518,8 +161518,8 @@
       "orders_prev": 0,
       "tier_prev": "Sticks",
       "leads_curr": 2,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMH3096",
@@ -168657,7 +168657,7 @@
       "leads_prev": 2,
       "orders_prev": 0,
       "tier_prev": "Stones",
-      "leads_curr": 2,
+      "leads_curr": 3,
       "orders_curr": 0,
       "tier_curr": "Stones"
     },
@@ -171557,7 +171557,7 @@
       "leads_prev": 3,
       "orders_prev": 1,
       "tier_prev": "Bronze",
-      "leads_curr": 3,
+      "leads_curr": 4,
       "orders_curr": 1,
       "tier_curr": "Bronze"
     },
@@ -187977,9 +187977,9 @@
       "leads_prev": 0,
       "orders_prev": 0,
       "tier_prev": "Sticks",
-      "leads_curr": 0,
+      "leads_curr": 1,
       "orders_curr": 0,
-      "tier_curr": "Sticks"
+      "tier_curr": "Stones"
     },
     {
       "sseid": "RSSEMH6247",
@@ -196118,8 +196118,8 @@
       "orders_prev": 0,
       "tier_prev": "Stones",
       "leads_curr": 2,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMH7211",
@@ -208397,7 +208397,7 @@
       "leads_prev": 3,
       "orders_prev": 2,
       "tier_prev": "Bronze",
-      "leads_curr": 3,
+      "leads_curr": 4,
       "orders_curr": 2,
       "tier_curr": "Bronze"
     },
@@ -208927,7 +208927,7 @@
       "leads_prev": 2,
       "orders_prev": 0,
       "tier_prev": "Stones",
-      "leads_curr": 2,
+      "leads_curr": 3,
       "orders_curr": 0,
       "tier_curr": "Stones"
     },
@@ -218967,9 +218967,9 @@
       "leads_prev": 0,
       "orders_prev": 0,
       "tier_prev": "Sticks",
-      "leads_curr": 0,
-      "orders_curr": 0,
-      "tier_curr": "Sticks"
+      "leads_curr": 1,
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMH9948",
@@ -228887,7 +228887,7 @@
       "leads_prev": 0,
       "orders_prev": 0,
       "tier_prev": "Sticks",
-      "leads_curr": 2,
+      "leads_curr": 3,
       "orders_curr": 1,
       "tier_curr": "Bronze"
     },
@@ -233957,7 +233957,7 @@
       "leads_prev": 3,
       "orders_prev": 1,
       "tier_prev": "Bronze",
-      "leads_curr": 5,
+      "leads_curr": 6,
       "orders_curr": 2,
       "tier_curr": "Bronze"
     },
@@ -255688,8 +255688,8 @@
       "orders_prev": 0,
       "tier_prev": "Sticks",
       "leads_curr": 1,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMP14969",
@@ -277447,7 +277447,7 @@
       "leads_prev": 1,
       "orders_prev": 1,
       "tier_prev": "Bronze",
-      "leads_curr": 2,
+      "leads_curr": 3,
       "orders_curr": 1,
       "tier_curr": "Bronze"
     },
@@ -279948,8 +279948,8 @@
       "orders_prev": 0,
       "tier_prev": "Stones",
       "leads_curr": 2,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMP6588",
@@ -280737,7 +280737,7 @@
       "leads_prev": 9,
       "orders_prev": 4,
       "tier_prev": "Silver",
-      "leads_curr": 9,
+      "leads_curr": 10,
       "orders_curr": 4,
       "tier_curr": "Silver"
     },
@@ -291297,7 +291297,7 @@
       "leads_prev": 1,
       "orders_prev": 0,
       "tier_prev": "Stones",
-      "leads_curr": 1,
+      "leads_curr": 2,
       "orders_curr": 0,
       "tier_curr": "Stones"
     },
@@ -292687,7 +292687,7 @@
       "leads_prev": 6,
       "orders_prev": 1,
       "tier_prev": "Bronze",
-      "leads_curr": 6,
+      "leads_curr": 7,
       "orders_curr": 1,
       "tier_curr": "Bronze"
     },
@@ -295987,8 +295987,8 @@
       "leads_prev": 5,
       "orders_prev": 1,
       "tier_prev": "Bronze",
-      "leads_curr": 5,
-      "orders_curr": 1,
+      "leads_curr": 6,
+      "orders_curr": 2,
       "tier_curr": "Bronze"
     },
     {
@@ -304258,8 +304258,8 @@
       "orders_prev": 0,
       "tier_prev": "Sticks",
       "leads_curr": 1,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMP9421",
@@ -336377,7 +336377,7 @@
       "leads_prev": 2,
       "orders_prev": 1,
       "tier_prev": "Bronze",
-      "leads_curr": 2,
+      "leads_curr": 3,
       "orders_curr": 1,
       "tier_curr": "Bronze"
     },
@@ -336717,7 +336717,7 @@
       "leads_prev": 1,
       "orders_prev": 0,
       "tier_prev": "Stones",
-      "leads_curr": 1,
+      "leads_curr": 2,
       "orders_curr": 0,
       "tier_curr": "Stones"
     },
@@ -347057,7 +347057,7 @@
       "leads_prev": 1,
       "orders_prev": 1,
       "tier_prev": "Bronze",
-      "leads_curr": 1,
+      "leads_curr": 2,
       "orders_curr": 1,
       "tier_curr": "Bronze"
     },
@@ -358347,7 +358347,7 @@
       "leads_prev": 0,
       "orders_prev": 0,
       "tier_prev": "Sticks",
-      "leads_curr": 1,
+      "leads_curr": 2,
       "orders_curr": 0,
       "tier_curr": "Stones"
     },
@@ -373847,7 +373847,7 @@
       "leads_prev": 5,
       "orders_prev": 2,
       "tier_prev": "Bronze",
-      "leads_curr": 7,
+      "leads_curr": 8,
       "orders_curr": 3,
       "tier_curr": "Silver"
     },
@@ -380068,8 +380068,8 @@
       "orders_prev": 0,
       "tier_prev": "Sticks",
       "leads_curr": 1,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEUP5163",
@@ -383317,7 +383317,7 @@
       "leads_prev": 1,
       "orders_prev": 0,
       "tier_prev": "Stones",
-      "leads_curr": 1,
+      "leads_curr": 2,
       "orders_curr": 0,
       "tier_curr": "Stones"
     },
@@ -385397,7 +385397,7 @@
       "leads_prev": 1,
       "orders_prev": 0,
       "tier_prev": "Stones",
-      "leads_curr": 1,
+      "leads_curr": 2,
       "orders_curr": 0,
       "tier_curr": "Stones"
     },
@@ -387698,8 +387698,8 @@
       "orders_prev": 1,
       "tier_prev": "Bronze",
       "leads_curr": 3,
-      "orders_curr": 2,
-      "tier_curr": "Bronze"
+      "orders_curr": 3,
+      "tier_curr": "Silver"
     },
     {
       "sseid": "RSSEUP6282",
@@ -394537,9 +394537,9 @@
       "leads_prev": 0,
       "orders_prev": 0,
       "tier_prev": "Sticks",
-      "leads_curr": 0,
+      "leads_curr": 1,
       "orders_curr": 0,
-      "tier_curr": "Sticks"
+      "tier_curr": "Stones"
     },
     {
       "sseid": "RSSEUP7462",
@@ -396477,7 +396477,7 @@
       "leads_prev": 2,
       "orders_prev": 2,
       "tier_prev": "Bronze",
-      "leads_curr": 2,
+      "leads_curr": 3,
       "orders_curr": 2,
       "tier_curr": "Bronze"
     },
@@ -399077,7 +399077,7 @@
       "leads_prev": 0,
       "orders_prev": 0,
       "tier_prev": "Sticks",
-      "leads_curr": 1,
+      "leads_curr": 2,
       "orders_curr": 0,
       "tier_curr": "Stones"
     },
@@ -416778,8 +416778,8 @@
       "orders_prev": 0,
       "tier_prev": "Stones",
       "leads_curr": 2,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "SSE2955",
@@ -419967,7 +419967,7 @@
       "leads_prev": 2,
       "orders_prev": 0,
       "tier_prev": "Stones",
-      "leads_curr": 2,
+      "leads_curr": 4,
       "orders_curr": 0,
       "tier_curr": "Stones"
     },
@@ -441387,7 +441387,7 @@
       "leads_prev": 7,
       "orders_prev": 0,
       "tier_prev": "Stones",
-      "leads_curr": 7,
+      "leads_curr": 8,
       "orders_curr": 0,
       "tier_curr": "Stones"
     },
@@ -453997,9 +453997,9 @@
       "leads_prev": 0,
       "orders_prev": 0,
       "tier_prev": "Sticks",
-      "leads_curr": 0,
+      "leads_curr": 1,
       "orders_curr": 0,
-      "tier_curr": "Sticks"
+      "tier_curr": "Stones"
     },
     {
       "sseid": "SSEMH1879",
@@ -454768,8 +454768,8 @@
       "orders_prev": 0,
       "tier_prev": "Stones",
       "leads_curr": 7,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "SSEMH1965",
@@ -455587,7 +455587,7 @@
       "leads_prev": 11,
       "orders_prev": 1,
       "tier_prev": "Bronze",
-      "leads_curr": 11,
+      "leads_curr": 12,
       "orders_curr": 1,
       "tier_curr": "Bronze"
     },
