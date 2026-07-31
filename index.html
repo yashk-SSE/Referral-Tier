@@ -472,19 +472,19 @@ function renderAll(cityFilter, tierFilter) {
     <div class="mom" id="momBars"></div>
   </div>` : ""}
 
-  ${cohortMonths.length ? `
+  ${mom.months.length ? `
   <div class="card">
     <div class="card-hd">
-      <div><div class="card-t">MoM asset base & tier counts</div>
-           <div class="card-s">Absolute count per tier, per cohort month${cityFilter ? " · "+cityFilter : ""} · "New" = commissioned that month, not yet tier-reported (folds into the cohort the following month)</div></div>
+      <div><div class="card-t">1. Cumulative — all customers till date</div>
+           <div class="card-s">Plain tier mix of EVERYONE commissioned by each month's end${cityFilter ? " · "+cityFilter : ""} (no cohort restriction) · pp = this month's % minus last month's %, simple subtraction · this is your headline number, but it mixes brand-new signups in with everyone else every month — see tables 2 and 3 below to separate them out</div></div>
     </div>
     <div class="dtbl-wrap" style="max-height:none">
       <table class="ttbl">
         <thead><tr>
           <th style="width:90px">Tier</th>
-          ${cohortMonths.map(m => `<th>${m.label}</th>`).join("")}
+          ${mom.months.map(m => `<th>${m.label}</th>`).join("")}
         </tr></thead>
-        <tbody id="momCountsTbody"></tbody>
+        <tbody id="cumulativeTbody"></tbody>
       </table>
     </div>
   </div>` : ""}
@@ -492,14 +492,31 @@ function renderAll(cityFilter, tierFilter) {
   ${cohortMonths.length ? `
   <div class="card">
     <div class="card-hd">
-      <div><div class="card-t">Tier movement (MoM)</div>
-           <div class="card-s">Cohort fixed to the prior month's end, re-tiered at the current month${cityFilter ? " · "+cityFilter : ""} · pp in brackets = current share minus that SAME cohort's baseline share · <span style="color:#15803d">green</span>/<span style="color:#b91c1c">red</span> = tier grew/shrank (not good/bad — hover a cell to see whether that's favorable for this tier)</div></div>
+      <div><div class="card-t">2. New customers this month</div>
+           <div class="card-s">Just the SSEIDs commissioned DURING that month${cityFilter ? " · "+cityFilter : ""}, tiered as of that SAME month's end · % = share of that month's OWN new-customer count (not the whole base) · some new customers already have leads/orders in their first month</div></div>
+    </div>
+    <div class="dtbl-wrap" style="max-height:none">
+      <table class="ttbl">
+        <thead><tr>
+          <th style="width:90px">Tier</th>
+          ${cohortMonths.map(m => `<th>${m.label}</th>`).join("")}
+        </tr></thead>
+        <tbody id="newCustomersTbody"></tbody>
+      </table>
+    </div>
+  </div>` : ""}
+
+  ${cohortMonths.length ? `
+  <div class="card">
+    <div class="card-hd">
+      <div><div class="card-t">3. Existing customers — tracked from the prior month</div>
+           <div class="card-s">Each cell shows baseline→current % for the group that ALREADY existed before that month started (excludes that month's new customers, shown in table 2 instead)${cityFilter ? " · "+cityFilter : ""} · pp = current minus that same cell's own baseline — <b>columns are separate groups (sizes shown per column), don't subtract one column's % from a neighboring column's</b> · <span style="color:#15803d">green</span>/<span style="color:#b91c1c">red</span> = tier grew/shrank (not good/bad — hover a cell to see whether that's favorable for this tier)</div></div>
     </div>
     <div class="dtbl-wrap" style="max-height:none">
       <table class="ttbl hbtbl">
         <thead><tr>
           <th style="width:90px">Tier</th><th>Count</th>
-          ${cohortMonths.map(m => `<th>${m.label}</th>`).join("")}
+          ${cohortMonths.map(m => `<th>${m.label}<br><span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--mu)">group: ${filterHeldBase(m).base_size.toLocaleString()}</span></th>`).join("")}
         </tr></thead>
         <tbody id="tierMovementTbody"></tbody>
       </table>
@@ -507,8 +524,8 @@ function renderAll(cityFilter, tierFilter) {
   </div>
   <div class="card">
     <div class="card-hd">
-      <div><div class="card-t">Tier movement trend</div>
-           <div class="card-s">Cohort-based %-share per month${cityFilter ? " · "+cityFilter : ""} — each point is that month's cohort (prior month's base), re-tiered as of that month's end</div></div>
+      <div><div class="card-t">Existing-customer tier trend</div>
+           <div class="card-s">Cohort-based %-share per month${cityFilter ? " · "+cityFilter : ""} — each point is that month's pre-existing group (prior month's base), re-tiered as of that month's end</div></div>
     </div>
     <div class="chart-wrap"><canvas id="trendCanvas"></canvas></div>
   </div>` : ""}
@@ -650,27 +667,64 @@ function renderAll(cityFilter, tierFilter) {
     });
   }
 
-  // MoM asset base & tier counts — cohort-tracked counts, plus a "New" row
-  // for SSEIDs commissioned that month but not yet tier-reported.
-  const momCountsTbody = document.getElementById("momCountsTbody");
-  if (momCountsTbody) {
+  // Table 1: Cumulative — plain tier %/count of everyone commissioned to
+  // date, per month. pp is a simple subtraction of adjacent columns' plain
+  // %'s (this table makes no attempt to isolate new-signup dilution — that's
+  // what tables 2 and 3 are for).
+  const cumulativeTbody = document.getElementById("cumulativeTbody");
+  if (cumulativeTbody) {
+    const plainPctByMonth = mom.months.map(mo => {
+      const bt = bucketize(filterMomMonth(mo));
+      const tot = monthTotal(mo);
+      const out = {};
+      activeTiers().forEach(t => { out[t] = tot ? +((bt[t]||0)/tot*100).toFixed(2) : 0; });
+      return out;
+    });
     activeTiers().forEach(t => {
-      const cells = cohortMonths.map(mo => {
-        const currB = bucketize(filterHeldBase(mo).curr);
-        return `<td>${(currB[t]||0).toLocaleString()}</td>`;
+      const cells = mom.months.map((mo, i) => {
+        const bt = bucketize(filterMomMonth(mo));
+        const c = bt[t] || 0;
+        const pct = plainPctByMonth[i][t];
+        if (i === 0) return `<td>${c.toLocaleString()} · ${pct.toFixed(1)}%</td>`;
+        const pp = +(pct - plainPctByMonth[i-1][t]).toFixed(2);
+        const arrow = pp > 0.05 ? "▲" : pp < -0.05 ? "▼" : "–";
+        return `<td class="${dirClass(pp)}">${c.toLocaleString()} · ${pct.toFixed(1)}% <span class="pp-sub">(${arrow} ${Math.abs(pp).toFixed(1)} pp)</span></td>`;
       }).join("");
-      momCountsTbody.innerHTML += `<tr>
+      cumulativeTbody.innerHTML += `<tr>
         <td><span class="badge" style="background:${activeColor(t)};color:${badgeTextColor(t)}">${t}</span></td>
         ${cells}
       </tr>`;
     });
-    const totalCells = cohortMonths.map(mo => `<td>${filterHeldBase(mo).base_size.toLocaleString()}</td>`).join("");
-    momCountsTbody.innerHTML += `<tr class="summary-row"><td>Total (cohort)</td>${totalCells}</tr>`;
-    const newCells = cohortMonths.map(mo => {
-      const newCount = Math.max(0, monthTotal(mo) - filterHeldBase(mo).base_size);
-      return `<td>${newCount.toLocaleString()}</td>`;
-    }).join("");
-    momCountsTbody.innerHTML += `<tr><td style="color:var(--mu);font-size:11px">New (untiered)</td>${newCells}</tr>`;
+    const totalCells = mom.months.map(mo => `<td>${monthTotal(mo).toLocaleString()}</td>`).join("");
+    cumulativeTbody.innerHTML += `<tr class="summary-row"><td>Total</td>${totalCells}</tr>`;
+  }
+
+  // Table 2: New customers — just this month's delta (this month's plain
+  // count minus the pre-existing cohort's curr count), tiered as of this
+  // same month's end. % is out of THAT month's own new-customer total.
+  const newCustomersTbody = document.getElementById("newCustomersTbody");
+  if (newCustomersTbody) {
+    const deltaByMonth = cohortMonths.map(mo => {
+      const fullB = bucketize(filterMomMonth(mo));
+      const oldB = bucketize(filterHeldBase(mo).curr);
+      const out = {};
+      activeTiers().forEach(t => { out[t] = (fullB[t]||0) - (oldB[t]||0); });
+      return out;
+    });
+    const newTotals = deltaByMonth.map(d => Object.values(d).reduce((s,v)=>s+v,0));
+    activeTiers().forEach(t => {
+      const cells = cohortMonths.map((mo, i) => {
+        const c = deltaByMonth[i][t];
+        const pct = newTotals[i] ? (c/newTotals[i]*100).toFixed(1) : "0.0";
+        return `<td>${c.toLocaleString()} <span class="pp-sub">(${pct}%)</span></td>`;
+      }).join("");
+      newCustomersTbody.innerHTML += `<tr>
+        <td><span class="badge" style="background:${activeColor(t)};color:${badgeTextColor(t)}">${t}</span></td>
+        ${cells}
+      </tr>`;
+    });
+    const totalCells = newTotals.map(n => `<td>${n.toLocaleString()}</td>`).join("");
+    newCustomersTbody.innerHTML += `<tr class="summary-row"><td>Total new</td>${totalCells}</tr>`;
   }
 
   // Tier table — cohort-based Count/Share (see latestCurrB/total above)
@@ -786,7 +840,7 @@ function renderAll(cityFilter, tierFilter) {
         const tip = `${t} was ${p.prev.toFixed(1)}% of the cohort in ${prevLabels[i]}, `
           + `${dir} to ${p.curr.toFixed(1)}% in ${cohortMonths[i].label} `
           + `(${p.pp >= 0 ? "+" : ""}${p.pp.toFixed(1)} pp) — ${article(fav)} ${fav} for this tier.`;
-        return `<td class="${dirClass(p.pp)}" title="${tip}">${p.curr.toFixed(1)}% <span class="pp-sub">(${arrow} ${Math.abs(p.pp).toFixed(1)} pp)</span></td>`;
+        return `<td class="${dirClass(p.pp)}" title="${tip}">${p.prev.toFixed(1)}→${p.curr.toFixed(1)}% <span class="pp-sub">(${arrow} ${Math.abs(p.pp).toFixed(1)} pp)</span></td>`;
       }).join("");
       tmTbody.innerHTML += `<tr>
         <td><span class="badge" style="background:${activeColor(t)};color:${badgeTextColor(t)}">${t}</span></td>
@@ -808,7 +862,7 @@ function renderAll(cityFilter, tierFilter) {
       const tip = `Engaged (non-Sticks) was ${engPrev.toFixed(1)}% of the cohort in ${prevLabels[i]}, `
         + `${dir} to ${engCurr.toFixed(1)}% in ${cohortMonths[i].label} `
         + `(${engPp >= 0 ? "+" : ""}${engPp.toFixed(1)} pp) — more engagement is always favorable.`;
-      return `<td class="${dirClass(engPp)}" title="${tip}">${engCurr.toFixed(1)}% <span class="pp-sub">(${arrow} ${Math.abs(engPp).toFixed(1)} pp)</span></td>`;
+      return `<td class="${dirClass(engPp)}" title="${tip}">${engPrev.toFixed(1)}→${engCurr.toFixed(1)}% <span class="pp-sub">(${arrow} ${Math.abs(engPp).toFixed(1)} pp)</span></td>`;
     }).join("");
     tmTbody.innerHTML += `<tr class="summary-row">
       <td>Engaged</td><td>${active.toLocaleString()}</td>
