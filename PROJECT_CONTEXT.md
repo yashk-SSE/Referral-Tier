@@ -39,6 +39,7 @@ Metabase (3 saved SQL questions)
    etl.py  ──writes──►  data/tier_mom.json
                         data/tier_sseid.json
                         data/tier_heldbase_sseid.json
+                        data/tier_mtd.json
                         data/meta.json
         │
         ▼
@@ -59,6 +60,11 @@ from the Actions tab.
 | Aggregated | `METABASE_AGG_CARD_ID` | `3262` | cluster × tier × count, one `end_date` param, called once per month in the window |
 | SSEID Detail | `METABASE_SSEID_CARD_ID` | `3263` | one row per SSEID (current month only), one `end_date` param |
 | Held-Base Movement | `METABASE_HELDBASE_CARD_ID` | `4467` | SSEID-level, **two** params `prev_end`/`curr_end` — fixes the asset base to `prev_end`, computes tier **and** leads/orders at both dates for that same fixed SSEID set |
+
+This same Held-Base card is now called **one extra time per run** — with
+`curr_end = today` instead of a month-end — to produce the month-to-date
+preview (`data/tier_mtd.json`, see Section 3.3). No new Metabase question was
+needed for this; it's the same card, different date params.
 
 ### Auth
 
@@ -169,6 +175,47 @@ not just tier) is written **only for the latest pair** to
 detail for older months is not persisted, only the aggregated tier counts
 are.
 
+### 3.3 — Never report the in-progress month (fixed 2026-08-03)
+
+**The bug:** `build_month_range()`'s default window used to anchor on
+`current_month_ist()` — the calendar month "today" falls in — with
+`end_date` set to that month's *last* day regardless of what day it actually
+was. Since the ETL runs twice daily, this meant the newest column was
+routinely labeled e.g. "Jul '26" while actually only containing data up to
+whatever day the ETL happened to run (Metabase can't return rows for a date
+that hasn't happened yet). The number kept silently growing every run through
+the month and then jumped again at month-end — a moving target mislabeled as
+a finished snapshot. Caught by comparing `meta.json`'s `generated_at`
+(2026-07-28) against its own `latest_end_date` (2026-07-31) — a future date
+relative to the run.
+
+**The fix:** `last_completed_month_ist()` — the default anchor is now always
+one calendar month behind `current_month_ist()`, full stop, regardless of
+what day of the month it is. A "Jul '26" column cannot exist until Aug 1.
+Verified across a real month rollover: ETL run on 2026-07-31 anchored on
+Jun '26 (as expected, July hadn't ended yet); the same code run again on
+2026-08-03 correctly rolled forward to Jul '26. `END_MONTH` env var override
+still works unchanged (for manually testing a specific past month).
+
+**The month-to-date preview (new):** the in-progress month isn't just
+dropped — it's tracked live, separately, in `data/tier_mtd.json`. One extra
+Held-Base fetch with `prev_end = last completed month's end`, `curr_end =
+today`, plus one extra Aggregated-card fetch at `end_date = today` (to derive
+`new_to_base` as `today's total − mtd base_size`). Shape:
+```
+{ "mtd": {
+    "as_of_date", "baseline_end_date", "baseline_label",
+    "held_base": { "base_size", "by_tier_prev", "by_tier_curr",
+                    "by_cluster_tier_prev", "by_cluster_tier_curr", "movement_pp" },
+    "leads_given", "orders_given", "new_to_base"
+} }
+```
+`leads_given`/`orders_given`/`new_to_base` are **India-wide only** — they're
+summed from raw rows in `etl.py`, not broken out by cluster (the
+`by_cluster_tier_*` fields inside `held_base` ARE per-city, but only cover
+tier *counts*, not leads/orders sums). See Section 7 if city-level MTD
+becomes a real ask.
+
 ## 4. Current dashboard structure (`index.html`)
 
 Sidebar + tab layout (not a single scrolling page). `TABS` array near the top
@@ -179,6 +226,14 @@ of the `<script>` block is the single place to add future tabs.
   current full count), **Engaged (non-Sticks)**, **Metals**, **New to base**
   (SSEIDs commissioned this month, deliberately excluded from tier %'s,
   shown here instead of silently dropped — the brief's own guidance).
+- **"This month so far" card** (added 2026-08-03, sourced from
+  `data/tier_mtd.json`): leads/orders given and new-to-base count for the
+  *currently in-progress* month, tracked live to today. Visually flagged
+  `IN PROGRESS` (`.mtd-card` CSS, accent left-border) and explicitly worded
+  as "not a finalized column" so it never gets confused with the tier tables
+  below it, which only ever show completed months. If a city filter is
+  active, this card says so and stays India-wide (see Section 3.3 — MTD
+  leads/orders aren't split by city yet).
 - **Tier breakdown** table: Count/Share for the latest cohort's *current*
   tier (as of the latest month). This is genuinely the "current tier state"
   — it can differ from what the Trends tab's "Existing customers" table
@@ -217,6 +272,36 @@ months:
    reconciliation columns tying this back to Executive Summary's current
    tier counts.
 
+**Redesign pass (2026-08-03) — tables 1–3 specifically:**
+- **% share / Absolute count toggle** (`numberMode`, shared `#numToggle`
+  control above table 1) — switches every cell in tables 1–3 between showing
+  %/pp or raw count/delta, instead of cramming both into every cell. Default
+  `"pct"`.
+- **Column headers now show the population size** for that column (`.th-sub`
+  CSS class) — e.g. table 1's "Jun '26" header also shows "46,902 total",
+  table 2's shows "3,835 new", table 3's shows "43,067 SSEIDs" — so you don't
+  have to hunt in the card subtitle to know what a column actually contains.
+- **Card subtitles rewritten in plainer language** — the original wording was
+  dense/methodology-heavy; kept the substance, cut the jargon.
+- **Sanity-check footnote** under table 3 (`#reconNote`), two checks:
+  1. City-level tier counts (summed from `by_cluster_tier_curr`) vs. the
+     national total (`by_tier_curr`) — genuinely independent aggregates from
+     `etl.py`, so a real mismatch here would mean something's actually wrong
+     upstream, not just a display quirk.
+  2. The existing+new=cumulative identity below, spelled out with real
+     numbers so it's eyeball-checkable against the other cards on screen.
+- **Gotcha hit and fixed while building this**: the footnote's "new this
+  month" sum originally iterated the raw `TIER_ORDER` (6 fixed tier names)
+  over `bucketize()`d objects. In Metals mode, a bucketized object's keys are
+  `Sticks`/`Stones`/`Metals` — indexing it with `TIER_ORDER`'s `Platinum`/
+  `Gold`/`Silver`/`Bronze` silently returns `undefined`→`0`, and `Metals`
+  itself never gets summed at all (it's not in `TIER_ORDER`). Caught via the
+  reconciliation footnote itself going wrong under Metals+city filter
+  (7,760 + 818 ≠ 8,696). **Fix: always use `activeTiers()`, never
+  `TIER_ORDER`, when iterating over anything that's been through
+  `bucketize()`.** `TIER_ORDER` is only correct for raw, un-bucketized 6-tier
+  data straight from the JSON files.
+
 **Reconciliation identity worth remembering** (all three of tables 2/3/Exec
 Summary tie together exactly):
 ```
@@ -224,6 +309,8 @@ Executive Summary's current Sticks count (existing only)
   + Table 2's new-customer Sticks count (this month)
   = Table "1. Cumulative"'s latest-month Sticks count (everyone)
 ```
+(This is now surfaced live in the sanity-check footnote above, not just
+documented here.)
 
 ### City Summary
 Same ideas, sliced by city: City summary table + India rollup row, City tier
@@ -273,6 +360,18 @@ complexity here.
   "bad" instinctively even when growing Sticks is in fact bad, which
   coincidentally lines up — but for Stones a red-for-up would have been
   backwards under the old combined scheme).
+- **`.mtd-card`** (2026-08-03): the month-to-date card uses a colored left
+  border (`--accent`) plus a small pill-shaped `IN PROGRESS` badge appended
+  via CSS `::after` on the card title — deliberate visual distinction so a
+  live, still-changing number is never mistaken for a finalized one at a
+  glance, without needing to read the subtitle text.
+- **`.roomy`** (2026-08-03): a table-class modifier (bigger cell padding/
+  font-size) applied to tables 1–3 only, per the ask for a "spacious, less
+  cluttered" feel — other tables (Tier-wise progress, City summary, SSEID
+  Detail) keep the original denser `.ttbl` sizing.
+- **Abs/% toggle reuses `.seg-toggle`** (the same pill-button CSS already
+  used for the 6-Tier/Metals switch) rather than introducing a second toggle
+  style.
 
 ## 6. Things that look like bugs but aren't
 
@@ -286,12 +385,25 @@ complexity here.
 - **Cumulative table's monthly numbers ≠ Executive Summary's numbers** —
   expected; they're different populations and/or different dates by
   design. See the reconciliation identity in Section 4.
+- **"This month so far" (MTD) numbers change on every single ETL run**,
+  including intra-day — that's the point, it's a live preview of an
+  in-progress month, not a bug. Don't expect it to match between two runs a
+  few hours apart. It's only ever India-wide (see Section 3.3).
+- **Local preview shows stale numbers right after re-running `etl.py`** —
+  almost always the browser's HTTP cache serving an old `fetch()` response
+  for `data/*.json`, not stale files on disk. See Section 8, step 3a.
 
 ## 7. Possible next steps (not yet built)
 
-- A short reconciliation footnote directly under the "1. Cumulative" table
-  (e.g. "Jul'26 = Existing + New, see tables 2 & 3") was offered but not
-  yet implemented — worth adding if the same question keeps coming up.
+- ~~A short reconciliation footnote directly under the "1. Cumulative" table~~
+  — **done 2026-08-03**, see the sanity-check footnote under table 3 in
+  Section 4.
+- **City-level split for the month-to-date card** — `tier_mtd.json`'s
+  `held_base.by_cluster_tier_prev/curr` already has per-city tier *counts*
+  for the in-progress month, but `leads_given`/`orders_given`/`new_to_base`
+  are national-only scalars. If "how's Nagpur doing so far this month"
+  becomes a real question, `etl.py` needs to sum leads/orders given from the
+  raw MTD rows grouped by city, not just nationally.
 - Historical per-SSEID leads/orders detail (`tier_heldbase_sseid.json`) is
   only kept for the latest month pair — if "Tier-wise progress" needs to
   show a trend across multiple months instead of just "this month," `etl.py`
@@ -307,6 +419,16 @@ complexity here.
    regenerate `data/*.json` before checking the frontend.
 3. Serve locally (`preview.bat`, or `python -m http.server 8080` manually)
    and open in a browser.
+   - **3a. Hard-reload, don't trust a normal reload.** Python's
+     `http.server` doesn't send cache-control headers, so a browser that
+     already fetched `data/*.json` once (e.g. from an earlier preview in the
+     same session) can silently keep serving that cached response to
+     `index.html`'s plain `fetch()` calls even after `etl.py` writes fresh
+     files — a real hard-reload/cache-bypass, or a one-off
+     `fetch(url, {cache: "no-store"})`, is needed to be sure you're looking
+     at current data. Hit this directly on 2026-08-03: the page kept showing
+     a 3-day-old "Jul '26" column after the ETL had already been re-run and
+     the file on disk was confirmed correct.
 4. Cross-check displayed numbers against the raw JSON by hand (e.g.
    `python -c "import json; ..."` one-liners) — this caught every real
    issue in this build; don't skip it.
