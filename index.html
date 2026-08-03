@@ -96,6 +96,9 @@
            color:var(--mu);padding:6px 8px;text-align:left;border-bottom:0.5px solid var(--bd)}
   .ttbl td{padding:7px 8px;border-bottom:0.5px solid var(--bd)}
   .ttbl tr:last-child td{border-bottom:none}
+  .ttbl.roomy th{padding:10px 12px;font-size:10.5px}
+  .ttbl.roomy td{padding:13px 12px;font-size:13px}
+  .th-sub{display:block;font-weight:400;text-transform:none;letter-spacing:0;color:var(--mu);margin-top:2px}
   .badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:10px;font-weight:500;color:#fff}
   .pp-dec{color:#b91c1c}
   .pp-inc{color:#15803d}
@@ -132,6 +135,19 @@
   @keyframes spin{to{transform:rotate(360deg)}}
   .err-box{background:#fcebeb;border:0.5px solid rgba(162,45,45,.3);color:#a32d2d;
            border-radius:8px;padding:12px 16px;font-size:12px}
+
+  /* ── RECONCILIATION FOOTNOTE ─────────────────────── */
+  .recon{font-size:11px;color:var(--mu);margin-top:10px;padding-top:10px;
+         border-top:0.5px dashed var(--bd)}
+  .recon b{color:var(--txt);font-weight:500}
+  .recon.ok::before{content:"✓ ";color:#15803d}
+  .recon.bad::before{content:"⚠ ";color:#b91c1c}
+
+  /* ── MONTH-TO-DATE CARD ──────────────────────────── */
+  .mtd-card{border-left:3px solid var(--accent)}
+  .mtd-card .card-t::after{content:"IN PROGRESS";margin-left:8px;font-size:9px;
+    font-weight:600;letter-spacing:.5px;color:var(--accent-hover);
+    background:rgba(0,189,255,.12);padding:2px 7px;border-radius:10px;vertical-align:2px}
 
   /* ── CITY CHART GRID ─────────────────────────────── */
   .city-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
@@ -203,10 +219,19 @@ const TIER_CONDITIONS = {
 const METALS_TIERS = ["Bronze","Silver","Gold","Platinum"];
 const METALS_COLOR = "#FFC100"; // brand gold
 
-let DATA = { mom: null, sseid: null, meta: null, heldbase: null };
+let DATA = { mom: null, sseid: null, meta: null, heldbase: null, mtd: null };
 let viewMode = "full"; // "full" | "metals"
+let numberMode = "pct"; // "pct" | "abs" — switches how tables 1-3 display each cell
 let trendChart = null;
 let cityTrendChart = null;
+
+function setNumberMode(mode) {
+  numberMode = mode;
+  document.querySelectorAll("#numToggle button").forEach(b => {
+    b.classList.toggle("on", b.dataset.mode === mode);
+  });
+  applyFilters();
+}
 
 // ── VIEW MODE (6-tier vs Sticks/Stones/Metals) ──────────────────────────────
 function activeTiers() {
@@ -271,13 +296,14 @@ syncTopbarHeight();
 // ── FETCH ALL DATA ─────────────────────────────────────────────────────────
 async function loadData() {
   try {
-    const [mom, sseid, meta, heldbase] = await Promise.all([
+    const [mom, sseid, meta, heldbase, mtd] = await Promise.all([
       fetch("data/tier_mom.json").then(r => r.json()),
       fetch("data/tier_sseid.json").then(r => r.json()),
       fetch("data/meta.json").then(r => r.json()),
       fetch("data/tier_heldbase_sseid.json").then(r => r.json()).catch(() => ({ meta: {}, records: [] })),
+      fetch("data/tier_mtd.json").then(r => r.json()).catch(() => ({ meta: {}, mtd: null })),
     ]);
-    DATA = { mom, sseid, meta, heldbase };
+    DATA = { mom, sseid, meta, heldbase, mtd };
 
     // Populate city filter
     const cities = [...new Set([
@@ -374,7 +400,8 @@ function renderAll(cityFilter, tierFilter) {
     activeTiers().forEach(t => {
       const p = hb.base_size ? (prevB[t]||0)/hb.base_size*100 : 0;
       const c = hb.base_size ? (currB[t]||0)/hb.base_size*100 : 0;
-      pct[t] = { prev: +p.toFixed(2), curr: +c.toFixed(2), pp: +(c-p).toFixed(2) };
+      pct[t] = { prev: +p.toFixed(2), curr: +c.toFixed(2), pp: +(c-p).toFixed(2),
+                 prevCount: prevB[t]||0, currCount: currB[t]||0 };
     });
     return pct;
   });
@@ -448,6 +475,23 @@ function renderAll(cityFilter, tierFilter) {
       <div class="met-sub">Commissioned in ${latestMonth?.label}, not yet tier-reported</div></div>
   </div>
 
+  ${DATA.mtd?.mtd ? (() => {
+    const mt = DATA.mtd.mtd;
+    return `
+  <div class="card mtd-card">
+    <div class="card-hd">
+      <div><div class="card-t">This month so far</div>
+           <div class="card-s">${mt.baseline_label} base (${mt.held_base.base_size.toLocaleString()} SSEIDs) tracked live to today, ${mt.as_of_date} — a preview, not a finalized column. It'll keep changing until the month closes${cityFilter ? " · shown India-wide (not yet split by city)" : ""}</div></div>
+    </div>
+    <div class="metrics">
+      <div class="met"><div class="met-lbl">Leads given so far</div><div class="met-val">+${mt.leads_given.toLocaleString()}</div></div>
+      <div class="met"><div class="met-lbl">Orders given so far</div><div class="met-val">+${mt.orders_given.toLocaleString()}</div></div>
+      <div class="met"><div class="met-lbl">New to base so far</div><div class="met-val">${mt.new_to_base.toLocaleString()}</div>
+        <div class="met-sub">commissioned this month, not yet tier-reported</div></div>
+    </div>
+  </div>`;
+  })() : ""}
+
   ${latestCohort ? `
   <div class="card">
     <div class="card-hd">
@@ -473,16 +517,24 @@ function renderAll(cityFilter, tierFilter) {
   </div>` : ""}
 
   ${mom.months.length ? `
+  <div style="display:flex;align-items:center;gap:8px">
+    <span style="font-size:11px;color:var(--mu)">Show tables 1–3 as</span>
+    <div class="seg-toggle" id="numToggle">
+      <button class="${numberMode==='pct'?'on':''}" data-mode="pct" onclick="setNumberMode('pct')">% share</button>
+      <button class="${numberMode==='abs'?'on':''}" data-mode="abs" onclick="setNumberMode('abs')">Absolute count</button>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-hd">
       <div><div class="card-t">1. Cumulative — all customers till date</div>
-           <div class="card-s">Plain tier mix of EVERYONE commissioned by each month's end${cityFilter ? " · "+cityFilter : ""} (no cohort restriction) · pp = this month's % minus last month's %, simple subtraction · this is your headline number, but it mixes brand-new signups in with everyone else every month — see tables 2 and 3 below to separate them out</div></div>
+           <div class="card-s">Every commissioned SSEID, as of each month's end${cityFilter ? " · "+cityFilter : ""} — the full picture, including that month's brand-new customers. This is the headline number; tables 2 &amp; 3 below split new vs. already-existing customers out of it.</div></div>
     </div>
     <div class="dtbl-wrap" style="max-height:none">
-      <table class="ttbl">
+      <table class="ttbl roomy">
         <thead><tr>
           <th style="width:90px">Tier</th>
-          ${mom.months.map(m => `<th>${m.label}</th>`).join("")}
+          ${mom.months.map(m => `<th>${m.label}<span class="th-sub">${monthTotal(m).toLocaleString()} total</span></th>`).join("")}
         </tr></thead>
         <tbody id="cumulativeTbody"></tbody>
       </table>
@@ -493,13 +545,13 @@ function renderAll(cityFilter, tierFilter) {
   <div class="card">
     <div class="card-hd">
       <div><div class="card-t">2. New customers this month</div>
-           <div class="card-s">Just the SSEIDs commissioned DURING that month${cityFilter ? " · "+cityFilter : ""}, tiered as of that SAME month's end · % = share of that month's OWN new-customer count (not the whole base) · some new customers already have leads/orders in their first month</div></div>
+           <div class="card-s">Only the SSEIDs commissioned DURING that month${cityFilter ? " · "+cityFilter : ""}, tiered as of that same month-end. % = share of that month's own new-customer count, not the whole base.</div></div>
     </div>
     <div class="dtbl-wrap" style="max-height:none">
-      <table class="ttbl">
+      <table class="ttbl roomy">
         <thead><tr>
           <th style="width:90px">Tier</th>
-          ${cohortMonths.map(m => `<th>${m.label}</th>`).join("")}
+          ${cohortMonths.map(m => `<th>${m.label}<span class="th-sub">${(monthTotal(m) - filterHeldBase(m).base_size).toLocaleString()} new</span></th>`).join("")}
         </tr></thead>
         <tbody id="newCustomersTbody"></tbody>
       </table>
@@ -510,17 +562,18 @@ function renderAll(cityFilter, tierFilter) {
   <div class="card">
     <div class="card-hd">
       <div><div class="card-t">3. Existing customers — tracked from the prior month</div>
-           <div class="card-s">Each cell shows baseline→current % for the group that ALREADY existed before that month started (excludes that month's new customers, shown in table 2 instead)${cityFilter ? " · "+cityFilter : ""} · pp = current minus that same cell's own baseline — <b>columns are separate groups (sizes shown per column), don't subtract one column's % from a neighboring column's</b> · <span style="color:#15803d">green</span>/<span style="color:#b91c1c">red</span> = tier grew/shrank (not good/bad — hover a cell to see whether that's favorable for this tier)</div></div>
+           <div class="card-s">The customers who already existed before that month started (this month's new customers are excluded — see table 2)${cityFilter ? " · "+cityFilter : ""}. Each cell shows that same fixed group at the start and end of the month. <b>Columns are different-sized groups (size shown per column) — don't subtract one column from its neighbor.</b> <span style="color:#15803d">Green</span>/<span style="color:#b91c1c">red</span> = grew/shrank (not good/bad — hover a cell for whether that's favorable for this tier).</div></div>
     </div>
     <div class="dtbl-wrap" style="max-height:none">
-      <table class="ttbl hbtbl">
+      <table class="ttbl roomy hbtbl">
         <thead><tr>
           <th style="width:90px">Tier</th><th>Count</th>
-          ${cohortMonths.map(m => `<th>${m.label}<br><span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--mu)">group: ${filterHeldBase(m).base_size.toLocaleString()}</span></th>`).join("")}
+          ${cohortMonths.map(m => `<th>${m.label}<span class="th-sub">${filterHeldBase(m).base_size.toLocaleString()} SSEIDs</span></th>`).join("")}
         </tr></thead>
         <tbody id="tierMovementTbody"></tbody>
       </table>
     </div>
+    <div id="reconNote"></div>
   </div>
   <div class="card">
     <div class="card-hd">
@@ -680,15 +733,20 @@ function renderAll(cityFilter, tierFilter) {
       activeTiers().forEach(t => { out[t] = tot ? +((bt[t]||0)/tot*100).toFixed(2) : 0; });
       return out;
     });
+    const countByMonth = mom.months.map(mo => bucketize(filterMomMonth(mo)));
     activeTiers().forEach(t => {
       const cells = mom.months.map((mo, i) => {
-        const bt = bucketize(filterMomMonth(mo));
-        const c = bt[t] || 0;
+        const c = countByMonth[i][t] || 0;
         const pct = plainPctByMonth[i][t];
-        if (i === 0) return `<td>${c.toLocaleString()} · ${pct.toFixed(1)}%</td>`;
+        if (i === 0) return numberMode === "abs" ? `<td>${c.toLocaleString()}</td>` : `<td>${pct.toFixed(1)}%</td>`;
+        if (numberMode === "abs") {
+          const absDelta = c - (countByMonth[i-1][t] || 0);
+          const arrow = absDelta > 0 ? "▲" : absDelta < 0 ? "▼" : "–";
+          return `<td class="${dirClass(absDelta)}">${c.toLocaleString()} <span class="pp-sub">(${arrow} ${Math.abs(absDelta).toLocaleString()})</span></td>`;
+        }
         const pp = +(pct - plainPctByMonth[i-1][t]).toFixed(2);
         const arrow = pp > 0.05 ? "▲" : pp < -0.05 ? "▼" : "–";
-        return `<td class="${dirClass(pp)}">${c.toLocaleString()} · ${pct.toFixed(1)}% <span class="pp-sub">(${arrow} ${Math.abs(pp).toFixed(1)} pp)</span></td>`;
+        return `<td class="${dirClass(pp)}">${pct.toFixed(1)}% <span class="pp-sub">(${arrow} ${Math.abs(pp).toFixed(1)} pp)</span></td>`;
       }).join("");
       cumulativeTbody.innerHTML += `<tr>
         <td><span class="badge" style="background:${activeColor(t)};color:${badgeTextColor(t)}">${t}</span></td>
@@ -715,8 +773,9 @@ function renderAll(cityFilter, tierFilter) {
     activeTiers().forEach(t => {
       const cells = cohortMonths.map((mo, i) => {
         const c = deltaByMonth[i][t];
+        if (numberMode === "abs") return `<td>${c.toLocaleString()}</td>`;
         const pct = newTotals[i] ? (c/newTotals[i]*100).toFixed(1) : "0.0";
-        return `<td>${c.toLocaleString()} <span class="pp-sub">(${pct}%)</span></td>`;
+        return `<td>${pct}%</td>`;
       }).join("");
       newCustomersTbody.innerHTML += `<tr>
         <td><span class="badge" style="background:${activeColor(t)};color:${badgeTextColor(t)}">${t}</span></td>
@@ -840,6 +899,11 @@ function renderAll(cityFilter, tierFilter) {
         const tip = `${t} was ${p.prev.toFixed(1)}% of the cohort in ${prevLabels[i]}, `
           + `${dir} to ${p.curr.toFixed(1)}% in ${cohortMonths[i].label} `
           + `(${p.pp >= 0 ? "+" : ""}${p.pp.toFixed(1)} pp) — ${article(fav)} ${fav} for this tier.`;
+        if (numberMode === "abs") {
+          const absDelta = p.currCount - p.prevCount;
+          const arrowA = absDelta > 0.5 ? "▲" : absDelta < -0.5 ? "▼" : "–";
+          return `<td class="${dirClass(p.pp)}" title="${tip}">${p.prevCount.toLocaleString()}→${p.currCount.toLocaleString()} <span class="pp-sub">(${arrowA} ${Math.abs(absDelta).toLocaleString()})</span></td>`;
+        }
         return `<td class="${dirClass(p.pp)}" title="${tip}">${p.prev.toFixed(1)}→${p.curr.toFixed(1)}% <span class="pp-sub">(${arrow} ${Math.abs(p.pp).toFixed(1)} pp)</span></td>`;
       }).join("");
       tmTbody.innerHTML += `<tr>
@@ -854,20 +918,60 @@ function renderAll(cityFilter, tierFilter) {
     // genuinely does sum to 100% of that one fixed population.
     const engagedCells = pctByMonth.map((pct, i) => {
       const sticks = pct["Sticks"];
+      const baseSize = filterHeldBase(cohortMonths[i]).base_size;
       const engCurr = +(100 - sticks.curr).toFixed(2);
       const engPrev = +(100 - sticks.prev).toFixed(2);
       const engPp = +(engCurr - engPrev).toFixed(2);
+      const engCurrCount = baseSize - sticks.currCount;
+      const engPrevCount = baseSize - sticks.prevCount;
       const arrow = engPp > 0.05 ? "▲" : engPp < -0.05 ? "▼" : "–";
       const dir = engPp > 0.05 ? "up" : engPp < -0.05 ? "down" : "flat";
       const tip = `Engaged (non-Sticks) was ${engPrev.toFixed(1)}% of the cohort in ${prevLabels[i]}, `
         + `${dir} to ${engCurr.toFixed(1)}% in ${cohortMonths[i].label} `
         + `(${engPp >= 0 ? "+" : ""}${engPp.toFixed(1)} pp) — more engagement is always favorable.`;
+      if (numberMode === "abs") {
+        const absDelta = engCurrCount - engPrevCount;
+        const arrowA = absDelta > 0.5 ? "▲" : absDelta < -0.5 ? "▼" : "–";
+        return `<td class="${dirClass(engPp)}" title="${tip}">${engPrevCount.toLocaleString()}→${engCurrCount.toLocaleString()} <span class="pp-sub">(${arrowA} ${Math.abs(absDelta).toLocaleString()})</span></td>`;
+      }
       return `<td class="${dirClass(engPp)}" title="${tip}">${engPrev.toFixed(1)}→${engCurr.toFixed(1)}% <span class="pp-sub">(${arrow} ${Math.abs(engPp).toFixed(1)} pp)</span></td>`;
     }).join("");
     tmTbody.innerHTML += `<tr class="summary-row">
       <td>Engaged</td><td>${active.toLocaleString()}</td>
       ${engagedCells}
     </tr>`;
+
+    // Sanity check: does the city-level breakdown sum back to the same
+    // nationwide total shown in this table? Independent cross-check between
+    // two separately-aggregated fields in tier_mom.json (by_tier_curr vs.
+    // by_cluster_tier_curr) — not the same number computed twice, so a real
+    // mismatch here would actually mean something's wrong upstream.
+    const reconNote = document.getElementById("reconNote");
+    if (reconNote && latestCohortMonth) {
+      const hb = latestCohortMonth.held_base;
+      const clusters = mom.meta.clusters || [];
+      const seenClusters = new Set(clusters);
+      const sumByTier = {};
+      TIER_ORDER.forEach(t => sumByTier[t] = 0);
+      Object.keys(hb.by_cluster_tier_curr || {}).forEach(k => {
+        const idx = k.lastIndexOf("|");
+        const t = k.slice(idx + 1);
+        sumByTier[t] = (sumByTier[t] || 0) + hb.by_cluster_tier_curr[k];
+      });
+      const mismatches = TIER_ORDER.filter(t => sumByTier[t] !== (hb.by_tier_curr[t] || 0));
+      const fullBLatest = bucketize(filterMomMonth(latestMonth));
+      const oldBLatest = bucketize(latestCohort.curr);
+      const newestTotal = activeTiers().reduce((s,t) => s + ((fullBLatest[t]||0) - (oldBLatest[t]||0)), 0);
+      const existingTotal = latestCohort.base_size;
+      const cumulativeTotal = monthTotal(latestMonth);
+      reconNote.innerHTML = `
+        <div class="recon ${mismatches.length ? "bad" : "ok"}">
+          City-level tier counts sum to the same India-wide total shown above${mismatches.length ? ` — MISMATCH on ${mismatches.join(", ")}, check the source data` : ""}.
+        </div>
+        <div class="recon ok">
+          Existing customers (<b>${existingTotal.toLocaleString()}</b>) + new this month (<b>${newestTotal.toLocaleString()}</b>) = ${latestMonth.label} cumulative total (<b>${cumulativeTotal.toLocaleString()}</b>).
+        </div>`;
+    }
   }
 
   // Tier movement trend chart

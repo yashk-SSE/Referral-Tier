@@ -6,8 +6,14 @@ Fetches referral tier data from two Metabase saved questions and
 writes structured JSON files consumed by the static dashboard.
 
 Outputs written to data/:
-  tier_mom.json      → month-over-month tier counts per cluster
+  tier_mom.json      → month-over-month tier counts per cluster (finalized
+                       months only — never includes the in-progress month)
   tier_sseid.json    → one row per SSEID with tier, leads, orders
+  tier_heldbase_sseid.json → SSEID-level leads/orders/tier at both dates,
+                       for the latest finalized month pair
+  tier_mtd.json      → live month-to-date preview of the in-progress month
+                       (leads/orders given so far, new-to-base so far) —
+                       kept separate from the finalized monthly data above
   meta.json          → run metadata, months covered, cities list
 
 Environment variables (set in GitHub Secrets or .env):
@@ -76,6 +82,28 @@ def current_month_ist() -> tuple:
     return now_ist.year, now_ist.month
 
 
+def today_ist_date() -> str:
+    """Returns today's date in IST as YYYY-MM-DD."""
+    now_ist = datetime.now(timezone.utc) + timedelta(hours=5, minutes=30)
+    return now_ist.strftime("%Y-%m-%d")
+
+
+def last_completed_month_ist() -> tuple:
+    """
+    Returns (year, month) for the last FULLY COMPLETED month in IST — never
+    the calendar month still in progress. The dashboard must not report a
+    partial month as if it were a finished one (that data — however far the
+    in-progress month has gotten — is surfaced separately as the
+    month-to-date indicator, not as a tier column). Always one month behind
+    current_month_ist(), regardless of what day of the month it is.
+    """
+    y, m = current_month_ist()
+    m -= 1
+    if m == 0:
+        m, y = 12, y - 1
+    return y, m
+
+
 def build_month_range(months: int, end_month_str: str = "") -> list:
     """
     Returns a list of dicts [{label, year, month, end_date}, ...]
@@ -84,7 +112,7 @@ def build_month_range(months: int, end_month_str: str = "") -> list:
     if end_month_str:
         ey, em = map(int, end_month_str.split("-"))
     else:
-        ey, em = current_month_ist()
+        ey, em = last_completed_month_ist()
 
     result = []
     y, m = ey, em
@@ -430,6 +458,55 @@ def main():
     else:
         print("[3/6] METABASE_HELDBASE_CARD_ID not set (or fewer than 2 months) — skipping held-base fetch.")
 
+    # ── Month-to-date: live preview of the IN-PROGRESS month, kept entirely
+    # separate from the finalized monthly columns above. Base = last fully
+    # completed month's cohort (same population `months[-1]` anchors), tier
+    # computed at that baseline and again as of TODAY. Never written into
+    # tier_mom.json / treated as a real column — just a "how's this month
+    # trending so far" number. ────────────────────────────────────────────────
+    mtd = None
+    if HELDBASE_CARD_ID and AGG_CARD_ID and months:
+        today_str = today_ist_date()
+        baseline_mo = months[-1]
+        print(f"[3b/6] Fetching month-to-date preview "
+              f"(baseline={baseline_mo['end_date']}, as_of={today_str})...")
+        raw_mtd = fetch_heldbase_card_json(headers, HELDBASE_CARD_ID, baseline_mo["end_date"], today_str)
+        mtd_rows = [r for r in (normalise_heldbase_row(row) for row in raw_mtd) if r]
+        mtd_summary = build_held_base_summary(mtd_rows)
+        leads_given_mtd = sum(r["leads_curr"] - r["leads_prev"] for r in mtd_rows)
+        orders_given_mtd = sum(r["orders_curr"] - r["orders_prev"] for r in mtd_rows)
+
+        raw_today_agg = fetch_card_json(headers, AGG_CARD_ID, today_str)
+        today_agg_rows = [r for r in (normalise_agg_row(row) for row in raw_today_agg) if r]
+        today_total = sum(r["cnt"] for r in today_agg_rows)
+        new_to_base_mtd = max(0, today_total - mtd_summary["base_size"])
+
+        mtd = {
+            "as_of_date":       today_str,
+            "baseline_end_date": baseline_mo["end_date"],
+            "baseline_label":   baseline_mo["label"],
+            "held_base":        mtd_summary,
+            "leads_given":      leads_given_mtd,
+            "orders_given":     orders_given_mtd,
+            "new_to_base":      new_to_base_mtd,
+        }
+        print(f"        → base {mtd_summary['base_size']:,} · "
+              f"+{leads_given_mtd:,} leads · +{orders_given_mtd:,} orders · "
+              f"{new_to_base_mtd:,} new-to-base so far")
+    else:
+        print("[3b/6] Skipping month-to-date preview (missing HELDBASE_CARD_ID/AGG_CARD_ID or no months).")
+
+    with open("data/tier_mtd.json", "w") as f:
+        json.dump({
+            "meta": {
+                "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "tiers":        TIER_ORDER,
+                "tier_colors":  TIER_COLORS,
+            },
+            "mtd": mtd,
+        }, f, indent=2, default=str)
+    print(f"      ✓ tier_mtd.json written" + (" (empty — no data)" if mtd is None else ""))
+
     # ── Aggregated: one fetch per month ──────────────────────────────────────
     month_agg_data = []
     if AGG_CARD_ID:
@@ -498,6 +575,7 @@ def main():
         "range_start":    months[0]["label"],
         "range_end":      months[-1]["label"],
         "latest_end_date": latest_end,
+        "mtd_as_of_date": mtd["as_of_date"] if mtd else None,
         "agg_card_id":    AGG_CARD_ID,
         "sseid_card_id":  SSEID_CARD_ID,
         "heldbase_card_id": HELDBASE_CARD_ID,
