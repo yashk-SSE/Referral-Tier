@@ -14,6 +14,9 @@ Outputs written to data/:
   tier_mtd.json      → live month-to-date preview of the in-progress month
                        (leads/orders given so far, new-to-base so far) —
                        kept separate from the finalized monthly data above
+  cohort_activation.json → fiscal-quarter commissioning cohort x trailing
+                       6-month activation grid (tier-at-month-start x gave-
+                       a-lead-that-month), city-broken-out
   meta.json          → run metadata, months covered, cities list
 
 Environment variables (set in GitHub Secrets or .env):
@@ -24,11 +27,12 @@ Environment variables (set in GitHub Secrets or .env):
   METABASE_PASSWORD       fallback auth — your password (used only if no API key)
   METABASE_AGG_CARD_ID    card ID of the aggregated question (cluster x tier x count)
   METABASE_SSEID_CARD_ID  card ID of the SSEID detail question
+  METABASE_COHORT_CARD_ID card ID of the cohort activation question
   MONTHS                  how many months back to fetch (default 6)
   END_MONTH               override end month as YYYY-MM (default = current month)
 """
 
-import os, sys, json, requests
+import os, sys, re, json, requests
 from datetime import datetime, date, timezone, timedelta
 from calendar import monthrange
 from dotenv import load_dotenv
@@ -48,6 +52,8 @@ PASSWORD       = os.environ.get("METABASE_PASSWORD", "")
 AGG_CARD_ID    = int(os.environ.get("METABASE_AGG_CARD_ID",  "0"))
 SSEID_CARD_ID  = int(os.environ.get("METABASE_SSEID_CARD_ID", "0"))
 HELDBASE_CARD_ID = int(os.environ.get("METABASE_HELDBASE_CARD_ID", "0"))
+COHORT_CARD_ID = int(os.environ.get("METABASE_COHORT_CARD_ID", "0"))
+COHORT_MONTHS  = 6   # trailing rolling window for the cohort-activation grid
 MONTHS         = int(os.environ.get("MONTHS", "6"))
 END_MONTH_STR  = os.environ.get("END_MONTH", "")   # YYYY-MM, optional override
 TIMEOUT_S      = 300
@@ -205,6 +211,25 @@ def fetch_heldbase_card_json(headers: dict, card_id: int, prev_end: str, curr_en
     return r.json()
 
 
+def fetch_cohort_card_json(headers: dict, card_id: int, as_of_date: str) -> list:
+    """
+    Calls POST /api/card/{id}/query/json with an as_of_date template parameter
+    for the cohort-activation question (fiscal-quarter cohort x trailing
+    6-month grid, computed entirely server-side).
+    """
+    params_payload = [
+        {"type": "date/single", "target": ["variable", ["template-tag", "as_of_date"]], "value": as_of_date},
+    ]
+    r = requests.post(
+        f"{METABASE_URL}/api/card/{card_id}/query/json",
+        headers=headers,
+        json={"ignore_cache": False, "parameters": params_payload},
+        timeout=TIMEOUT_S,
+    )
+    r.raise_for_status()
+    return r.json()
+
+
 # ── TRANSFORM: AGGREGATED DATA ────────────────────────────────────────────────
 def normalise_agg_row(row: dict) -> dict | None:
     """
@@ -300,6 +325,61 @@ def normalise_heldbase_row(row: dict) -> dict | None:
         "leads_curr":  int(row.get(leads_curr_key) or 0) if leads_curr_key else 0,
         "orders_curr": int(row.get(orders_curr_key) or 0) if orders_curr_key else 0,
         "tier_curr":   norm_tier(row.get(tier_curr_key)),
+    }
+
+
+def normalise_cohort_row(row: dict) -> dict | None:
+    """
+    Normalises one row from the cohort-activation card.
+    Expected columns: Cohort, FY Start, FQ, City, Month, Tier, Pool, Activated
+    """
+    keys = {k.lower(): k for k in row}
+
+    def find(*parts):
+        return next((keys[k] for k in keys if all(p in k for p in parts)), None)
+
+    cohort_key = find("cohort")
+    fy_key     = find("fy")
+    city_key   = find("city")
+    month_key  = find("month")
+    # "tier" alone would also match a future "Prior Tier" column — exclude
+    # "prior" so the two never get confused. Same trick for Activated/Repeat.
+    tier_key       = next((keys[k] for k in keys if "tier" in k and "prior" not in k), None)
+    prior_tier_key = find("prior", "tier")   # optional — only present once the SQL adds it
+    pool_key   = find("pool")
+    act_key    = next((keys[k] for k in keys if "activat" in k and "repeat" not in k), None)
+    repeat_key = find("repeat")   # optional — only present once the SQL adds it
+
+    if not cohort_key or not month_key or not tier_key:
+        return None
+
+    def norm_tier(v):
+        v = str(v or "Sticks").strip()
+        return next((t for t in TIER_ORDER if t.lower() == v.lower()), "Sticks")
+
+    tier_normalised = norm_tier(row.get(tier_key))
+    prior_tier_normalised = norm_tier(row.get(prior_tier_key)) if prior_tier_key else None
+
+    month_val = row.get(month_key)
+    month_str = str(month_val)[:7] if month_val else ""   # YYYY-MM
+
+    cohort_label = str(row.get(cohort_key) or "").strip()
+    fq_match = re.match(r"Q(\d)", cohort_label)
+    fq_num = int(fq_match.group(1)) if fq_match else 0
+
+    return {
+        "cohort":   cohort_label,
+        "fy_start": int(row.get(fy_key) or 0) if fy_key else 0,
+        "fq_num":   fq_num,
+        "city":     str(row.get(city_key) or "Unknown").strip() if city_key else "Unknown",
+        "month":    month_str,
+        "tier":     tier_normalised,
+        "prior_tier":     prior_tier_normalised,
+        "has_prior_tier": prior_tier_key is not None,
+        "pop":         int(row.get(pool_key) or 0) if pool_key else 0,
+        "act":         int(row.get(act_key) or 0) if act_key else 0,
+        "repeat_act":  int(row.get(repeat_key) or 0) if repeat_key else 0,
+        "has_repeat":  repeat_key is not None,
     }
 
 
@@ -407,6 +487,53 @@ def build_tier_mom(month_agg_data: list, held_base_by_end_date: dict | None = No
     }
 
 
+def build_cohort_activation(rows: list, as_of_date: str) -> dict:
+    """
+    rows: normalised cohort-activation rows (one per cohort x city x month x tier).
+    Cohort/month ordering is computed here (from fy_start/fq_num and the raw
+    YYYY-MM month string) so the frontend never has to string-sort fiscal
+    labels itself — it just walks meta.cohorts / meta.months in order.
+    """
+    cohort_keys = sorted({(r["fy_start"], r["fq_num"], r["cohort"]) for r in rows})
+    cohorts = [c for (_, _, c) in cohort_keys]
+
+    months = sorted({r["month"] for r in rows})
+    mo_labels = [datetime.strptime(m, "%Y-%m").strftime("%b '%y") for m in months]
+
+    cities = sorted({r["city"] for r in rows if r["city"] != "Unknown"})
+    has_repeat_data = any(r.get("has_repeat") for r in rows)
+    has_prior_tier_data = any(r.get("has_prior_tier") for r in rows)
+
+    # Once "Prior Tier" exists, the same (cohort, city, month, tier) that used
+    # to be one row now splits into several — one per prior tier the arrivals
+    # came from. Sum pop/act across those splits and you get back exactly the
+    # same totals as before; prior_tier itself is only used for the "who
+    # moved into Metals from where" breakdown, so records without it (or
+    # before the SQL adds it) just carry prior_tier: null and work as before.
+    records = [{
+        "cohort": r["cohort"], "city": r["city"], "month": r["month"],
+        "tier":   r["tier"],   "pop":  r["pop"],  "act":   r["act"],
+        "repeat_act": r["repeat_act"],
+        "prior_tier": r["prior_tier"],
+    } for r in rows]
+
+    return {
+        "meta": {
+            "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "as_of_date":   as_of_date,
+            "cohorts":      cohorts,
+            "months":       months,
+            "moLabels":     mo_labels,
+            "cities":       cities,
+            "tiers":        TIER_ORDER,
+            "tier_colors":  TIER_COLORS,
+            "has_repeat_data": has_repeat_data,
+            "has_prior_tier_data": has_prior_tier_data,
+        },
+        "records": records,
+    }
+
+
 def build_tier_sseid(rows: list, end_date: str) -> dict:
     cities = sorted({r["city"] for r in rows if r["city"] != "Unknown"})
     return {
@@ -507,6 +634,29 @@ def main():
         }, f, indent=2, default=str)
     print(f"      ✓ tier_mtd.json written" + (" (empty — no data)" if mtd is None else ""))
 
+    # ── Cohort activation: fiscal-quarter commissioning cohort x trailing
+    # 6-month grid, computed entirely server-side (one call, {{as_of_date}}
+    # = last completed month's end — same anchor as everything else, no
+    # in-progress month). ──────────────────────────────────────────────────
+    if COHORT_CARD_ID:
+        print(f"[Cohort] Fetching cohort activation (card {COHORT_CARD_ID}, as_of_date={latest_end})...")
+        raw_cohort = fetch_cohort_card_json(headers, COHORT_CARD_ID, latest_end)
+        cohort_rows = [r for r in (normalise_cohort_row(row) for row in raw_cohort) if r]
+        cohort_activation = build_cohort_activation(cohort_rows, latest_end)
+        with open("data/cohort_activation.json", "w") as f:
+            json.dump(cohort_activation, f, indent=2, default=str)
+        print(f"      ✓ cohort_activation.json written — {len(cohort_rows):,} rows, "
+              f"{len(cohort_activation['meta']['cohorts'])} cohorts, "
+              f"{len(cohort_activation['meta']['months'])} months")
+    else:
+        print("[Cohort] METABASE_COHORT_CARD_ID not set — skipping cohort activation fetch.")
+        with open("data/cohort_activation.json", "w") as f:
+            json.dump({"meta": {"generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                "as_of_date": latest_end, "cohorts": [], "months": [], "moLabels": [],
+                                "cities": [], "tiers": TIER_ORDER, "tier_colors": TIER_COLORS,
+                                "has_repeat_data": False, "has_prior_tier_data": False},
+                       "records": []}, f, indent=2)
+
     # ── Aggregated: one fetch per month ──────────────────────────────────────
     month_agg_data = []
     if AGG_CARD_ID:
@@ -579,6 +729,7 @@ def main():
         "agg_card_id":    AGG_CARD_ID,
         "sseid_card_id":  SSEID_CARD_ID,
         "heldbase_card_id": HELDBASE_CARD_ID,
+        "cohort_card_id": COHORT_CARD_ID,
     }
     with open("data/meta.json", "w") as f:
         json.dump(meta, f, indent=2)

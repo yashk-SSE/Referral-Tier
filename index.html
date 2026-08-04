@@ -136,6 +136,23 @@
   .err-box{background:#fcebeb;border:0.5px solid rgba(162,45,45,.3);color:#a32d2d;
            border-radius:8px;padding:12px 16px;font-size:12px}
 
+  /* ── COHORT ACTIVATION HEATMAP ────────────────────── */
+  .seg-toggle.sm button{padding:4px 10px;font-size:11px}
+  .seg-toggle button:disabled{opacity:.45;cursor:not-allowed}
+  table.hm td{text-align:center;font-family:'Courier New',monospace;cursor:default}
+  table.hm td.rl{text-align:left;font-family:inherit;font-weight:500;background:var(--bg);
+                 border-right:1.5px solid var(--bd);white-space:nowrap}
+  table.hm td.sc{text-align:right;color:var(--mu);background:var(--bg);border-right:0.5px solid var(--bd)}
+  table.hm tr.era-row td{background:var(--bg);font-size:10px;font-weight:700;color:var(--mu);
+                          text-transform:uppercase;letter-spacing:.06em;text-align:left;padding-left:10px}
+  .noise-flag{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--brand-gold);
+              vertical-align:super;margin-left:2px}
+  .hm-legend{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:11px;color:var(--mu)}
+  .leg-bar{height:10px;width:140px;border-radius:3px;overflow:hidden;display:flex}
+  .ctog-wrap{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+  .ctog{font-size:10px;font-weight:600;padding:3px 9px;border-radius:12px;border:1.5px solid var(--bd);
+        background:var(--sur);color:var(--mu);cursor:pointer;transition:all .12s}
+
   /* ── RECONCILIATION FOOTNOTE ─────────────────────── */
   .recon{font-size:11px;color:var(--mu);margin-top:10px;padding-top:10px;
          border-top:0.5px dashed var(--bd)}
@@ -219,7 +236,7 @@ const TIER_CONDITIONS = {
 const METALS_TIERS = ["Bronze","Silver","Gold","Platinum"];
 const METALS_COLOR = "#FFC100"; // brand gold
 
-let DATA = { mom: null, sseid: null, meta: null, heldbase: null, mtd: null };
+let DATA = { mom: null, sseid: null, meta: null, heldbase: null, mtd: null, cohort: null };
 let viewMode = "full"; // "full" | "metals"
 let numberMode = "pct"; // "pct" | "abs" — switches how tables 1-3 display each cell
 let trendChart = null;
@@ -231,6 +248,135 @@ function setNumberMode(mode) {
     b.classList.toggle("on", b.dataset.mode === mode);
   });
   applyFilters();
+}
+
+// ── COHORT ACTIVATION TAB ────────────────────────────────────────────────────
+// A cohort here = customers commissioned in the same FISCAL quarter (Apr–Mar),
+// a fixed group forever — unlike the monthly held-base cohorts elsewhere in
+// this dashboard, which roll forward every month. Tracks, for a trailing
+// window of calendar months, what tier each cohort member was sitting in as
+// of that month's START, and whether they gave >=1 referral lead DURING that
+// month ("activation"). Never shows the in-progress month — same rule as
+// everywhere else in this dashboard.
+const COHORT_TIER_GROUPS = {
+  Sticks:   ["Sticks"],
+  Stones:   ["Stones"],
+  Bronze:   ["Bronze"],
+  Silver:   ["Silver"],
+  Gold:     ["Gold"],
+  Platinum: ["Platinum"],
+  Metals:   METALS_TIERS,
+  Combined: TIER_ORDER,
+};
+const METAL_SUBS = ["Metals","Bronze","Silver","Gold","Platinum"];
+let cohortSeg = "Sticks";       // Sticks | Stones | Metals | Bronze | Silver | Gold | Platinum | Combined
+let cohortMetalSub = "Metals";  // which metal sub-tab was last picked, remembered across toggles
+let cohortHmMode = "pct";       // "pct" | "act" | "pop"
+let cohortActiveCohorts = new Set();
+let cohortLineChart = null;
+
+// The global Tier filter (topbar), when set, pins this tab to that exact
+// tier — same rule as everywhere else that dropdown touches. Sticks/Stones
+// map to their own segment; Bronze/Silver/Gold/Platinum map 1:1. Clearing
+// the global filter hands control back to the tab's own segment buttons.
+function cohortEffectiveSeg(tierFilter) {
+  if (tierFilter) return tierFilter;
+  if (viewMode === "metals" && METAL_SUBS.includes(cohortSeg) && cohortSeg !== "Metals") return "Metals";
+  return cohortSeg;
+}
+function setCohortSeg(seg) {
+  cohortSeg = seg;
+  if (METAL_SUBS.includes(seg)) cohortMetalSub = seg;
+  applyFilters();
+}
+function setCohortHmMode(mode) {
+  cohortHmMode = mode;
+  applyFilters();
+}
+function toggleCohortLine(cohort) {
+  if (cohortActiveCohorts.has(cohort)) cohortActiveCohorts.delete(cohort);
+  else cohortActiveCohorts.add(cohort);
+  applyFilters();
+}
+// FY label ("FY24-25") from a cohort string ("Q4 FY24-25") — used to group
+// cohorts into era-aggregate rows, one era per fiscal year.
+function cohortEra(cohort) {
+  const m = /FY\d{2}-\d{2}/.exec(cohort);
+  return m ? m[0] : cohort;
+}
+// "2026-03" -> "Feb'26" — the calendar month immediately before `mo`, used
+// to label the "also active last month" tooltip line without needing the
+// displayed month array (works even for the window's first column, whose
+// prior month isn't itself shown).
+function prevMonthLabelOf(mo) {
+  const [y, m] = mo.split("-").map(Number);
+  const d = new Date(y, m - 2, 1);
+  return d.toLocaleDateString("en-US", { month: "short" }) + "'" + String(d.getFullYear()).slice(-2);
+}
+// Aggregates cohort_activation.json's flat records into {cohort: {month: {pop,act}}}
+// for one segment (already tier-grouped) and an optional city filter.
+function buildCohortGrid(records, seg, cityFilter) {
+  const wanted = new Set(COHORT_TIER_GROUPS[seg] || []);
+  const grid = {};
+  records.forEach(r => {
+    if (cityFilter && r.city !== cityFilter) return;
+    if (!wanted.has(r.tier)) return;
+    const byMonth = grid[r.cohort] || (grid[r.cohort] = {});
+    const cell = byMonth[r.month] || (byMonth[r.month] = { pop: 0, act: 0, repeatAct: 0, byTier: {} });
+    cell.pop += r.pop;
+    cell.act += r.act;
+    cell.repeatAct += r.repeat_act || 0;
+    // Keep the raw-tier split too — only meaningful when this segment blends
+    // more than one raw tier (Metals, All Customers); the tooltip shows it
+    // only then, since a single-tier view has nothing to break down.
+    const bt = cell.byTier[r.tier] || (cell.byTier[r.tier] = { pop: 0, act: 0, repeatAct: 0 });
+    bt.pop += r.pop; bt.act += r.act; bt.repeatAct += r.repeat_act || 0;
+  });
+  return grid;
+}
+// Same aggregation but ignoring tier entirely — used for the "Size" column,
+// which is always the cohort's whole population, independent of which
+// segment is currently selected.
+function buildCohortSizeByLatestMonth(records, months, cityFilter) {
+  const latest = months[months.length - 1];
+  const sizes = {};
+  records.forEach(r => {
+    if (r.month !== latest) return;
+    if (cityFilter && r.city !== cityFilter) return;
+    sizes[r.cohort] = (sizes[r.cohort] || 0) + r.pop;
+  });
+  return sizes;
+}
+// Who moved into Metals (from Sticks or Stones) between last month-start
+// and this month-start, for this fixed fiscal-quarter cohort. Needs
+// "prior_tier" from the SQL (meta.has_prior_tier_data) — segment-independent,
+// since it's a fact about the whole cohort, not about whichever tier/segment
+// is currently selected.
+function buildNewToMetalsBreakdown(records, cityFilter) {
+  const grid = {};
+  records.forEach(r => {
+    if (cityFilter && r.city !== cityFilter) return;
+    if (!METALS_TIERS.includes(r.tier)) return;
+    if (!r.prior_tier || METALS_TIERS.includes(r.prior_tier)) return;   // already Metals last month too — not "new"
+    const byMonth = grid[r.cohort] || (grid[r.cohort] = {});
+    const cell = byMonth[r.month] || (byMonth[r.month] = { Sticks: 0, Stones: 0, total: 0 });
+    cell[r.prior_tier] = (cell[r.prior_tier] || 0) + r.pop;
+    cell.total += r.pop;
+  });
+  return grid;
+}
+function cohortPctToHex(pct, maxPct) {
+  const t = Math.min(Math.max(maxPct > 0 ? pct / maxPct : 0, 0), 1);
+  const stops = [[0,[244,244,242]],[.25,[209,250,229]],[.5,[110,231,183]],[.75,[0,189,255]],[1,[19,28,162]]];
+  let rgb = [244,244,242];
+  for (let i = 0; i < stops.length - 1; i++) {
+    const [ta,ca] = stops[i], [tb,cb] = stops[i+1];
+    if (t >= ta && t <= tb) { const f = (t-ta)/(tb-ta); rgb = ca.map((v,j) => v+(cb[j]-v)*f); break; }
+  }
+  return "#"+rgb.map(v => Math.round(v).toString(16).padStart(2,"0")).join("");
+}
+function cohortFgForBg(pct, maxPct) {
+  return (maxPct > 0 ? pct/maxPct : 0) >= 0.6 ? "#fff" : "#1a1a18";
 }
 
 // ── VIEW MODE (6-tier vs Sticks/Stones/Metals) ──────────────────────────────
@@ -264,6 +410,7 @@ function setViewMode(mode) {
 const TABS = [
   { id: "exec",   label: "Executive Summary" },
   { id: "trends", label: "Trends & MoM" },
+  { id: "cohort", label: "Cohort Activation" },
   { id: "city",   label: "City Summary" },
   { id: "sseid",  label: "SSEID Detail" },
 ];
@@ -296,19 +443,22 @@ syncTopbarHeight();
 // ── FETCH ALL DATA ─────────────────────────────────────────────────────────
 async function loadData() {
   try {
-    const [mom, sseid, meta, heldbase, mtd] = await Promise.all([
+    const [mom, sseid, meta, heldbase, mtd, cohort] = await Promise.all([
       fetch("data/tier_mom.json").then(r => r.json()),
       fetch("data/tier_sseid.json").then(r => r.json()),
       fetch("data/meta.json").then(r => r.json()),
       fetch("data/tier_heldbase_sseid.json").then(r => r.json()).catch(() => ({ meta: {}, records: [] })),
       fetch("data/tier_mtd.json").then(r => r.json()).catch(() => ({ meta: {}, mtd: null })),
+      fetch("data/cohort_activation.json").then(r => r.json()).catch(() => ({ meta: {}, records: [] })),
     ]);
-    DATA = { mom, sseid, meta, heldbase, mtd };
+    DATA = { mom, sseid, meta, heldbase, mtd, cohort };
+    cohortActiveCohorts = new Set((cohort.meta?.cohorts || []).slice(-10));
 
     // Populate city filter
     const cities = [...new Set([
       ...(mom.meta?.clusters || []),
       ...(sseid.meta?.cities || []),
+      ...(cohort.meta?.cities || []),
     ])].sort();
     const cf = document.getElementById("cityFilter");
     cities.forEach(c => { const o = document.createElement("option"); o.value=c; o.textContent=c; cf.appendChild(o); });
@@ -340,6 +490,7 @@ function renderAll(cityFilter, tierFilter) {
 
   if (trendChart) { trendChart.destroy(); trendChart = null; }
   if (cityTrendChart) { cityTrendChart.destroy(); cityTrendChart = null; }
+  if (cohortLineChart) { cohortLineChart.destroy(); cohortLineChart = null; }
 
   const latestMonth = mom.months[mom.months.length - 1];
 
@@ -603,6 +754,80 @@ function renderAll(cityFilter, tierFilter) {
   </div>` : ""}
   `;
 
+  // ── Cohort Activation data prep ──────────────────────────────────────────
+  const cohortRecords = DATA.cohort?.records || [];
+  const cohortMetaInfo = DATA.cohort?.meta || {};
+  const cohortActMonths = cohortMetaInfo.months || [];
+  const cohortMoLabels = cohortMetaInfo.moLabels || [];
+  const cohortLabels = cohortMetaInfo.cohorts || [];
+  const cohortEffSeg = cohortEffectiveSeg(tierFilter);
+  const cohortGridData = buildCohortGrid(cohortRecords, cohortEffSeg, cityFilter);
+  const cohortSizeMap = buildCohortSizeByLatestMonth(cohortRecords, cohortActMonths, cityFilter);
+  const newToMetalsData = buildNewToMetalsBreakdown(cohortRecords, cityFilter);
+  const COHORT_SEG_TITLES = {
+    Sticks:   "Sticks Activation — % of Sticks giving ≥1 referral lead that month",
+    Stones:   "Stones Activation — % of Stones giving ≥1 referral lead that month",
+    Bronze:   "Bronze Activation — % of Bronze customers giving ≥1 referral lead that month",
+    Silver:   "Silver Activation — % of Silver customers giving ≥1 referral lead that month",
+    Gold:     "Gold Activation — % of Gold customers giving ≥1 referral lead that month",
+    Platinum: "Platinum Activation — % of Platinum customers giving ≥1 referral lead that month",
+    Metals:   "Metals Activation — % of all Metals (Bronze+Silver+Gold+Platinum) giving ≥1 referral lead that month",
+    Combined: "Overall Activation — % of the WHOLE cohort giving ≥1 referral lead that month",
+  };
+
+  const cohortHTML = `
+  ${cohortLabels.length ? `
+  <div class="card">
+    <div class="card-hd">
+      <div><div class="card-t">Cohort = customers commissioned in the same fiscal quarter (Apr–Mar)</div>
+           <div class="card-s">Fixed group forever, tracked across a trailing 6-month window — unlike the rolling monthly cohorts in Trends &amp; MoM. Activation = gave ≥1 referral lead in that specific month.${cityFilter ? " · "+cityFilter : ""}</div></div>
+    </div>
+    <div class="seg-toggle" id="cohortSegToggle">
+      <button class="${cohortEffSeg==='Sticks'?'on':''}" ${tierFilter?'disabled':''} onclick="setCohortSeg('Sticks')">Sticks</button>
+      <button class="${cohortEffSeg==='Stones'?'on':''}" ${tierFilter?'disabled':''} onclick="setCohortSeg('Stones')">Stones</button>
+      <button class="${METAL_SUBS.includes(cohortEffSeg)?'on':''}" ${tierFilter?'disabled':''} onclick="setCohortSeg('Metals')">Metals</button>
+      <button class="${cohortEffSeg==='Combined'?'on':''}" ${tierFilter?'disabled':''} onclick="setCohortSeg('Combined')">All Customers</button>
+    </div>
+    ${(METAL_SUBS.includes(cohortEffSeg) && viewMode!=='metals' && !tierFilter) ? `
+    <div class="seg-toggle sm" style="margin-top:6px">
+      ${METAL_SUBS.map(s => `<button class="${cohortEffSeg===s?'on':''}" onclick="setCohortSeg('${s}')">${s==='Metals'?'All Metals':s}</button>`).join("")}
+    </div>` : ""}
+    ${tierFilter ? `<div class="card-s" style="margin-top:8px">Pinned to <b>${tierFilter}</b> by the global Tier filter above — clear it to browse segments freely.</div>` : ""}
+    ${viewMode==='metals' && !tierFilter ? `<div class="card-s" style="margin-top:8px">6-Tier/Metals toggle is set to Metals — Bronze/Silver/Gold/Platinum sub-tabs are hidden. Switch to 6-Tier above to drill in.</div>` : ""}
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div><div class="card-t" id="cohortHmTitle">${COHORT_SEG_TITLES[cohortEffSeg] || cohortEffSeg+" Activation"}</div>
+           <div class="card-s"><b>Size</b> (left column) = the whole cohort, fixed, same in every segment · <b>Pool</b> mode's monthly cells = only the SELECTED segment's population that month, which is meant to shift as customers move between tiers · hover a cell for detail · — = not yet commissioned</div></div>
+      <div class="tg-grp" id="cohortHmModeToggle">
+        <button class="tg${cohortHmMode==='pct'?' on':''}" onclick="setCohortHmMode('pct')">Rate %</button>
+        <button class="tg${cohortHmMode==='act'?' on':''}" onclick="setCohortHmMode('act')">Active</button>
+        <button class="tg${cohortHmMode==='pop'?' on':''}" onclick="setCohortHmMode('pop')">Pool</button>
+      </div>
+    </div>
+    <div class="dtbl-wrap" style="max-height:560px">
+      <table class="ttbl hm">
+        <thead><tr>
+          <th class="rh">Cohort</th><th class="sh">Size</th>
+          ${cohortMoLabels.map(l => `<th>${l}</th>`).join("")}
+        </tr></thead>
+        <tbody id="cohortHmBody"></tbody>
+      </table>
+    </div>
+    <div class="hm-legend" id="cohortLegend"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div><div class="card-t">Cohort trajectories</div>
+           <div class="card-s">Toggle which cohorts' activation trend to plot</div></div>
+    </div>
+    <div class="ctog-wrap" id="cohortToggles"></div>
+    <div class="chart-wrap"><canvas id="cohortLineCanvas"></canvas></div>
+  </div>` : `<div class="card">No cohort activation data available yet — run the ETL with METABASE_COHORT_CARD_ID set.</div>`}
+  `;
+
   const cityHTML = `
   ${mom.meta?.clusters?.length && latestCohort ? `
   <div class="card">
@@ -683,7 +908,7 @@ function renderAll(cityFilter, tierFilter) {
   `;
 
   document.getElementById("page").innerHTML =
-    ({ exec: execHTML, trends: trendsHTML, city: cityHTML, sseid: sseidHTML })[activeTab]
+    ({ exec: execHTML, trends: trendsHTML, cohort: cohortHTML, city: cityHTML, sseid: sseidHTML })[activeTab]
     || `<div class="err-box">Unknown tab "${activeTab}".</div>`;
 
   // Legend
@@ -1040,6 +1265,139 @@ function renderAll(cityFilter, tierFilter) {
         <td>${g.ordersPrev.toLocaleString()}</td><td>${g.ordersCurr.toLocaleString()}</td>
         <td class="${dirClass(ordersGiven)}">${ordersGiven >= 0 ? "+" : ""}${ordersGiven.toLocaleString()}</td>
       </tr>`;
+    });
+  }
+
+  // ── Cohort Activation heatmap — grouped into era rows (one per fiscal
+  // year), each with an aggregate rollup. Color scale is normalised to the
+  // max activation % actually observed in the current segment+city slice,
+  // so contrast stays meaningful whichever tier/city is selected.
+  const cohortHmBody = document.getElementById("cohortHmBody");
+  if (cohortHmBody && cohortLabels.length) {
+    const eras = [];
+    cohortLabels.forEach(c => {
+      const era = cohortEra(c);
+      let bucket = eras.find(e => e.era === era);
+      if (!bucket) { bucket = { era, cohorts: [] }; eras.push(bucket); }
+      bucket.cohorts.push(c);
+    });
+
+    let maxPct = 0;
+    cohortLabels.forEach(c => {
+      cohortActMonths.forEach(mo => {
+        const cell = cohortGridData[c]?.[mo];
+        if (cell && cell.pop > 0) maxPct = Math.max(maxPct, cell.act / cell.pop * 100);
+      });
+    });
+    maxPct = maxPct || 1;
+
+    const ncols = 2 + cohortActMonths.length;
+    let html = "";
+    eras.forEach(({ era, cohorts }) => {
+      html += `<tr class="era-row"><td colspan="${ncols}">${era}</td></tr>`;
+      cohorts.forEach(c => {
+        html += `<tr><td class="rl">${c}</td><td class="sc">${(cohortSizeMap[c]||0).toLocaleString()}</td>`;
+        cohortActMonths.forEach(mo => {
+          const cell = cohortGridData[c]?.[mo];
+          if (!cell || cell.pop === 0) { html += `<td style="color:var(--bd)">—</td>`; return; }
+          const pct = cell.act / cell.pop * 100;
+          const bg = cohortPctToHex(pct, maxPct), fg = cohortFgForBg(pct, maxPct);
+          const noise = cell.pop < 30;
+          const disp = cohortHmMode === "pct" ? pct.toFixed(1)+"%"
+                     : cohortHmMode === "act" ? cell.act.toLocaleString()
+                     : cell.pop.toLocaleString();
+          const prevLabel = prevMonthLabelOf(mo);
+          let tip = `${c} · ${mo}\nPool: ${cell.pop.toLocaleString()}\nActivated: ${cell.act.toLocaleString()} (${pct.toFixed(1)}%)`;
+          if (cohortMetaInfo.has_repeat_data && cell.act > 0) {
+            const rPct = (cell.repeatAct / cell.act * 100).toFixed(0);
+            tip += `\nAlso active in ${prevLabel}: ${cell.repeatAct.toLocaleString()} (${rPct}% of activated)`;
+          }
+          const tierBreakdown = Object.entries(cell.byTier)
+            .filter(([,v]) => v.act > 0)
+            .sort((a,b) => b[1].act - a[1].act);
+          if (tierBreakdown.length > 1) {
+            tip += `\nActivated by tier (baseline as of ${prevLabel} end):`;
+            tierBreakdown.forEach(([t,v]) => { tip += `\n  ${t}: ${v.act.toLocaleString()}`; });
+          }
+          if ((cohortEffSeg === "Metals" || cohortEffSeg === "Combined") && cohortMetaInfo.has_prior_tier_data) {
+            const ntm = newToMetalsData[c]?.[mo];
+            if (ntm && ntm.total > 0) {
+              tip += `\nNew to Metals this month: ${ntm.total.toLocaleString()}`
+                   + ` (from Sticks: ${(ntm.Sticks||0).toLocaleString()}, from Stones: ${(ntm.Stones||0).toLocaleString()})`;
+            }
+          }
+          if (noise) tip += `\n⚠ pool < 30`;
+          html += `<td style="background:${bg};color:${fg}" title="${tip}">${disp}${noise ? '<span class="noise-flag"></span>' : ""}</td>`;
+        });
+        html += `</tr>`;
+      });
+      const monthTotals = cohortActMonths.map(mo => {
+        let p = 0, a = 0;
+        cohorts.forEach(c => { const cell = cohortGridData[c]?.[mo]; if (cell) { p += cell.pop; a += cell.act; } });
+        return { p, a };
+      });
+      const eraSize = cohorts.reduce((s,c) => s + (cohortSizeMap[c]||0), 0);
+      html += `<tr style="border-top:2px solid var(--bd);background:var(--bg)">`
+            + `<td class="rl" style="font-size:11px;color:var(--mu);font-weight:500">↳ ${era} total</td>`
+            + `<td class="sc" style="font-size:11px">${eraSize.toLocaleString()}</td>`;
+      monthTotals.forEach(({ p, a }) => {
+        if (!p) { html += `<td style="color:var(--bd)">—</td>`; return; }
+        const pct = a / p * 100;
+        const bg = cohortPctToHex(pct, maxPct), fg = cohortFgForBg(pct, maxPct);
+        const disp = cohortHmMode === "pct" ? pct.toFixed(1)+"%" : cohortHmMode === "act" ? a.toLocaleString() : p.toLocaleString();
+        html += `<td style="background:${bg};color:${fg};font-weight:700" title="${era} total — ${pct.toFixed(1)}% (${a}/${p})">${disp}</td>`;
+      });
+      html += `</tr>`;
+    });
+    cohortHmBody.innerHTML = html;
+
+    const cohortLegend = document.getElementById("cohortLegend");
+    if (cohortLegend) {
+      let bar = "";
+      for (let i = 0; i < 20; i++) bar += `<div style="flex:1;background:${cohortPctToHex(maxPct*i/19, maxPct)}"></div>`;
+      cohortLegend.innerHTML = `<span>0%</span><div class="leg-bar">${bar}</div><span>${maxPct.toFixed(1)}%+</span>`
+        + `<span style="margin-left:10px"><span class="noise-flag"></span> pool &lt; 30 SSEIDs</span>`;
+    }
+  }
+
+  // Cohort trajectory toggles + line chart
+  const cohortToggles = document.getElementById("cohortToggles");
+  if (cohortToggles) {
+    cohortToggles.innerHTML = cohortLabels.map((c, i) => {
+      const on = cohortActiveCohorts.has(c);
+      const col = `hsl(${Math.round(360*i/Math.max(cohortLabels.length,1))},60%,45%)`;
+      return `<button class="ctog${on?" on":""}" style="${on?`background:${col};border-color:${col};color:#fff`:""}" onclick="toggleCohortLine('${c}')">${c}</button>`;
+    }).join("");
+  }
+  const cohortLineCanvas = document.getElementById("cohortLineCanvas");
+  if (cohortLineCanvas && cohortLabels.length) {
+    const datasets = cohortLabels.filter(c => cohortActiveCohorts.has(c)).map(c => {
+      const col = `hsl(${Math.round(360*cohortLabels.indexOf(c)/Math.max(cohortLabels.length,1))},60%,45%)`;
+      return {
+        label: c,
+        data: cohortActMonths.map(mo => {
+          const cell = cohortGridData[c]?.[mo];
+          return cell && cell.pop > 0 ? +(cell.act/cell.pop*100).toFixed(2) : null;
+        }),
+        borderColor: col, backgroundColor: "transparent", borderWidth: 2,
+        pointRadius: 3, tension: .35, fill: false, spanGaps: false,
+      };
+    });
+    cohortLineChart = new Chart(cohortLineCanvas, {
+      type: "line",
+      data: { labels: cohortMoLabels, datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          legend: { display: datasets.length <= 12, position: "bottom", labels: { boxWidth: 10, font: { size: 10 } } },
+          tooltip: { callbacks: { label: ctx => ctx.raw !== null ? ` ${ctx.raw.toFixed(2)}% (${ctx.dataset.label})` : "" } },
+        },
+        scales: {
+          y: { beginAtZero: true, ticks: { callback: v => v + "%" }, grid: { color: "rgba(128,128,128,.15)" } },
+          x: { grid: { display: false } },
+        },
+      },
     });
   }
 
