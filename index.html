@@ -347,6 +347,22 @@ function buildCohortSizeByLatestMonth(records, months, cityFilter) {
   });
   return sizes;
 }
+// How many of the cohort are Metals as of the MOST RECENT data we have —
+// a stable "big picture" number, same anchor month as Size, shown in every
+// cell's tooltip regardless of which month/segment you're actually hovering,
+// specifically so it can't be mistaken for that cell's own (possibly
+// still-forming, possibly non-Metals) Pool value.
+function buildEngagedTillDate(records, months, cityFilter) {
+  const latest = months[months.length - 1];
+  const engaged = {};
+  records.forEach(r => {
+    if (r.month !== latest) return;
+    if (cityFilter && r.city !== cityFilter) return;
+    if (!METALS_TIERS.includes(r.tier)) return;
+    engaged[r.cohort] = (engaged[r.cohort] || 0) + r.pop;
+  });
+  return engaged;
+}
 // Who moved into Metals (from Sticks or Stones) between last month-start
 // and this month-start, for this fixed fiscal-quarter cohort. Needs
 // "prior_tier" from the SQL (meta.has_prior_tier_data) — segment-independent,
@@ -764,6 +780,7 @@ function renderAll(cityFilter, tierFilter) {
   const cohortGridData = buildCohortGrid(cohortRecords, cohortEffSeg, cityFilter);
   const cohortSizeMap = buildCohortSizeByLatestMonth(cohortRecords, cohortActMonths, cityFilter);
   const newToMetalsData = buildNewToMetalsBreakdown(cohortRecords, cityFilter);
+  const cohortEngagedMap = buildEngagedTillDate(cohortRecords, cohortActMonths, cityFilter);
   const COHORT_SEG_TITLES = {
     Sticks:   "Sticks Activation — % of Sticks giving ≥1 referral lead that month",
     Stones:   "Stones Activation — % of Stones giving ≥1 referral lead that month",
@@ -1307,7 +1324,12 @@ function renderAll(cityFilter, tierFilter) {
                      : cohortHmMode === "act" ? cell.act.toLocaleString()
                      : cell.pop.toLocaleString();
           const prevLabel = prevMonthLabelOf(mo);
-          let tip = `${c} · ${mo}\nPool: ${cell.pop.toLocaleString()}\nActivated: ${cell.act.toLocaleString()} (${pct.toFixed(1)}%)`;
+          const engagedTillDate = cohortEngagedMap[c] || 0;
+          const cohortSizeForTip = cohortSizeMap[c] || 0;
+          const engagedPct = cohortSizeForTip ? (engagedTillDate / cohortSizeForTip * 100).toFixed(1) : "0.0";
+          let tip = `${c} · ${mo}\nPool (this cell, ${cohortEffSeg}): ${cell.pop.toLocaleString()}`
+                  + `\nEngaged till date (Metals, whole cohort): ${engagedTillDate.toLocaleString()} (${engagedPct}% of cohort size ${cohortSizeForTip.toLocaleString()})`
+                  + `\nActivated: ${cell.act.toLocaleString()} (${pct.toFixed(1)}%)`;
           if (cohortMetaInfo.has_repeat_data && cell.act > 0) {
             const rPct = (cell.repeatAct / cell.act * 100).toFixed(0);
             tip += `\nAlso active in ${prevLabel}: ${cell.repeatAct.toLocaleString()} (${rPct}% of activated)`;
