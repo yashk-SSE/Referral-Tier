@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-08-04T11:56:41Z",
+  "generated_at": "2026-08-05T00:03:24Z",
   "months_fetched": 6,
   "range_start": "Feb '26",
   "range_end": "Jul '26",
   "latest_end_date": "2026-07-31",
-  "mtd_as_of_date": "2026-08-04",
+  "mtd_as_of_date": "2026-08-05",
   "agg_card_id": 3262,
   "sseid_card_id": 3263,
   "heldbase_card_id": 4467,
-  "cohort_card_id": 4570
+  "cohort_card_id": 0
 }

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-04T11:54:48Z",
+    "generated_at": "2026-08-05T00:01:52Z",
     "tiers": [
       "Platinum",
       "Gold",
@@ -19,7 +19,7 @@
     }
   },
   "mtd": {
-    "as_of_date": "2026-08-04",
+    "as_of_date": "2026-08-05",
     "baseline_end_date": "2026-07-31",
     "baseline_label": "Jul '26",
     "held_base": {
@@ -36,9 +36,9 @@
         "Platinum": 7,
         "Gold": 65,
         "Silver": 1229,
-        "Bronze": 10943,
-        "Stones": 14156,
-        "Sticks": 24632
+        "Bronze": 10944,
+        "Stones": 14157,
+        "Sticks": 24630
       },
       "by_cluster_tier_prev": {
         "Vijayawada|Sticks": 13,
@@ -221,21 +221,21 @@
         "Bengaluru|Silver": 17,
         "Pune|Bronze": 1625,
         "Nagpur|Bronze": 2215,
-        "Nagpur|Sticks": 5068,
+        "Nagpur|Sticks": 5067,
         "Pune|Sticks": 3318,
         "Pune|Stones": 1562,
         "Kolhapur|Bronze": 172,
         "Nagpur|Silver": 284,
         "Nashik|Sticks": 1162,
         "Amravati|Bronze": 185,
-        "Nagpur|Stones": 1857,
+        "Nagpur|Stones": 1858,
         "Nashik|Bronze": 514,
         "Kolhapur|Sticks": 324,
         "Aurangabad|Sticks": 647,
-        "Aurangabad|Stones": 329,
+        "Aurangabad|Stones": 328,
         "Amravati|Sticks": 438,
         "Kolhapur|Stones": 139,
-        "Aurangabad|Bronze": 288,
+        "Aurangabad|Bronze": 289,
         "Kolhapur|Silver": 27,
         "Nashik|Stones": 579,
         "Amravati|Stones": 199,
@@ -299,8 +299,8 @@
         "Coimbatore|Bronze": 8,
         "Salem|Sticks": 1,
         "Varanasi|Stones": 106,
-        "Lucknow|Sticks": 1806,
-        "Lucknow|Stones": 964,
+        "Lucknow|Sticks": 1805,
+        "Lucknow|Stones": 965,
         "Lucknow|Bronze": 702,
         "Kanpur|Sticks": 954,
         "Noida|Stones": 195,
@@ -346,11 +346,11 @@
         "Silver": 0.02,
         "Bronze": 0.05,
         "Stones": 0.11,
-        "Sticks": -0.17
+        "Sticks": -0.18
       }
     },
-    "leads_given": 349,
-    "orders_given": 65,
-    "new_to_base": 268
+    "leads_given": 369,
+    "orders_given": 69,
+    "new_to_base": 293
   }
 }
