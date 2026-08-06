@@ -24,7 +24,7 @@
 - **Git clone for pushing:** `C:\Users\Yash Kahndelwal\Referral-Tier-repo` —
   a separate clone of the actual GitHub repo, used only to push changes.
   Workflow: edit files in `C:\Referral Tiers` → copy the changed files into
-  the clone → `git add` / `commit` / `push` from the clone. See Section 8,
+  the clone → `git add` / `commit` / `push` from the clone. See Section 9,
   step 7.
 - **Local preview:** double-click `preview.bat` in `C:\Referral Tiers` (or run
   `preview.ps1`) — starts `python -m http.server 8080` and opens the browser
@@ -33,13 +33,14 @@
 ## 2. Architecture
 
 ```
-Metabase (3 saved SQL questions)
+Metabase (4 saved SQL questions)
         │
         ▼
    etl.py  ──writes──►  data/tier_mom.json
                         data/tier_sseid.json
                         data/tier_heldbase_sseid.json
                         data/tier_mtd.json
+                        data/cohort_activation.json
                         data/meta.json
         │
         ▼
@@ -53,18 +54,28 @@ schedule, auto-commits data/*.json if changed. Can also be triggered manually
 from the Actions tab.
 ```
 
-### The three Metabase questions (SQL is in `SETUP.md`)
+### The four Metabase questions (SQL is in `SETUP.md`; Cohort Activation's SQL is in this file, Section 7)
 
 | Question | Env var | Card ID | Purpose |
 |---|---|---|---|
 | Aggregated | `METABASE_AGG_CARD_ID` | `3262` | cluster × tier × count, one `end_date` param, called once per month in the window |
 | SSEID Detail | `METABASE_SSEID_CARD_ID` | `3263` | one row per SSEID (current month only), one `end_date` param |
 | Held-Base Movement | `METABASE_HELDBASE_CARD_ID` | `4467` | SSEID-level, **two** params `prev_end`/`curr_end` — fixes the asset base to `prev_end`, computes tier **and** leads/orders at both dates for that same fixed SSEID set |
+| Cohort Activation | `METABASE_COHORT_CARD_ID` | `4570` | fiscal-quarter cohort × trailing-6-month grid, **one** param `as_of_date` — computes everything (tier-at-month-start, activation, repeat-activation, prior-month tier) server-side in one call. See Section 7. |
 
 This same Held-Base card is now called **one extra time per run** — with
 `curr_end = today` instead of a month-end — to produce the month-to-date
 preview (`data/tier_mtd.json`, see Section 3.3). No new Metabase question was
 needed for this; it's the same card, different date params.
+
+**GitHub Secrets checklist** — `METABASE_COHORT_CARD_ID` was added to local
+`.env`/`env.example` on 2026-08-04 but as of this writing it's *unconfirmed*
+whether it's been added to the repo's GitHub Secrets too (Settings → Secrets
+and variables → Actions). Until it is, the scheduled Action's `etl.py` run
+will skip the cohort fetch and write an empty placeholder
+`cohort_activation.json` (graceful — the tab just shows "no data available"
+— but check this if the Cohort Activation tab looks empty after a
+scheduled/automated run despite working locally).
 
 ### Auth
 
@@ -136,6 +147,17 @@ subtraction. See Section 3.1.
 
 **This is the current, correct, final methodology. Do not revert to V2 or
 V3 without a very good reason and explicit user sign-off.**
+
+**Scope note added 2026-08-04**: V4 is still exactly this, unchanged, for
+its intended purpose — isolating real tier movement from base growth in a
+month-over-month *comparison* (Trends & MoM's tables, held-base movement).
+What changed on 2026-08-04 is narrower: Executive Summary and City
+Summary's *headline, current-state* numbers stopped using this cohort and
+switched to the full current total instead, because "how big is our book
+right now" and "how did our existing book move this month" turned out to
+be two different questions that don't need the same answer. See Section 4's
+Executive Summary entry for the full reasoning — this is additive
+clarification, not a reversal of V4.
 
 ### 3.1 — The core rule, in plain language
 
@@ -213,7 +235,7 @@ today`, plus one extra Aggregated-card fetch at `end_date = today` (to derive
 `leads_given`/`orders_given`/`new_to_base` are **India-wide only** — they're
 summed from raw rows in `etl.py`, not broken out by cluster (the
 `by_cluster_tier_*` fields inside `held_base` ARE per-city, but only cover
-tier *counts*, not leads/orders sums). See Section 7 if city-level MTD
+tier *counts*, not leads/orders sums). See Section 8 if city-level MTD
 becomes a real ask.
 
 ## 4. Current dashboard structure (`index.html`)
@@ -222,10 +244,28 @@ Sidebar + tab layout (not a single scrolling page). `TABS` array near the top
 of the `<script>` block is the single place to add future tabs.
 
 ### Executive Summary
-- Metrics: **Total assets** (= latest cohort's `base_size`, NOT the true
-  current full count), **Engaged (non-Sticks)**, **Metals**, **New to base**
-  (SSEIDs commissioned this month, deliberately excluded from tier %'s,
-  shown here instead of silently dropped — the brief's own guidance).
+
+**Changed 2026-08-04 — Total assets is now the FULL current total, not the
+lagged cohort.** Originally, "Total assets" showed the held-base cohort's
+`base_size` (commissioned by the month BEFORE the latest, e.g. 46,902 for
+"Jun-commissioned, tracked to Jul"), holding that month's new commissions
+out for a full extra month before folding them in. The user pushed back on
+this directly: the "hold new commissions out" rule exists to stop a
+still-forming, partial month from being shown as final (Section 3.3) — but
+once that month is actually CLOSED, there's no more instability to protect
+against, so there's no real reason to keep holding its new adds out any
+further. Confirmed explicitly (with scope): change **Executive Summary and
+City Summary's current-state numbers** to the full total; leave the
+**Trends & MoM comparison tables exactly as they were** (they need a
+stable, unchanging population to compare against itself validly, which is a
+different requirement than "what's the current picture right now").
+
+- Metrics: **Total assets** (`fullTotal` — every SSEID commissioned through
+  the latest closed month, e.g. 51,032 for Jul '26 — now identical to Table
+  1 "Cumulative"'s latest column), **Engaged (non-Sticks)**, **Metals**. The
+  old **"New to base"** card was removed — there's no more held-out group
+  for the just-closed month to report on; the *in-progress* month's new
+  commissions are still covered by the "This month so far" card below.
 - **"This month so far" card** (added 2026-08-03, sourced from
   `data/tier_mtd.json`): leads/orders given and new-to-base count for the
   *currently in-progress* month, tracked live to today. Visually flagged
@@ -234,12 +274,16 @@ of the `<script>` block is the single place to add future tabs.
   below it, which only ever show completed months. If a city filter is
   active, this card says so and stays India-wide (see Section 3.3 — MTD
   leads/orders aren't split by city yet).
-- **Tier breakdown** table: Count/Share for the latest cohort's *current*
-  tier (as of the latest month). This is genuinely the "current tier state"
-  — it can differ from what the Trends tab's "Existing customers" table
-  shows as that same cohort's *baseline*, because some SSEIDs moved up
-  during the month (see the "Moved up" reconciliation in the Tier-wise
-  progress table).
+- **Tier breakdown** table: Count/Share for the FULL current total (same
+  `fullTierB` as the metrics above), not the cohort. Now matches Trends &
+  MoM's "1. Cumulative" latest column exactly, by construction.
+- The held-base cohort concept itself is **not removed** — `latestCohort`/
+  `total`/`active`/`metalsCount`/`latestCurrB` (the old, cohort-restricted
+  versions) are still computed and still power Trends & MoM's comparison
+  tables and the reconciliation footnote, completely unchanged. Two parallel
+  sets of similarly-named variables now coexist in `renderAll()` on purpose
+  — `full*` (Exec Summary/City Summary, this change) vs. the un-prefixed
+  ones (Trends & MoM, untouched). Don't merge them.
 
 ### Trends & MoM
 Five cards, **read top to bottom in this order** — each answers a different
@@ -302,20 +346,37 @@ months:
   `bucketize()`.** `TIER_ORDER` is only correct for raw, un-bucketized 6-tier
   data straight from the JSON files.
 
-**Reconciliation identity worth remembering** (all three of tables 2/3/Exec
-Summary tie together exactly):
+**Reconciliation identity worth remembering** (tables 2/3 tie together
+exactly):
 ```
-Executive Summary's current Sticks count (existing only)
+Table "3. Existing customers"'s current Sticks count (existing only)
   + Table 2's new-customer Sticks count (this month)
   = Table "1. Cumulative"'s latest-month Sticks count (everyone)
 ```
-(This is now surfaced live in the sanity-check footnote above, not just
-documented here.)
+**Changed 2026-08-04**: this used to also equal Executive Summary's
+headline Sticks count, back when Exec Summary showed the cohort-restricted
+"existing only" number. Since Exec Summary switched to the full total
+(Section 4), it now equals Table 1's number *directly* — Exec Summary and
+Table 1 are the same number by construction, not something that needs
+reconciling anymore. The three-way identity above still holds entirely
+within Trends & MoM, unaffected. Surfaced live in the sanity-check footnote
+under Table 3.
 
 ### City Summary
-Same ideas, sliced by city: City summary table + India rollup row, City tier
-trend chart (respects the topbar city filter), City breakdown visual grid,
-and City-wise progress this month table (leads/orders given, by city).
+- **City summary table + India rollup row, City breakdown visual grid**:
+  changed 2026-08-04 along with Executive Summary — now the full current
+  per-city total (`latestMonth.by_cluster_tier`, the same field Table 1
+  "Cumulative" uses), not the held-base cohort's per-city breakdown. The
+  India row is guaranteed to equal Executive Summary's Total assets exactly,
+  since they're now literally the same underlying numbers.
+- **City tier trend chart**: deliberately left as the cohort-based rolling
+  series (unchanged) — it's a trend/comparison view, the same category of
+  thing as Trends & MoM's charts, not a current-snapshot view. Its card
+  subtitle says so explicitly, since it now sits next to full-total siblings
+  and the difference needs calling out.
+- **City-wise progress this month table**: unchanged (leads/orders given,
+  by city, from the held-base SSEID detail) — this is a Trends & MoM-style
+  comparison, not a current-snapshot metric.
 
 ### SSEID Detail
 Plain searchable/filterable table over `tier_sseid.json` (current month,
@@ -382,18 +443,177 @@ complexity here.
   showing "48.0→...") — coincidental rounding of two genuinely different
   underlying values (e.g. 47.98% and 48.00% both round to 48.0% at one
   decimal place). Check the unrounded data before assuming it's a bug.
-- **Cumulative table's monthly numbers ≠ Executive Summary's numbers** —
-  expected; they're different populations and/or different dates by
-  design. See the reconciliation identity in Section 4.
+- **Cumulative table's *latest* column now equals Executive Summary's
+  numbers exactly** (changed 2026-08-04, see Section 4) — they're the same
+  full-total population by construction now. Older months in the Cumulative
+  table have no Exec Summary equivalent at all (Exec Summary only ever
+  shows the latest month), so there's nothing to compare there. What's
+  still *intentionally* different: Trends & MoM's own cohort-based tables
+  (2/3, held-base movement) — those still use the lagged cohort on purpose,
+  see Section 3's scope note.
 - **"This month so far" (MTD) numbers change on every single ETL run**,
   including intra-day — that's the point, it's a live preview of an
   in-progress month, not a bug. Don't expect it to match between two runs a
   few hours apart. It's only ever India-wide (see Section 3.3).
 - **Local preview shows stale numbers right after re-running `etl.py`** —
   almost always the browser's HTTP cache serving an old `fetch()` response
-  for `data/*.json`, not stale files on disk. See Section 8, step 3a.
+  for `data/*.json`, not stale files on disk. See Section 9, step 3a.
+- **Executive Summary says "Commissioned by Jun '26, tracked to Jul '26" on a
+  day well into August** — this looks like the dashboard is stuck a month
+  behind, but it isn't. "Tracked to" is the real, current, last-completed
+  month (checked directly against `meta.json`'s `latest_end_date` — it *is*
+  July 31 here). "Commissioned by" is one month earlier by design: it's
+  naming the **cohort's own baseline**, not how stale the data is (see
+  Section 3.1 — the cohort excludes SSEIDs commissioned during the tracked
+  month itself, so its baseline is always the month before). Check
+  `meta.json.latest_end_date` directly before assuming this metric is behind.
+- **Cohort Activation: "Pool" looking smaller than a cohort's "Size", or a
+  tier breakdown that "loses" people** — three different numbers that are
+  easy to conflate, asked about more than once while building this:
+  1. **Size** (fixed, per cohort) — the whole cohort, same in every segment.
+  2. **Pool** (per cell) — only the *currently selected segment's* slice,
+     as of *that column's* month-start. For a still-forming cohort (the
+     current fiscal quarter), Pool in an early column can be well under
+     Size simply because part of the cohort hadn't been commissioned yet —
+     not a bug, same "not yet commissioned" rule as the `—` cells elsewhere.
+  3. **Engaged till date** (tooltip, added 2026-08-04) — Metals share of the
+     *whole* cohort as of the *latest* available data, divided by the true
+     Size. Exists specifically to give a stable answer that can't be
+     confused with either of the above. See Section 7.4.
 
-## 7. Possible next steps (not yet built)
+## 7. Cohort Activation tab (added 2026-08-04)
+
+A second, structurally different analysis alongside everything in Sections
+3-6: instead of the monthly rolling held-base cohort, this tracks
+**fiscal-quarter commissioning cohorts** (Apr-Mar, e.g. "Q4 FY24-25" =
+Jan-Mar 2025) — a cohort that's fixed **forever** once its quarter ends,
+never rolling — against a **trailing 6-month window** of referral
+**activation** (gave ≥1 lead that specific month). Built from the reference
+file `cohort_analysis_fresh (2).html` the user supplied, adapted to real
+Metabase data, our real 6-tier taxonomy (the reference had no Platinum —
+we added it as a 4th Metal sub-tab), and our fiscal-year quarter convention
+(the reference used calendar quarters).
+
+### 7.1 — Why a whole separate cohort concept
+
+The held-base cohort (Sections 3-4) answers "how is the base we already had
+doing." Fiscal-quarter cohorts answer a different question: "of everyone
+commissioned in Q4 FY24-25, how engaged have they become, and is that
+engagement still growing months or years later." Cohort membership here
+never changes (unlike the rolling monthly cohort) — a customer commissioned
+in Q4 FY24-25 is in that cohort permanently, and their activation can be
+checked against *any* later calendar month, including ones years after
+their own quarter ended.
+
+### 7.2 — The SQL (card 4570, `METABASE_COHORT_CARD_ID`)
+
+One query, one `{{as_of_date}}` param (same convention as `end_date`
+elsewhere — always the last *completed* month's end; the in-progress month
+is never shown here either, matching Section 3.3's rule). Per SSEID, per
+each of the trailing 6 months:
+
+- **Pool** = cohort members already commissioned by that month's baseline
+  cutoff (end of the prior month), bucketed by their **tier as of that
+  cutoff**. SSEIDs commissioned mid-window (the current, still-forming
+  fiscal quarter) simply don't appear yet — same "not yet commissioned"
+  handling as `—` cells elsewhere, no special-case code needed.
+- **Activated** = of that Pool, how many gave ≥1 referral lead **during**
+  that specific month.
+- **Repeat Activated** (added after the first version) = of those Activated,
+  how many *also* gave a lead in the **prior calendar month** — computed by
+  widening the same per-referrer date check to a second range, no self-join
+  needed (the query already has full referral history, not just the visible
+  6-month window).
+- **Prior Tier** (added after Repeat Activated) = the same SSEID's tier as
+  of **two months before** the current baseline cutoff — computed by
+  deriving a `prev_baseline_cutoff` directly (`date_trunc('month',
+  baseline_cutoff) - 1 day`), again no self-join. This is what lets the
+  frontend compute "who moved into Metals this month, and from which tier"
+  (Section 7.4).
+
+Both `Repeat Activated` and `Prior Tier` were added as **backward-compatible
+column additions** — `etl.py`'s `normalise_cohort_row()` looks for them by
+name and sets `meta.has_repeat_data` / `meta.has_prior_tier_data` to `false`
+if they're absent, so the frontend degrades gracefully (those tooltip lines
+just don't render) rather than showing fake zeros. Useful pattern if this
+card grows again.
+
+City is a real output dimension (not summed away), so the topbar city filter
+works on this tab exactly like everywhere else.
+
+### 7.3 — `etl.py` output (`data/cohort_activation.json`)
+
+Flat `records` array — `{cohort, city, month, tier, pop, act, repeat_act,
+prior_tier}` — plus a `meta` block with pre-sorted `cohorts` (chronological
+by fiscal year/quarter, not a string sort — `Q10` would otherwise misorder)
+and `months`/`moLabels`. `COHORT_MONTHS = 6` in `etl.py` is currently a
+constant, not an env var like `MONTHS` — see Section 8 if that needs to
+become configurable.
+
+### 7.4 — The tooltip
+
+Went through several rounds of clarification while building this, because
+the underlying numbers are genuinely easy to conflate. Final shape, top to
+bottom:
+
+1. **Pool (this cell, `<segment>`)** — the currently-selected segment's
+   population this specific month. Segment-dependent and month-dependent.
+2. **Engaged till date (Metals, whole cohort)** — added 2026-08-04
+   specifically to stop this being confused with #1. Metals share of the
+   *entire* cohort as of the *latest available* month (same anchor as the
+   Size column), divided by true cohort Size. Identical in every cell for a
+   given cohort, regardless of which month/segment you're hovering —
+   deliberately a stable reference point.
+3. **Activated** — of Pool, how many gave a lead this month.
+4. **Also active in `<prev month>`** (if `has_repeat_data`) — of Activated,
+   how many repeated from last month too.
+5. **Activated by tier** (if the segment blends >1 raw tier — Metals or All
+   Customers) — baseline-tier breakdown of the Activated count. Can only
+   ever list Bronze/Silver/Gold/Platinum for a Metals cell — Sticks/Stones
+   are excluded from Metals' Pool by definition, so they're mathematically
+   impossible to see here. This is *not* the same thing as tier movement —
+   see #6.
+6. **New to Metals this month** (Metals/Combined only, if
+   `has_prior_tier_data`) — a **different metric than Activated**: net
+   count who crossed from Sticks/Stones into Metals during the month,
+   split by which tier they came from. Since tiers only ever move up, this
+   is exactly `(this month's Metals Pool) − (last month's Metals Pool)`,
+   further split by prior tier.
+7. **⚠ pool < 30** — small-sample flag, same idea as the reference file's
+   noise dot.
+
+**Pool vs. Activated vs. New-to-Metals, the distinction that actually
+caused confusion twice while building this**: Pool is a population snapshot.
+Activated is "did they refer *this specific month*" — it says nothing about
+whether their tier changed. New-to-Metals is "did their tier cross into
+Metals *this specific month*" — it says nothing about whether they referred
+anyone. A person can activate without moving tiers (most do), and can move
+tiers without activating that same month (e.g. an order closing from a lead
+given months earlier). Don't assume one implies the other.
+
+### 7.5 — UI controls
+
+- **Segment toggle**: Sticks / Stones / Metals (→ Bronze/Silver/Gold/
+  Platinum sub-tabs) / All Customers. Reuses `.seg-toggle` styling, not a
+  new component.
+- **Display mode**: Rate % / Active / Pool — same three the reference file
+  had.
+- **Global filter interplay** (per explicit ask — "global filters should
+  apply perfectly here too"):
+  - **City filter**: filters the whole tab to that city — real, substantial.
+  - **6-Tier/Metals topbar toggle**: in Metals mode, the Bronze/Silver/Gold/
+    Platinum sub-tabs hide (this tab's own segment selector already covers
+    both granularities, so the toggle just picks which one's exposed).
+  - **Tier filter (topbar dropdown)**: when set to a specific tier, pins
+    this tab to that tier and disables the local segment buttons (with an
+    on-screen note explaining why) — so picking e.g. "Gold" anywhere shows
+    Gold's cohort view here too. Clearing it returns control to the local
+    buttons.
+- Era rows group cohorts by **fiscal year** (not the reference's ad hoc
+  "Legacy/Mature/Growing" bands, which don't map onto FY numbering) — each
+  with its own rollup row, same idea as the reference's era aggregates.
+
+## 8. Possible next steps (not yet built)
 
 - ~~A short reconciliation footnote directly under the "1. Cumulative" table~~
   — **done 2026-08-03**, see the sanity-check footnote under table 3 in
@@ -410,9 +630,20 @@ complexity here.
   would need to persist this detail every run instead of overwriting it.
 - No automated tests exist — every verification in this build was done by
   spinning up a local static server and checking real numbers by hand
-  (see Section 8).
+  (see Section 9).
+- **Cohort Activation's 6-month window is a hardcoded constant**
+  (`COHORT_MONTHS = 6` in `etl.py`), unlike the main dashboard's `MONTHS`
+  which is an env var. Make it one too if a longer/shorter trailing window
+  becomes a real ask.
+- **"New to Metals" breakdown only exists for the Metals/Combined segments**
+  — the same prior-tier data would support a narrower "new to Gold
+  specifically" (or Silver, Bronze) view; not built since it wasn't asked
+  for, but the SQL already has everything needed (Section 7.2's `Prior
+  Tier` column).
+- **Confirm `METABASE_COHORT_CARD_ID` is actually in GitHub Secrets** — see
+  the checklist note in Section 2. Unverified as of 2026-08-04.
 
-## 8. How to verify changes (what's actually been done every time so far)
+## 9. How to verify changes (what's actually been done every time so far)
 
 1. Edit `index.html` / `etl.py` in `C:\Referral Tiers`.
 2. If `etl.py` changed, re-run it locally (`.env` has real credentials) to

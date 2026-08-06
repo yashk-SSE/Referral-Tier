@@ -616,30 +616,45 @@ function renderAll(cityFilter, tierFilter) {
     return (badWhenUp ? pp > 0 : pp < 0) ? "decline" : "improvement";
   }
 
-  // Headline metrics come from the latest COHORT, not the true current total
-  // (which would include SSEIDs commissioned this month — tracked separately
-  // as "New to base" instead of being folded into tier numbers).
+  // Headline metrics: the FULL current total for the latest CLOSED month —
+  // everyone commissioned through that month's end, tiered as of that same
+  // end date. A month's new commissions are held out of tier reporting only
+  // WHILE that month is still in progress (to avoid a partial, still-moving
+  // count masquerading as final — see Section 3.3). Once the month closes,
+  // there's no more reason to hold them out any further, so they're folded
+  // in immediately here — this now matches Table 1 "Cumulative"'s latest
+  // column exactly. This is a deliberate change (2026-08) from the earlier
+  // design, which kept new adds out for one EXTRA month via the held-base
+  // cohort; that cohort concept still exists and is unchanged, just no
+  // longer used for these headline numbers — see Section 7 for the decision
+  // and Trends & MoM below for where the cohort-based view still lives.
+  const rawFullTierB = filterMomMonth(latestMonth);
+  const fullTierB = bucketize(rawFullTierB);
+  const fullTotal = monthTotal(latestMonth);
+  const fullActive = TIER_ORDER.filter(t => t !== "Sticks").reduce((s,t) => s+(rawFullTierB[t]||0), 0);
+  const fullMetalsCount = METALS_TIERS.reduce((s,t) => s+(rawFullTierB[t]||0), 0);
+  const fullEngPct = fullTotal ? Math.round(fullActive/fullTotal*100) : 0;
+
+  // Kept for the cohort-based views below (Trends & MoM tables, reconciliation
+  // footnote) — deliberately UNCHANGED, per explicit confirmation that those
+  // comparison tables keep their existing one-month-rolling methodology.
   const latestCurrB = latestCohort ? bucketize(latestCohort.curr) : {};
   const total = latestCohort ? latestCohort.base_size : 0;
   const active = TIER_ORDER.filter(t => t !== "Sticks").reduce((s,t) => s+(latestCurrB[t]||0), 0);
   const metalsCount = METALS_TIERS.reduce((s,t) => s+(latestCurrB[t]||0), 0);
   const engPct = total ? Math.round(active/total*100) : 0;
-  const newToBase = latestCohort ? Math.max(0, monthTotal(latestMonth) - total) : 0;
 
   const execHTML = `
   <div class="metrics">
     <div class="met"><div class="met-lbl">Total assets</div>
-      <div class="met-val">${total.toLocaleString()}</div>
-      <div class="met-sub">Commissioned by ${priorMonthLabel}, tracked to ${latestCohortMonth?.label || latestMonth?.label}</div></div>
+      <div class="met-val">${fullTotal.toLocaleString()}</div>
+      <div class="met-sub">Commissioned by ${latestMonth?.label}, tiered as of ${latestMonth?.label}</div></div>
     <div class="met"><div class="met-lbl">Engaged (non-Sticks)</div>
-      <div class="met-val">${active.toLocaleString()}</div>
-      <div class="met-sub">${engPct}% of base</div></div>
+      <div class="met-val">${fullActive.toLocaleString()}</div>
+      <div class="met-sub">${fullEngPct}% of base</div></div>
     <div class="met"><div class="met-lbl">Metals</div>
-      <div class="met-val">${metalsCount.toLocaleString()}</div>
+      <div class="met-val">${fullMetalsCount.toLocaleString()}</div>
       <div class="met-sub">Bronze + Silver + Gold + Platinum</div></div>
-    <div class="met"><div class="met-lbl">New to base</div>
-      <div class="met-val">${newToBase.toLocaleString()}</div>
-      <div class="met-sub">Commissioned in ${latestMonth?.label}, not yet tier-reported</div></div>
   </div>
 
   ${DATA.mtd?.mtd ? (() => {
@@ -659,17 +674,17 @@ function renderAll(cityFilter, tierFilter) {
   </div>`;
   })() : ""}
 
-  ${latestCohort ? `
+  ${mom.months.length ? `
   <div class="card">
     <div class="card-hd">
-      <div><div class="card-t">Tier breakdown — ${latestCohortMonth?.label}</div>
-           <div class="card-s">Cohort: ${total.toLocaleString()} SSEIDs commissioned by ${priorMonthLabel}${cityFilter ? " · "+cityFilter : ""} · Count/Share = that same cohort's CURRENT tier, as of ${latestCohortMonth?.label} (Share always sums to 100%) — this can differ from the ${priorMonthLabel} BASELINE tier shown in Trends & MoM's "Tier-wise progress", since some SSEIDs moved up during the month (see that table's "Moved up" column)</div></div>
+      <div><div class="card-t">Tier breakdown — ${latestMonth?.label}</div>
+           <div class="card-s">Every SSEID commissioned by ${latestMonth?.label}${cityFilter ? " · "+cityFilter : ""} · Count/Share is this same ${fullTotal.toLocaleString()}-strong group's tier as of that same date (Share always sums to 100%) · matches "1. Cumulative"'s latest column in Trends &amp; MoM exactly</div></div>
     </div>
     <table class="ttbl">
       <thead><tr><th style="width:90px">Tier</th><th>Count</th><th>Share</th><th>Condition</th></tr></thead>
       <tbody id="tierTbody"></tbody>
     </table>
-  </div>` : `<div class="card">Need at least 2 months loaded to compute a cohort-based tier breakdown.</div>`}
+  </div>` : `<div class="card">Load at least one month to compute a tier breakdown.</div>`}
   `;
 
   const trendsHTML = `
@@ -754,7 +769,7 @@ function renderAll(cityFilter, tierFilter) {
   <div class="card">
     <div class="card-hd">
       <div><div class="card-t">Tier-wise progress this month</div>
-           <div class="card-s">Baseline tier = as of ${hbPrevLabel}${cityFilter ? " · "+cityFilter : ""} · leads/orders given = ${hbLabel} total minus ${hbPrevLabel} total, for that same baseline cohort · "Still"/"Moved up" reconciles this against the CURRENT tier shown in Executive Summary (tiers only ever move up within a month, never down)</div></div>
+           <div class="card-s">Baseline tier = as of ${hbPrevLabel}${cityFilter ? " · "+cityFilter : ""} · leads/orders given = ${hbLabel} total minus ${hbPrevLabel} total, for that same baseline cohort · "Still"/"Moved up" reconciles this against that same cohort's current tier in table "3. Existing customers" above (tiers only ever move up within a month, never down) — not against Executive Summary, which now shows the full current total instead of this cohort</div></div>
     </div>
     <div class="dtbl-wrap" style="max-height:none">
       <table class="ttbl">
@@ -849,8 +864,8 @@ function renderAll(cityFilter, tierFilter) {
   ${mom.meta?.clusters?.length && latestCohort ? `
   <div class="card">
     <div class="card-hd">
-      <div><div class="card-t">City summary — ${latestCohortMonth?.label}</div>
-           <div class="card-s">Cohort commissioned by ${priorMonthLabel}, re-tiered as of ${latestCohortMonth?.label} · Share = count ÷ that same city's cohort total</div></div>
+      <div><div class="card-t">City summary — ${latestMonth?.label}</div>
+           <div class="card-s">Every SSEID commissioned by ${latestMonth?.label}, current tier, by city · Share = count ÷ that same city's total · India row matches Executive Summary exactly</div></div>
     </div>
     <div class="dtbl-wrap" style="max-height:none">
       <table class="ttbl">
@@ -865,14 +880,14 @@ function renderAll(cityFilter, tierFilter) {
   <div class="card">
     <div class="card-hd">
       <div><div class="card-t">City tier trend</div>
-           <div class="card-s">Cohort-based %-share for ${cityFilter || "all cities"} · each point = that month's cohort, re-tiered as of that month · use the city filter above to change</div></div>
+           <div class="card-s">Cohort-based %-share for ${cityFilter || "all cities"} · each point = that month's pre-existing cohort, re-tiered as of that month · deliberately a different (rolling-cohort) view than the current-snapshot table above — see Trends &amp; MoM for what that means · use the city filter above to change</div></div>
     </div>
     <div class="chart-wrap"><canvas id="cityTrendCanvas"></canvas></div>
   </div>
   <div class="card">
     <div class="card-hd">
-      <div><div class="card-t">City breakdown — ${latestCohortMonth?.label}</div>
-           <div class="card-s">Tier distribution per city, cohort-based</div></div>
+      <div><div class="card-t">City breakdown — ${latestMonth?.label}</div>
+           <div class="card-s">Current tier distribution per city, full total (same population as the table above)</div></div>
     </div>
     <div class="city-grid" id="cityGrid"></div>
   </div>
@@ -1028,13 +1043,12 @@ function renderAll(cityFilter, tierFilter) {
     newCustomersTbody.innerHTML += `<tr class="summary-row"><td>Total new</td>${totalCells}</tr>`;
   }
 
-  // Tier table — cohort-based Count/Share (see latestCurrB/total above)
+  // Tier table — full current breakdown (see fullTierB/fullTotal above)
   const ttbody = document.getElementById("tierTbody");
-  if (ttbody && latestCohort) {
-    const latestPct = pctByMonth[pctByMonth.length - 1];
+  if (ttbody && mom.months.length) {
     activeTiers().forEach(t => {
-      const c = latestCurrB[t] || 0;
-      const sh = latestPct[t].curr.toFixed(1);
+      const c = fullTierB[t] || 0;
+      const sh = fullTotal ? (c/fullTotal*100).toFixed(1) : "0.0";
       const cond = t === "Metals" ? "Bronze + Silver + Gold + Platinum" : TIER_CONDITIONS[t];
       ttbody.innerHTML += `<tr>
         <td><span class="badge" style="background:${activeColor(t)};color:${badgeTextColor(t)}">${t}</span></td>
@@ -1044,29 +1058,26 @@ function renderAll(cityFilter, tierFilter) {
     });
   }
 
-  // City grid + City summary table — both driven by the latest cohort's
-  // per-city breakdown (by_cluster_tier_curr), so numerator and denominator
-  // are always the SAME fixed per-city population and segments sum to 100%.
+  // City grid + City summary table — full current per-city breakdown (same
+  // by_cluster_tier field Table 1 "Cumulative" uses), so numerator and
+  // denominator are always the SAME fixed per-city population and this
+  // always matches Executive Summary's national total exactly.
   const cg = document.getElementById("cityGrid");
   const ctbody = document.getElementById("cityTbody");
-  if ((cg || ctbody) && latestCohortMonth) {
-    const hb = latestCohortMonth.held_base;
-
-    // India row — nationwide cohort total, reusing latestCurrB/total from above
-    // (always matches the Executive Summary tier breakdown exactly).
+  if ((cg || ctbody) && latestMonth) {
     if (ctbody) {
       const indiaCells = activeTiers().map(t => {
-        const c = latestCurrB[t] || 0;
-        const sh = total ? (c/total*100).toFixed(1) : "0.0";
+        const c = fullTierB[t] || 0;
+        const sh = fullTotal ? (c/fullTotal*100).toFixed(1) : "0.0";
         return `<td>${c.toLocaleString()} <span class="pp-sub">(${sh}%)</span></td>`;
       }).join("");
-      ctbody.innerHTML += `<tr class="india-row"><td>India</td><td>${total.toLocaleString()}</td>${indiaCells}</tr>`;
+      ctbody.innerHTML += `<tr class="india-row"><td>India</td><td>${fullTotal.toLocaleString()}</td>${indiaCells}</tr>`;
     }
 
     const clusters = mom.meta.clusters || [];
     clusters.forEach(city => {
       const raw = {};
-      TIER_ORDER.forEach(t => { raw[t] = hb.by_cluster_tier_curr?.[`${city}|${t}`] || 0; });
+      TIER_ORDER.forEach(t => { raw[t] = latestMonth.by_cluster_tier?.[`${city}|${t}`] || 0; });
       const bt = bucketize(raw);
       const tot = Object.values(bt).reduce((s,v)=>s+v,0);
       if (!tot) return;
