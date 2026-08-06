@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-05T07:41:44Z",
+    "generated_at": "2026-08-06T00:01:57Z",
     "prev_end": "2026-06-30",
     "curr_end": "2026-07-31",
     "prev_label": "Jun '26",
@@ -256184,12 +256184,12 @@
     {
       "sseid": "RSSEMP15288",
       "city": "Jabalpur",
-      "leads_prev": 0,
-      "orders_prev": 0,
-      "tier_prev": "Sticks",
-      "leads_curr": 0,
-      "orders_curr": 0,
-      "tier_curr": "Sticks"
+      "leads_prev": 1,
+      "orders_prev": 1,
+      "tier_prev": "Bronze",
+      "leads_curr": 1,
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMP15289",
@@ -304124,12 +304124,12 @@
     {
       "sseid": "RSSEMP9399",
       "city": "Indore",
-      "leads_prev": 1,
-      "orders_prev": 1,
-      "tier_prev": "Bronze",
-      "leads_curr": 1,
-      "orders_curr": 1,
-      "tier_curr": "Bronze"
+      "leads_prev": 3,
+      "orders_prev": 3,
+      "tier_prev": "Silver",
+      "leads_curr": 3,
+      "orders_curr": 3,
+      "tier_curr": "Silver"
     },
     {
       "sseid": "RSSEMP9400",
@@ -315374,11 +315374,11 @@
     {
       "sseid": "RSSERJ1023",
       "city": "Jaipur",
-      "leads_prev": 2,
-      "orders_prev": 1,
+      "leads_prev": 3,
+      "orders_prev": 2,
       "tier_prev": "Bronze",
-      "leads_curr": 2,
-      "orders_curr": 1,
+      "leads_curr": 3,
+      "orders_curr": 2,
       "tier_curr": "Bronze"
     },
     {
