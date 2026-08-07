@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-07T01:43:08Z",
+    "generated_at": "2026-08-07T06:11:16Z",
     "tiers": [
       "Platinum",
       "Gold",
@@ -37,8 +37,8 @@
         "Gold": 66,
         "Silver": 1232,
         "Bronze": 10977,
-        "Stones": 14177,
-        "Sticks": 24573
+        "Stones": 14179,
+        "Sticks": 24571
       },
       "by_cluster_tier_prev": {
         "Vijayawada|Sticks": 13,
@@ -221,14 +221,14 @@
         "Bengaluru|Silver": 17,
         "Pune|Bronze": 1631,
         "Nagpur|Bronze": 2225,
-        "Nagpur|Sticks": 5056,
+        "Nagpur|Sticks": 5054,
         "Pune|Sticks": 3311,
         "Pune|Stones": 1563,
         "Kolhapur|Bronze": 171,
         "Nagpur|Silver": 283,
         "Nashik|Sticks": 1159,
         "Amravati|Bronze": 188,
-        "Nagpur|Stones": 1859,
+        "Nagpur|Stones": 1861,
         "Nashik|Bronze": 515,
         "Kolhapur|Sticks": 324,
         "Aurangabad|Sticks": 645,
@@ -346,11 +346,11 @@
         "Silver": 0.02,
         "Bronze": 0.11,
         "Stones": 0.15,
-        "Sticks": -0.28
+        "Sticks": -0.29
       }
     },
-    "leads_given": 550,
-    "orders_given": 124,
-    "new_to_base": 497
+    "leads_given": 568,
+    "orders_given": 125,
+    "new_to_base": 509
   }
 }
