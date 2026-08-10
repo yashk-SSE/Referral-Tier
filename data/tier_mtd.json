@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-09T23:31:01Z",
+    "generated_at": "2026-08-10T06:11:52Z",
     "tiers": [
       "Platinum",
       "Gold",
@@ -37,8 +37,8 @@
         "Gold": 66,
         "Silver": 1246,
         "Bronze": 11019,
-        "Stones": 14195,
-        "Sticks": 24499
+        "Stones": 14200,
+        "Sticks": 24494
       },
       "by_cluster_tier_prev": {
         "Vijayawada|Sticks": 13,
@@ -215,20 +215,20 @@
         "Unknown|Sticks": 2,
         "Gurgaon|Stones": 71,
         "Gurgaon|Silver": 2,
-        "Bengaluru|Sticks": 1009,
+        "Bengaluru|Sticks": 1008,
         "Bengaluru|Bronze": 306,
-        "Bengaluru|Stones": 682,
+        "Bengaluru|Stones": 683,
         "Bengaluru|Silver": 17,
         "Pune|Bronze": 1631,
         "Nagpur|Bronze": 2228,
-        "Nagpur|Sticks": 5040,
-        "Pune|Sticks": 3303,
-        "Pune|Stones": 1565,
+        "Nagpur|Sticks": 5038,
+        "Pune|Sticks": 3302,
+        "Pune|Stones": 1566,
         "Kolhapur|Bronze": 172,
         "Nagpur|Silver": 289,
         "Nashik|Sticks": 1155,
         "Amravati|Bronze": 189,
-        "Nagpur|Stones": 1866,
+        "Nagpur|Stones": 1868,
         "Nashik|Bronze": 518,
         "Kolhapur|Sticks": 322,
         "Aurangabad|Sticks": 644,
@@ -299,8 +299,8 @@
         "Coimbatore|Bronze": 8,
         "Salem|Sticks": 1,
         "Varanasi|Stones": 108,
-        "Lucknow|Sticks": 1795,
-        "Lucknow|Stones": 970,
+        "Lucknow|Sticks": 1794,
+        "Lucknow|Stones": 971,
         "Lucknow|Bronze": 706,
         "Kanpur|Sticks": 946,
         "Noida|Stones": 197,
@@ -345,12 +345,12 @@
         "Gold": 0.0,
         "Silver": 0.05,
         "Bronze": 0.2,
-        "Stones": 0.18,
-        "Sticks": -0.43
+        "Stones": 0.19,
+        "Sticks": -0.44
       }
     },
-    "leads_given": 824,
+    "leads_given": 838,
     "orders_given": 227,
-    "new_to_base": 804
+    "new_to_base": 807
   }
 }
