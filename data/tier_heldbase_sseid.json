@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-10T06:13:27Z",
+    "generated_at": "2026-08-10T23:36:34Z",
     "prev_end": "2026-06-30",
     "curr_end": "2026-07-31",
     "prev_label": "Jun '26",
@@ -449845,11 +449845,11 @@
       "sseid": "SSEMH1375",
       "city": "Nagpur",
       "leads_prev": 6,
-      "orders_prev": 0,
-      "tier_prev": "Stones",
+      "orders_prev": 1,
+      "tier_prev": "Bronze",
       "leads_curr": 6,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "SSEMH1376",
