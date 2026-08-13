@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-12T23:41:22Z",
+    "generated_at": "2026-08-13T06:19:53Z",
     "prev_end": "2026-06-30",
     "curr_end": "2026-07-31",
     "prev_label": "Jun '26",
@@ -371314,12 +371314,12 @@
     {
       "sseid": "RSSEUP4008",
       "city": "Lucknow",
-      "leads_prev": 0,
-      "orders_prev": 0,
-      "tier_prev": "Sticks",
-      "leads_curr": 0,
-      "orders_curr": 0,
-      "tier_curr": "Sticks"
+      "leads_prev": 1,
+      "orders_prev": 1,
+      "tier_prev": "Bronze",
+      "leads_curr": 1,
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEUP4009",
