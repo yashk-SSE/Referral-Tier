@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-13T06:19:53Z",
+    "generated_at": "2026-08-13T23:41:53Z",
     "prev_end": "2026-06-30",
     "curr_end": "2026-07-31",
     "prev_label": "Jun '26",
@@ -103774,11 +103774,11 @@
     {
       "sseid": "RSSEMH17856",
       "city": "Nagpur",
-      "leads_prev": 1,
-      "orders_prev": 1,
+      "leads_prev": 2,
+      "orders_prev": 2,
       "tier_prev": "Bronze",
-      "leads_curr": 2,
-      "orders_curr": 1,
+      "leads_curr": 3,
+      "orders_curr": 2,
       "tier_curr": "Bronze"
     },
     {
@@ -139534,12 +139534,12 @@
     {
       "sseid": "RSSEMH23117",
       "city": "Aurangabad",
-      "leads_prev": 1,
-      "orders_prev": 0,
-      "tier_prev": "Stones",
-      "leads_curr": 1,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "leads_prev": 2,
+      "orders_prev": 1,
+      "tier_prev": "Bronze",
+      "leads_curr": 2,
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMH23118",
@@ -164804,11 +164804,11 @@
     {
       "sseid": "RSSEMH3486",
       "city": "Nagpur",
-      "leads_prev": 7,
-      "orders_prev": 1,
+      "leads_prev": 8,
+      "orders_prev": 2,
       "tier_prev": "Bronze",
-      "leads_curr": 7,
-      "orders_curr": 1,
+      "leads_curr": 8,
+      "orders_curr": 2,
       "tier_curr": "Bronze"
     },
     {
@@ -254514,12 +254514,12 @@
     {
       "sseid": "RSSEMP14594",
       "city": "Bhopal",
-      "leads_prev": 0,
-      "orders_prev": 0,
-      "tier_prev": "Sticks",
-      "leads_curr": 1,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "leads_prev": 1,
+      "orders_prev": 1,
+      "tier_prev": "Bronze",
+      "leads_curr": 2,
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMP14596",
@@ -304904,12 +304904,12 @@
     {
       "sseid": "RSSEMP9507",
       "city": "Jabalpur",
-      "leads_prev": 4,
-      "orders_prev": 0,
-      "tier_prev": "Stones",
-      "leads_curr": 4,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "leads_prev": 5,
+      "orders_prev": 1,
+      "tier_prev": "Bronze",
+      "leads_curr": 5,
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMP9508",
