@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-13T23:40:18Z",
+    "generated_at": "2026-08-14T06:15:18Z",
     "tiers": [
       "Platinum",
       "Gold",
@@ -36,9 +36,9 @@
         "Platinum": 7,
         "Gold": 67,
         "Silver": 1257,
-        "Bronze": 11056,
-        "Stones": 14221,
-        "Sticks": 24424
+        "Bronze": 11058,
+        "Stones": 14223,
+        "Sticks": 24420
       },
       "by_cluster_tier_prev": {
         "Vijayawada|Sticks": 13,
@@ -221,14 +221,14 @@
         "Bengaluru|Silver": 17,
         "Pune|Bronze": 1635,
         "Nagpur|Bronze": 2236,
-        "Nagpur|Sticks": 5021,
-        "Pune|Sticks": 3290,
-        "Pune|Stones": 1571,
+        "Nagpur|Sticks": 5020,
+        "Pune|Sticks": 3289,
+        "Pune|Stones": 1572,
         "Kolhapur|Bronze": 174,
         "Nagpur|Silver": 291,
-        "Nashik|Sticks": 1152,
+        "Nashik|Sticks": 1151,
         "Amravati|Bronze": 191,
-        "Nagpur|Stones": 1875,
+        "Nagpur|Stones": 1876,
         "Nashik|Bronze": 520,
         "Kolhapur|Sticks": 321,
         "Aurangabad|Sticks": 643,
@@ -237,7 +237,7 @@
         "Kolhapur|Stones": 139,
         "Aurangabad|Bronze": 292,
         "Kolhapur|Silver": 28,
-        "Nashik|Stones": 582,
+        "Nashik|Stones": 583,
         "Amravati|Stones": 196,
         "Nashik|Silver": 83,
         "Pune|Silver": 245,
@@ -265,12 +265,12 @@
         "Indore|Stones": 1269,
         "Jabalpur|Silver": 100,
         "Gwalior|Sticks": 586,
-        "Jabalpur|Stones": 1124,
+        "Jabalpur|Stones": 1123,
         "Bhopal|Silver": 88,
         "Gwalior|Bronze": 371,
         "Indore|Bronze": 556,
         "Gwalior|Stones": 713,
-        "Jabalpur|Bronze": 753,
+        "Jabalpur|Bronze": 754,
         "Gwalior|Silver": 31,
         "Indore|Silver": 43,
         "Bhopal|Gold": 2,
@@ -300,11 +300,11 @@
         "Salem|Sticks": 1,
         "Varanasi|Stones": 108,
         "Lucknow|Sticks": 1789,
-        "Lucknow|Stones": 970,
-        "Lucknow|Bronze": 711,
-        "Kanpur|Sticks": 944,
+        "Lucknow|Stones": 969,
+        "Lucknow|Bronze": 712,
+        "Kanpur|Sticks": 943,
         "Noida|Stones": 196,
-        "Kanpur|Stones": 353,
+        "Kanpur|Stones": 354,
         "Kanpur|Bronze": 442,
         "Kanpur|Silver": 58,
         "Lucknow|Silver": 65,
@@ -345,11 +345,11 @@
         "Silver": 0.07,
         "Bronze": 0.26,
         "Stones": 0.24,
-        "Sticks": -0.57
+        "Sticks": -0.58
       }
     },
-    "leads_given": 1173,
-    "orders_given": 319,
-    "new_to_base": 1308
+    "leads_given": 1200,
+    "orders_given": 321,
+    "new_to_base": 1321
   }
 }
