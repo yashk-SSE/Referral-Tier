@@ -68,14 +68,24 @@ This same Held-Base card is now called **one extra time per run** — with
 preview (`data/tier_mtd.json`, see Section 3.3). No new Metabase question was
 needed for this; it's the same card, different date params.
 
-**GitHub Secrets checklist** — `METABASE_COHORT_CARD_ID` was added to local
-`.env`/`env.example` on 2026-08-04 but as of this writing it's *unconfirmed*
-whether it's been added to the repo's GitHub Secrets too (Settings → Secrets
-and variables → Actions). Until it is, the scheduled Action's `etl.py` run
-will skip the cohort fetch and write an empty placeholder
-`cohort_activation.json` (graceful — the tab just shows "no data available"
-— but check this if the Cohort Activation tab looks empty after a
-scheduled/automated run despite working locally).
+**Bug hit and fixed 2026-08-17: `etl.yml` never actually passed
+`METABASE_COHORT_CARD_ID` through.** `.env`/`env.example`/`etl.py` all got
+updated for the new card on 2026-08-04, but `.github/workflows/etl.yml`'s
+`env:` block — the thing that maps GitHub Secrets into the Action's actual
+process environment — did not. Every scheduled AND manual run from
+2026-08-05 through 2026-08-17 (confirmed via `git log` on
+`data/cohort_activation.json` — every single commit in that window has
+`records: []`) silently wrote the empty placeholder, even though the
+Metabase card itself worked fine and local runs worked fine (`.env` has the
+var; the Action's env block didn't). The dashboard's own "no cohort
+activation data available" message was doing exactly what it's designed to
+do — degrade gracefully — which is precisely why this went unnoticed for
+12 days: nothing *looked* broken, it just quietly never had real data.
+Fixed by adding one line to `etl.yml`. **Lesson: when a new env var gets
+added to `etl.py`, checking `.env`/`env.example` is not enough —
+`.github/workflows/etl.yml`'s `env:` block needs the same line, or the
+Action silently never sees it.** Worth double-checking this specific file
+any time a new `METABASE_*_CARD_ID` gets added in the future.
 
 ### Auth
 
@@ -640,8 +650,13 @@ given months earlier). Don't assume one implies the other.
   specifically" (or Silver, Bronze) view; not built since it wasn't asked
   for, but the SQL already has everything needed (Section 7.2's `Prior
   Tier` column).
-- **Confirm `METABASE_COHORT_CARD_ID` is actually in GitHub Secrets** — see
-  the checklist note in Section 2. Unverified as of 2026-08-04.
+- ~~Confirm `METABASE_COHORT_CARD_ID` is actually in GitHub Secrets~~ —
+  **partially resolved 2026-08-17**: found and fixed the real bug
+  (`etl.yml` wasn't passing it through at all, see Section 2's note). Not
+  yet re-verified with a fresh Action run at time of writing — if the
+  Cohort Activation tab is STILL empty after the next scheduled/manual run,
+  the Secret itself genuinely isn't set — go add it (Settings → Secrets and
+  variables → Actions → `METABASE_COHORT_CARD_ID` → `4570`).
 
 ## 9. How to verify changes (what's actually been done every time so far)
 
