@@ -47,6 +47,7 @@ jobs:
           METABASE_AGG_CARD_ID:   ${{ secrets.METABASE_AGG_CARD_ID }}
           METABASE_SSEID_CARD_ID: ${{ secrets.METABASE_SSEID_CARD_ID }}
           METABASE_HELDBASE_CARD_ID: ${{ secrets.METABASE_HELDBASE_CARD_ID }}
+          METABASE_COHORT_CARD_ID: ${{ secrets.METABASE_COHORT_CARD_ID }}
           MONTHS:                 ${{ github.event.inputs.months || '6' }}
           END_MONTH:              ${{ github.event.inputs.end_month || '' }}
         run: python etl.py
