@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-17T06:48:18Z",
+    "generated_at": "2026-08-17T07:05:51Z",
     "tiers": [
       "Platinum",
       "Gold",
@@ -348,8 +348,8 @@
         "Sticks": -0.67
       }
     },
-    "leads_given": 1429,
+    "leads_given": 1430,
     "orders_given": 414,
-    "new_to_base": 1485
+    "new_to_base": 1489
   }
 }

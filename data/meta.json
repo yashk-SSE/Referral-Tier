@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-17T06:50:01Z",
+  "generated_at": "2026-08-17T07:07:57Z",
   "months_fetched": 6,
   "range_start": "Feb '26",
   "range_end": "Jul '26",
@@ -8,5 +8,5 @@
   "agg_card_id": 3262,
   "sseid_card_id": 3263,
   "heldbase_card_id": 4467,
-  "cohort_card_id": 0
+  "cohort_card_id": 4570
 }
