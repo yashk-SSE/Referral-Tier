@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-17T07:05:51Z",
+    "generated_at": "2026-08-17T23:22:13Z",
     "tiers": [
       "Platinum",
       "Gold",
@@ -19,7 +19,7 @@
     }
   },
   "mtd": {
-    "as_of_date": "2026-08-17",
+    "as_of_date": "2026-08-18",
     "baseline_end_date": "2026-07-31",
     "baseline_label": "Jul '26",
     "held_base": {
@@ -36,9 +36,9 @@
         "Platinum": 8,
         "Gold": 66,
         "Silver": 1268,
-        "Bronze": 11094,
-        "Stones": 14221,
-        "Sticks": 24375
+        "Bronze": 11097,
+        "Stones": 14222,
+        "Sticks": 24371
       },
       "by_cluster_tier_prev": {
         "Vijayawada|Sticks": 13,
@@ -215,20 +215,20 @@
         "Unknown|Sticks": 2,
         "Gurgaon|Stones": 71,
         "Gurgaon|Silver": 2,
-        "Bengaluru|Sticks": 1005,
+        "Bengaluru|Sticks": 1004,
         "Bengaluru|Bronze": 307,
-        "Bengaluru|Stones": 685,
+        "Bengaluru|Stones": 686,
         "Bengaluru|Silver": 17,
         "Pune|Bronze": 1638,
-        "Nagpur|Bronze": 2246,
-        "Nagpur|Sticks": 5011,
-        "Pune|Sticks": 3281,
-        "Pune|Stones": 1573,
+        "Nagpur|Bronze": 2247,
+        "Nagpur|Sticks": 5009,
+        "Pune|Sticks": 3280,
+        "Pune|Stones": 1574,
         "Kolhapur|Bronze": 174,
         "Nagpur|Silver": 291,
         "Nashik|Sticks": 1151,
         "Amravati|Bronze": 191,
-        "Nagpur|Stones": 1875,
+        "Nagpur|Stones": 1876,
         "Nashik|Bronze": 520,
         "Kolhapur|Sticks": 319,
         "Aurangabad|Sticks": 643,
@@ -276,18 +276,18 @@
         "Bhopal|Gold": 2,
         "Gwalior|Gold": 2,
         "Jabalpur|Gold": 3,
-        "Jaipur|Stones": 379,
+        "Jaipur|Stones": 378,
         "Jaipur|Sticks": 468,
-        "Jaipur|Bronze": 247,
+        "Jaipur|Bronze": 248,
         "Ajmer|Bronze": 7,
         "Ajmer|Stones": 47,
         "Ajmer|Sticks": 38,
         "Jaipur|Silver": 18,
         "Jaipur|Gold": 1,
         "Kota|Bronze": 2,
-        "Hyderabad|Stones": 684,
+        "Hyderabad|Stones": 683,
         "Hyderabad|Sticks": 1010,
-        "Hyderabad|Bronze": 436,
+        "Hyderabad|Bronze": 437,
         "Hyderabad|Silver": 33,
         "Hyderabad|Gold": 2,
         "Chennai|Sticks": 517,
@@ -343,13 +343,13 @@
         "Platinum": 0.0,
         "Gold": 0.0,
         "Silver": 0.09,
-        "Bronze": 0.33,
+        "Bronze": 0.34,
         "Stones": 0.24,
-        "Sticks": -0.67
+        "Sticks": -0.68
       }
     },
-    "leads_given": 1430,
-    "orders_given": 414,
-    "new_to_base": 1489
+    "leads_given": 1453,
+    "orders_given": 417,
+    "new_to_base": 1613
   }
 }
