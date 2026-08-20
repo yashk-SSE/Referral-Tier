@@ -112,6 +112,32 @@ the Action.
   inconsistent with the newly-pushed code. Always `git pull` in the clone
   right before copying files over, and sanity-check the pulled data's
   shape matches what the new code expects before pushing.
+- **Metabase silently ignores a parameter with the wrong `id` — no error,
+  it just uses the tag's default instead (hit 2026-08-20).** Metabase
+  migrated its internal query schema at some point (cards are now
+  `card_schema: 23+`, SQL lives at `dataset_query.stages[].native` instead
+  of the old `dataset_query.native.query`). Every template tag now carries
+  a permanent, real UUID as its own `"id"` (visible via `GET
+  /api/card/{id}` → `dataset_query.stages[].template-tags[].id`), and the
+  `/query/json` parameter object's `"id"` field **must match that UUID
+  exactly**. `etl.py` had been sending arbitrary strings (`"prev_end"`,
+  `"end_date"`, etc.) as the id — this used to work under the old schema,
+  then silently stopped: Metabase didn't error, it just fell back to each
+  tag's own configured **default** value every single call, so the
+  held-base card returned the *same* `prev_end=2026-06-30`/`curr_end=
+  2026-07-31` result (base_size 46,902) for every month pair regardless of
+  what was actually requested. Caught because `base_size` never changed
+  across months — it should grow every time. **Fix**: `etl.py` now calls
+  `get_template_tag_ids()` (`GET /api/card/{id}`, reads the real UUIDs out
+  of `dataset_query.stages[].template-tags`, cached per card_id for the
+  run) before building any parameter payload, instead of hardcoding a
+  guessed id. This is self-healing against another schema migration or a
+  recreated question, since it always asks Metabase for the current UUID
+  rather than assuming one.
+  **If any future card fetch mysteriously returns a fixed, non-varying
+  result no matter what date is passed: check this first** — it's almost
+  certainly the same silent-default-fallback behavior, not a code logic
+  bug in the aggregation/tiering.
 
 ## 3. The methodology journey — READ THIS BEFORE TOUCHING %-SHARE LOGIC
 

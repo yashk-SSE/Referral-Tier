@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-18T05:32:36Z",
+    "generated_at": "2026-08-20T05:55:09Z",
     "prev_end": "2026-06-30",
     "curr_end": "2026-07-31",
     "prev_label": "Jun '26",
@@ -285384,12 +285384,12 @@
     {
       "sseid": "RSSEMP7223",
       "city": "Jabalpur",
-      "leads_prev": 4,
-      "orders_prev": 0,
-      "tier_prev": "Stones",
-      "leads_curr": 4,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "leads_prev": 5,
+      "orders_prev": 1,
+      "tier_prev": "Bronze",
+      "leads_curr": 5,
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMP7224",
@@ -354134,12 +354134,12 @@
     {
       "sseid": "RSSEUP1934",
       "city": "Noida",
-      "leads_prev": 0,
-      "orders_prev": 0,
-      "tier_prev": "Sticks",
-      "leads_curr": 0,
-      "orders_curr": 0,
-      "tier_curr": "Sticks"
+      "leads_prev": 1,
+      "orders_prev": 1,
+      "tier_prev": "Bronze",
+      "leads_curr": 1,
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEUP1935",
@@ -442995,11 +442995,11 @@
       "sseid": "SSEMH0541",
       "city": "Pune",
       "leads_prev": 19,
-      "orders_prev": 0,
-      "tier_prev": "Stones",
+      "orders_prev": 1,
+      "tier_prev": "Bronze",
       "leads_curr": 19,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "SSEMH0542",

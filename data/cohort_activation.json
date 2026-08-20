@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-18T05:31:06Z",
+    "generated_at": "2026-08-20T05:53:28Z",
     "as_of_date": "2026-07-31",
     "cohorts": [
       "Q3 FY20-21",
@@ -9665,7 +9665,7 @@
       "city": "Pune",
       "month": "2026-02",
       "tier": "Bronze",
-      "pop": 18,
+      "pop": 19,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -10045,7 +10045,7 @@
       "city": "Pune",
       "month": "2026-02",
       "tier": "Stones",
-      "pop": 53,
+      "pop": 52,
       "act": 1,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -10195,7 +10195,7 @@
       "city": "Pune",
       "month": "2026-03",
       "tier": "Bronze",
-      "pop": 19,
+      "pop": 20,
       "act": 3,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -10595,7 +10595,7 @@
       "city": "Pune",
       "month": "2026-03",
       "tier": "Stones",
-      "pop": 52,
+      "pop": 51,
       "act": 3,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -10745,7 +10745,7 @@
       "city": "Pune",
       "month": "2026-04",
       "tier": "Bronze",
-      "pop": 20,
+      "pop": 21,
       "act": 1,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -11125,7 +11125,7 @@
       "city": "Pune",
       "month": "2026-04",
       "tier": "Stones",
-      "pop": 52,
+      "pop": 51,
       "act": 2,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -11265,7 +11265,7 @@
       "city": "Pune",
       "month": "2026-05",
       "tier": "Bronze",
-      "pop": 20,
+      "pop": 21,
       "act": 3,
       "repeat_act": 1,
       "prior_tier": "Bronze"
@@ -11615,7 +11615,7 @@
       "city": "Pune",
       "month": "2026-05",
       "tier": "Stones",
-      "pop": 53,
+      "pop": 52,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -11755,7 +11755,7 @@
       "city": "Pune",
       "month": "2026-06",
       "tier": "Bronze",
-      "pop": 19,
+      "pop": 20,
       "act": 4,
       "repeat_act": 2,
       "prior_tier": "Bronze"
@@ -12145,7 +12145,7 @@
       "city": "Pune",
       "month": "2026-06",
       "tier": "Stones",
-      "pop": 53,
+      "pop": 52,
       "act": 2,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -12285,7 +12285,7 @@
       "city": "Pune",
       "month": "2026-07",
       "tier": "Bronze",
-      "pop": 18,
+      "pop": 19,
       "act": 1,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -12665,7 +12665,7 @@
       "city": "Pune",
       "month": "2026-07",
       "tier": "Stones",
-      "pop": 53,
+      "pop": 52,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -56776,7 +56776,7 @@
       "month": "2026-05",
       "tier": "Sticks",
       "pop": 48,
-      "act": 2,
+      "act": 3,
       "repeat_act": 0,
       "prior_tier": "Sticks"
     },
@@ -57445,7 +57445,7 @@
       "city": "Noida",
       "month": "2026-06",
       "tier": "Bronze",
-      "pop": 1,
+      "pop": 2,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -57935,7 +57935,7 @@
       "city": "Noida",
       "month": "2026-06",
       "tier": "Sticks",
-      "pop": 46,
+      "pop": 45,
       "act": 1,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -58615,7 +58615,7 @@
       "city": "Noida",
       "month": "2026-07",
       "tier": "Bronze",
-      "pop": 20,
+      "pop": 21,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -59135,7 +59135,7 @@
       "city": "Noida",
       "month": "2026-07",
       "tier": "Sticks",
-      "pop": 45,
+      "pop": 44,
       "act": 1,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -64316,7 +64316,7 @@
       "month": "2026-05",
       "tier": "Stones",
       "pop": 82,
-      "act": 4,
+      "act": 5,
       "repeat_act": 1,
       "prior_tier": "Stones"
     },
@@ -64685,7 +64685,7 @@
       "city": "Jabalpur",
       "month": "2026-06",
       "tier": "Bronze",
-      "pop": 1,
+      "pop": 2,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -65575,7 +65575,7 @@
       "city": "Jabalpur",
       "month": "2026-06",
       "tier": "Stones",
-      "pop": 85,
+      "pop": 84,
       "act": 6,
       "repeat_act": 2,
       "prior_tier": "Stones"
@@ -65935,7 +65935,7 @@
       "city": "Jabalpur",
       "month": "2026-07",
       "tier": "Bronze",
-      "pop": 80,
+      "pop": 81,
       "act": 1,
       "repeat_act": 1,
       "prior_tier": "Bronze"
@@ -66805,7 +66805,7 @@
       "city": "Jabalpur",
       "month": "2026-07",
       "tier": "Stones",
-      "pop": 86,
+      "pop": 85,
       "act": 6,
       "repeat_act": 2,
       "prior_tier": "Stones"

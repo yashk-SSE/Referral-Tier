@@ -157,12 +157,51 @@ def get_auth_headers() -> dict:
     return {"X-Metabase-Session": get_session_token()}
 
 
+_TAG_ID_CACHE: dict = {}
+
+def get_template_tag_ids(headers: dict, card_id: int) -> dict:
+    """
+    Returns {template_tag_name: real_tag_uuid} for a saved question.
+
+    Metabase's newer query schema (card_schema 23+, query stored under
+    dataset_query.stages[] instead of the old dataset_query.native) assigns
+    each template tag a permanent UUID as its "id" — and every /query/json
+    parameter object MUST carry that exact UUID as its own "id" or Metabase
+    silently ignores the supplied value/target and falls back to that tag's
+    configured default instead (no error, no warning — this produced weeks
+    of the held-base card quietly returning prev_end=2026-06-30/curr_end=
+    2026-07-31's fixed result for every single date pair requested, until
+    caught by comparing base_size across months and finding it never
+    changed). Fetching this fresh per card, rather than hardcoding UUIDs,
+    means a future Metabase migration or a recreated question can't
+    silently break this again the same way.
+    """
+    if card_id in _TAG_ID_CACHE:
+        return _TAG_ID_CACHE[card_id]
+    r = requests.get(f"{METABASE_URL}/api/card/{card_id}", headers=headers, timeout=30)
+    r.raise_for_status()
+    card = r.json()
+    dq = card.get("dataset_query", {}) or {}
+    tags = {}
+    for stage in dq.get("stages", []) or []:
+        for tag in stage.get("template-tags", []) or []:
+            tags[tag["name"]] = tag["id"]
+    # Fallback for the older (pre-migration) schema shape, just in case.
+    native = dq.get("native", {}) or {}
+    for name, tag in (native.get("template-tags") or {}).items():
+        tags.setdefault(name, (tag or {}).get("id", name))
+    _TAG_ID_CACHE[card_id] = tags
+    return tags
+
+
 def fetch_card_json(headers: dict, card_id: int, end_date: str) -> list:
     """
     Calls POST /api/card/{id}/query/json with an end_date template parameter.
     Falls back to a plain fetch (no params) if the question has no parameters.
     """
+    tag_ids = get_template_tag_ids(headers, card_id)
     params_payload = json.dumps([{
+        "id":     tag_ids.get("end_date", "end_date"),
         "type":   "date/single",
         "target": ["variable", ["template-tag", "end_date"]],
         "value":  end_date,
@@ -196,9 +235,10 @@ def fetch_heldbase_card_json(headers: dict, card_id: int, prev_end: str, curr_en
     Calls POST /api/card/{id}/query/json with prev_end/curr_end template parameters
     for the held-base movement question (SSEID tier at both dates, base fixed to prev_end).
     """
+    tag_ids = get_template_tag_ids(headers, card_id)
     params_payload = [
-        {"type": "date/single", "target": ["variable", ["template-tag", "prev_end"]], "value": prev_end},
-        {"type": "date/single", "target": ["variable", ["template-tag", "curr_end"]], "value": curr_end},
+        {"id": tag_ids.get("prev_end", "prev_end"), "type": "date/single", "target": ["variable", ["template-tag", "prev_end"]], "value": prev_end},
+        {"id": tag_ids.get("curr_end", "curr_end"), "type": "date/single", "target": ["variable", ["template-tag", "curr_end"]], "value": curr_end},
     ]
 
     r = requests.post(
@@ -217,8 +257,9 @@ def fetch_cohort_card_json(headers: dict, card_id: int, as_of_date: str) -> list
     for the cohort-activation question (fiscal-quarter cohort x trailing
     6-month grid, computed entirely server-side).
     """
+    tag_ids = get_template_tag_ids(headers, card_id)
     params_payload = [
-        {"type": "date/single", "target": ["variable", ["template-tag", "as_of_date"]], "value": as_of_date},
+        {"id": tag_ids.get("as_of_date", "as_of_date"), "type": "date/single", "target": ["variable", ["template-tag", "as_of_date"]], "value": as_of_date},
     ]
     r = requests.post(
         f"{METABASE_URL}/api/card/{card_id}/query/json",
