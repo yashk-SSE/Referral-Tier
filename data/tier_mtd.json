@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-23T23:20:13Z",
+    "generated_at": "2026-08-24T05:39:34Z",
     "tiers": [
       "Platinum",
       "Gold",
@@ -37,8 +37,8 @@
         "Gold": 67,
         "Silver": 1277,
         "Bronze": 11181,
-        "Stones": 14252,
-        "Sticks": 24247
+        "Stones": 14256,
+        "Sticks": 24243
       },
       "by_cluster_tier_prev": {
         "Vijayawada|Sticks": 13,
@@ -224,11 +224,11 @@
         "Pune|Sticks": 3261,
         "Pune|Stones": 1573,
         "Kolhapur|Bronze": 173,
-        "Nagpur|Sticks": 4995,
+        "Nagpur|Sticks": 4993,
         "Nagpur|Silver": 294,
         "Nashik|Stones": 587,
         "Amravati|Bronze": 191,
-        "Nagpur|Stones": 1878,
+        "Nagpur|Stones": 1880,
         "Nashik|Bronze": 523,
         "Nashik|Sticks": 1144,
         "Kolhapur|Sticks": 317,
@@ -265,12 +265,12 @@
         "Indore|Sticks": 1255,
         "Indore|Stones": 1271,
         "Jabalpur|Silver": 102,
-        "Gwalior|Sticks": 583,
+        "Gwalior|Sticks": 582,
         "Jabalpur|Stones": 1122,
         "Bhopal|Silver": 89,
         "Gwalior|Bronze": 377,
         "Indore|Bronze": 558,
-        "Gwalior|Stones": 709,
+        "Gwalior|Stones": 710,
         "Jabalpur|Bronze": 760,
         "Gwalior|Silver": 32,
         "Indore|Silver": 44,
@@ -304,7 +304,7 @@
         "Lucknow|Stones": 976,
         "Lucknow|Bronze": 725,
         "Kanpur|Sticks": 930,
-        "Noida|Stones": 196,
+        "Noida|Stones": 197,
         "Kanpur|Stones": 359,
         "Kanpur|Bronze": 450,
         "Kanpur|Silver": 58,
@@ -312,7 +312,7 @@
         "Lucknow|Gold": 6,
         "Kanpur|Gold": 6,
         "Noida|Silver": 14,
-        "Noida|Sticks": 513,
+        "Noida|Sticks": 512,
         "Noida|Bronze": 182,
         "Meerut|Sticks": 22,
         "Bareilly|Sticks": 17,
@@ -346,11 +346,11 @@
         "Silver": 0.11,
         "Bronze": 0.5,
         "Stones": 0.31,
-        "Sticks": -0.92
+        "Sticks": -0.93
       }
     },
-    "leads_given": 1947,
+    "leads_given": 1958,
     "orders_given": 590,
-    "new_to_base": 2355
+    "new_to_base": 2357
   }
 }
