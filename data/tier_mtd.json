@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-24T23:22:16Z",
+    "generated_at": "2026-08-25T05:33:36Z",
     "tiers": [
       "Platinum",
       "Gold",
@@ -37,8 +37,8 @@
         "Gold": 68,
         "Silver": 1277,
         "Bronze": 11184,
-        "Stones": 14271,
-        "Sticks": 24224
+        "Stones": 14272,
+        "Sticks": 24223
       },
       "by_cluster_tier_prev": {
         "Vijayawada|Sticks": 13,
@@ -300,8 +300,8 @@
         "Coimbatore|Bronze": 8,
         "Salem|Sticks": 1,
         "Varanasi|Stones": 108,
-        "Lucknow|Sticks": 1766,
-        "Lucknow|Stones": 978,
+        "Lucknow|Sticks": 1765,
+        "Lucknow|Stones": 979,
         "Lucknow|Bronze": 726,
         "Kanpur|Sticks": 930,
         "Noida|Stones": 198,
@@ -346,11 +346,11 @@
         "Silver": 0.11,
         "Bronze": 0.5,
         "Stones": 0.34,
-        "Sticks": -0.96
+        "Sticks": -0.97
       }
     },
-    "leads_given": 2004,
+    "leads_given": 2015,
     "orders_given": 599,
-    "new_to_base": 2461
+    "new_to_base": 2473
   }
 }
