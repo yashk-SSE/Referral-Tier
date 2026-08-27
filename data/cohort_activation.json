@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-26T05:37:38Z",
+    "generated_at": "2026-08-27T04:15:57Z",
     "as_of_date": "2026-07-31",
     "cohorts": [
       "Q3 FY20-21",
@@ -93365,9 +93365,9 @@
       "city": "Pune",
       "month": "2026-05",
       "tier": "Bronze",
-      "pop": 8,
-      "act": 3,
-      "repeat_act": 3,
+      "pop": 9,
+      "act": 4,
+      "repeat_act": 4,
       "prior_tier": "Sticks"
     },
     {
@@ -93745,8 +93745,8 @@
       "city": "Pune",
       "month": "2026-05",
       "tier": "Sticks",
-      "pop": 260,
-      "act": 16,
+      "pop": 259,
+      "act": 15,
       "repeat_act": 0,
       "prior_tier": "Sticks"
     },
@@ -94845,7 +94845,7 @@
       "city": "Pune",
       "month": "2026-06",
       "tier": "Bronze",
-      "pop": 158,
+      "pop": 159,
       "act": 24,
       "repeat_act": 8,
       "prior_tier": "Bronze"
@@ -95895,7 +95895,7 @@
       "city": "Pune",
       "month": "2026-06",
       "tier": "Stones",
-      "pop": 38,
+      "pop": 37,
       "act": 7,
       "repeat_act": 7,
       "prior_tier": "Sticks"
@@ -96025,7 +96025,7 @@
       "city": "Amravati",
       "month": "2026-07",
       "tier": "Bronze",
-      "pop": 1,
+      "pop": 2,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -96355,9 +96355,9 @@
       "city": "Jabalpur",
       "month": "2026-07",
       "tier": "Bronze",
-      "pop": 13,
-      "act": 1,
-      "repeat_act": 1,
+      "pop": 14,
+      "act": 2,
+      "repeat_act": 2,
       "prior_tier": "Sticks"
     },
     {
@@ -96645,7 +96645,7 @@
       "city": "Pune",
       "month": "2026-07",
       "tier": "Bronze",
-      "pop": 263,
+      "pop": 264,
       "act": 24,
       "repeat_act": 7,
       "prior_tier": "Bronze"
@@ -97115,7 +97115,7 @@
       "city": "Amravati",
       "month": "2026-07",
       "tier": "Sticks",
-      "pop": 131,
+      "pop": 130,
       "act": 4,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -97235,7 +97235,7 @@
       "city": "Jabalpur",
       "month": "2026-07",
       "tier": "Sticks",
-      "pop": 302,
+      "pop": 301,
       "act": 22,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -97855,7 +97855,7 @@
       "city": "Pune",
       "month": "2026-07",
       "tier": "Stones",
-      "pop": 175,
+      "pop": 174,
       "act": 15,
       "repeat_act": 8,
       "prior_tier": "Stones"
