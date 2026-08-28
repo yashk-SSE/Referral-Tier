@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-27T16:09:37Z",
+    "generated_at": "2026-08-28T06:47:29Z",
     "tiers": [
       "Platinum",
       "Gold",
@@ -19,7 +19,7 @@
     }
   },
   "mtd": {
-    "as_of_date": "2026-08-27",
+    "as_of_date": "2026-08-28",
     "baseline_end_date": "2026-07-31",
     "baseline_label": "Jul '26",
     "held_base": {
@@ -36,9 +36,9 @@
         "Platinum": 8,
         "Gold": 68,
         "Silver": 1286,
-        "Bronze": 11212,
-        "Stones": 14288,
-        "Sticks": 24170
+        "Bronze": 11216,
+        "Stones": 14286,
+        "Sticks": 24168
       },
       "by_cluster_tier_prev": {
         "Vijayawada|Sticks": 13,
@@ -219,16 +219,16 @@
         "Bengaluru|Bronze": 313,
         "Bengaluru|Stones": 684,
         "Bengaluru|Silver": 18,
-        "Pune|Bronze": 1660,
-        "Nagpur|Bronze": 2263,
+        "Pune|Bronze": 1661,
+        "Nagpur|Bronze": 2265,
         "Pune|Sticks": 3249,
-        "Pune|Stones": 1581,
+        "Pune|Stones": 1580,
         "Kolhapur|Bronze": 175,
-        "Nagpur|Sticks": 4983,
+        "Nagpur|Sticks": 4982,
         "Nagpur|Silver": 295,
         "Nashik|Bronze": 524,
         "Amravati|Bronze": 195,
-        "Nagpur|Stones": 1882,
+        "Nagpur|Stones": 1881,
         "Nashik|Sticks": 1143,
         "Kolhapur|Sticks": 316,
         "Aurangabad|Sticks": 638,
@@ -301,13 +301,13 @@
         "Coimbatore|Bronze": 8,
         "Salem|Sticks": 1,
         "Varanasi|Stones": 108,
-        "Lucknow|Sticks": 1761,
-        "Lucknow|Stones": 982,
+        "Lucknow|Sticks": 1760,
+        "Lucknow|Stones": 983,
         "Lucknow|Bronze": 726,
         "Kanpur|Sticks": 924,
         "Noida|Stones": 198,
-        "Kanpur|Stones": 363,
-        "Kanpur|Bronze": 452,
+        "Kanpur|Stones": 362,
+        "Kanpur|Bronze": 453,
         "Kanpur|Silver": 58,
         "Lucknow|Silver": 66,
         "Lucknow|Gold": 6,
@@ -345,13 +345,13 @@
         "Platinum": 0.0,
         "Gold": 0.01,
         "Silver": 0.13,
-        "Bronze": 0.55,
-        "Stones": 0.38,
-        "Sticks": -1.06
+        "Bronze": 0.56,
+        "Stones": 0.37,
+        "Sticks": -1.07
       }
     },
-    "leads_given": 2204,
-    "orders_given": 664,
-    "new_to_base": 2835
+    "leads_given": 2219,
+    "orders_given": 670,
+    "new_to_base": 2853
   }
 }
