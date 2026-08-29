@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-28T17:13:08Z",
+    "generated_at": "2026-08-29T04:03:32Z",
     "tiers": [
       "Platinum",
       "Gold",
@@ -19,7 +19,7 @@
     }
   },
   "mtd": {
-    "as_of_date": "2026-08-28",
+    "as_of_date": "2026-08-29",
     "baseline_end_date": "2026-07-31",
     "baseline_label": "Jul '26",
     "held_base": {
@@ -35,9 +35,9 @@
       "by_tier_curr": {
         "Platinum": 8,
         "Gold": 68,
-        "Silver": 1288,
-        "Bronze": 11221,
-        "Stones": 14285,
+        "Silver": 1289,
+        "Bronze": 11223,
+        "Stones": 14282,
         "Sticks": 24162
       },
       "by_cluster_tier_prev": {
@@ -219,13 +219,13 @@
         "Bengaluru|Bronze": 313,
         "Bengaluru|Stones": 684,
         "Bengaluru|Silver": 18,
-        "Pune|Bronze": 1662,
-        "Nagpur|Bronze": 2266,
+        "Pune|Bronze": 1664,
+        "Nagpur|Bronze": 2265,
         "Pune|Sticks": 3248,
-        "Pune|Stones": 1579,
-        "Kolhapur|Bronze": 175,
+        "Pune|Stones": 1577,
+        "Kolhapur|Bronze": 176,
         "Nagpur|Sticks": 4981,
-        "Nagpur|Silver": 295,
+        "Nagpur|Silver": 296,
         "Nashik|Bronze": 525,
         "Amravati|Bronze": 195,
         "Nagpur|Stones": 1881,
@@ -234,7 +234,7 @@
         "Aurangabad|Sticks": 638,
         "Aurangabad|Stones": 330,
         "Amravati|Sticks": 431,
-        "Kolhapur|Stones": 141,
+        "Kolhapur|Stones": 140,
         "Aurangabad|Bronze": 296,
         "Kolhapur|Silver": 31,
         "Nashik|Stones": 587,
@@ -350,8 +350,8 @@
         "Sticks": -1.08
       }
     },
-    "leads_given": 2256,
-    "orders_given": 686,
-    "new_to_base": 2932
+    "leads_given": 2259,
+    "orders_given": 691,
+    "new_to_base": 2934
   }
 }
