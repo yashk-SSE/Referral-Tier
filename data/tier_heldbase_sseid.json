@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-02T09:23:36Z",
+    "generated_at": "2026-09-03T01:00:38Z",
     "prev_end": "2026-07-31",
     "curr_end": "2026-08-31",
     "prev_label": "Jul '26",
@@ -83689,8 +83689,8 @@
       "orders_prev": 0,
       "tier_prev": "Stones",
       "leads_curr": 2,
-      "orders_curr": 1,
-      "tier_curr": "Bronze"
+      "orders_curr": 0,
+      "tier_curr": "Stones"
     },
     {
       "sseid": "RSSEMH14734",

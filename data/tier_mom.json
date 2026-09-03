@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-02T09:23:20Z",
+    "generated_at": "2026-09-03T01:00:10Z",
     "months": 6,
     "clusters": [
       "Agra",
@@ -2030,8 +2030,8 @@
         "Platinum": 8,
         "Gold": 69,
         "Silver": 1315,
-        "Bronze": 11693,
-        "Stones": 14848,
+        "Bronze": 11692,
+        "Stones": 14849,
         "Sticks": 26288
       },
       "by_cluster_tier": {
@@ -2144,12 +2144,12 @@
         "Nagpur|Silver": 302,
         "Nagpur|Sticks": 5392,
         "Nagpur|Stones": 1931,
-        "Nashik|Bronze": 550,
+        "Nashik|Bronze": 549,
         "Nashik|Gold": 1,
         "Nashik|Platinum": 1,
         "Nashik|Silver": 86,
         "Nashik|Sticks": 1246,
-        "Nashik|Stones": 598,
+        "Nashik|Stones": 599,
         "Noida|Bronze": 191,
         "Noida|Gold": 1,
         "Noida|Silver": 15,
@@ -2200,8 +2200,8 @@
           "Platinum": 8,
           "Gold": 69,
           "Silver": 1298,
-          "Bronze": 11259,
-          "Stones": 14290,
+          "Bronze": 11258,
+          "Stones": 14291,
           "Sticks": 24108
         },
         "by_cluster_tier_prev": {
@@ -2390,7 +2390,7 @@
           "Kolhapur|Bronze": 180,
           "Nagpur|Sticks": 4973,
           "Nagpur|Silver": 299,
-          "Nashik|Bronze": 526,
+          "Nashik|Bronze": 525,
           "Amravati|Bronze": 196,
           "Nagpur|Stones": 1884,
           "Nashik|Sticks": 1138,
@@ -2401,7 +2401,7 @@
           "Kolhapur|Stones": 139,
           "Aurangabad|Bronze": 297,
           "Kolhapur|Silver": 30,
-          "Nashik|Stones": 588,
+          "Nashik|Stones": 589,
           "Amravati|Stones": 197,
           "Nashik|Silver": 85,
           "Pune|Silver": 255,
