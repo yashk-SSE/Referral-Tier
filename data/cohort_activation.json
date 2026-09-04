@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-03T09:31:29Z",
+    "generated_at": "2026-09-04T00:48:50Z",
     "as_of_date": "2026-08-31",
     "cohorts": [
       "Q3 FY20-21",
@@ -77098,8 +77098,8 @@
       "month": "2026-04",
       "tier": "Bronze",
       "pop": 4,
-      "act": 1,
-      "repeat_act": 0,
+      "act": 2,
+      "repeat_act": 1,
       "prior_tier": "Stones"
     },
     {
@@ -79927,7 +79927,7 @@
       "city": "Indore",
       "month": "2026-06",
       "tier": "Bronze",
-      "pop": 32,
+      "pop": 31,
       "act": 4,
       "repeat_act": 2,
       "prior_tier": "Bronze"
@@ -80347,7 +80347,7 @@
       "city": "Indore",
       "month": "2026-06",
       "tier": "Silver",
-      "pop": 2,
+      "pop": 3,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -81347,7 +81347,7 @@
       "city": "Indore",
       "month": "2026-07",
       "tier": "Bronze",
-      "pop": 39,
+      "pop": 38,
       "act": 2,
       "repeat_act": 2,
       "prior_tier": "Bronze"
@@ -81767,7 +81767,7 @@
       "city": "Indore",
       "month": "2026-07",
       "tier": "Silver",
-      "pop": 2,
+      "pop": 3,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Silver"
@@ -82747,7 +82747,7 @@
       "city": "Indore",
       "month": "2026-08",
       "tier": "Bronze",
-      "pop": 43,
+      "pop": 42,
       "act": 3,
       "repeat_act": 2,
       "prior_tier": "Bronze"
@@ -83127,7 +83127,7 @@
       "city": "Indore",
       "month": "2026-08",
       "tier": "Silver",
-      "pop": 2,
+      "pop": 3,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Silver"
@@ -86388,7 +86388,7 @@
       "month": "2026-04",
       "tier": "Sticks",
       "pop": 573,
-      "act": 20,
+      "act": 19,
       "repeat_act": 0,
       "prior_tier": "Sticks"
     },
@@ -86508,7 +86508,7 @@
       "month": "2026-04",
       "tier": "Stones",
       "pop": 105,
-      "act": 10,
+      "act": 11,
       "repeat_act": 0,
       "prior_tier": "Stones"
     },
@@ -86977,7 +86977,7 @@
       "city": "Bhopal",
       "month": "2026-05",
       "tier": "Bronze",
-      "pop": 4,
+      "pop": 5,
       "act": 1,
       "repeat_act": 1,
       "prior_tier": "Stones"
@@ -87288,7 +87288,7 @@
       "month": "2026-05",
       "tier": "Bronze",
       "pop": 47,
-      "act": 3,
+      "act": 4,
       "repeat_act": 0,
       "prior_tier": "Bronze"
     },
@@ -87357,7 +87357,7 @@
       "city": "Pune",
       "month": "2026-05",
       "tier": "Bronze",
-      "pop": 6,
+      "pop": 5,
       "act": 1,
       "repeat_act": 1,
       "prior_tier": "Sticks"
@@ -87937,7 +87937,7 @@
       "city": "Pune",
       "month": "2026-05",
       "tier": "Sticks",
-      "pop": 553,
+      "pop": 554,
       "act": 23,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -88057,7 +88057,7 @@
       "city": "Bhopal",
       "month": "2026-05",
       "tier": "Stones",
-      "pop": 130,
+      "pop": 129,
       "act": 12,
       "repeat_act": 1,
       "prior_tier": "Stones"
@@ -88507,7 +88507,7 @@
       "city": "Bhopal",
       "month": "2026-06",
       "tier": "Bronze",
-      "pop": 61,
+      "pop": 62,
       "act": 9,
       "repeat_act": 2,
       "prior_tier": "Bronze"
@@ -88837,7 +88837,7 @@
       "city": "Nashik",
       "month": "2026-06",
       "tier": "Bronze",
-      "pop": 55,
+      "pop": 54,
       "act": 6,
       "repeat_act": 2,
       "prior_tier": "Bronze"
@@ -88877,7 +88877,7 @@
       "city": "Pune",
       "month": "2026-06",
       "tier": "Bronze",
-      "pop": 217,
+      "pop": 216,
       "act": 22,
       "repeat_act": 6,
       "prior_tier": "Bronze"
@@ -89227,6 +89227,16 @@
       "city": "Nashik",
       "month": "2026-06",
       "tier": "Silver",
+      "pop": 1,
+      "act": 0,
+      "repeat_act": 0,
+      "prior_tier": "Bronze"
+    },
+    {
+      "cohort": "Q4 FY25-26",
+      "city": "Nashik",
+      "month": "2026-06",
+      "tier": "Silver",
       "pop": 5,
       "act": 0,
       "repeat_act": 0,
@@ -89288,7 +89298,7 @@
       "month": "2026-06",
       "tier": "Sticks",
       "pop": 106,
-      "act": 9,
+      "act": 8,
       "repeat_act": 0,
       "prior_tier": "Sticks"
     },
@@ -89487,7 +89497,7 @@
       "city": "Pune",
       "month": "2026-06",
       "tier": "Sticks",
-      "pop": 530,
+      "pop": 531,
       "act": 24,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -89607,7 +89617,7 @@
       "city": "Bhopal",
       "month": "2026-06",
       "tier": "Stones",
-      "pop": 131,
+      "pop": 130,
       "act": 4,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -89947,7 +89957,7 @@
       "city": "Ahmedabad",
       "month": "2026-07",
       "tier": "Bronze",
-      "pop": 5,
+      "pop": 4,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -90017,7 +90027,7 @@
       "city": "Bhopal",
       "month": "2026-07",
       "tier": "Bronze",
-      "pop": 71,
+      "pop": 72,
       "act": 10,
       "repeat_act": 3,
       "prior_tier": "Bronze"
@@ -90387,7 +90397,7 @@
       "city": "Nashik",
       "month": "2026-07",
       "tier": "Bronze",
-      "pop": 60,
+      "pop": 59,
       "act": 5,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -90427,7 +90437,7 @@
       "city": "Pune",
       "month": "2026-07",
       "tier": "Bronze",
-      "pop": 222,
+      "pop": 221,
       "act": 16,
       "repeat_act": 3,
       "prior_tier": "Bronze"
@@ -90807,7 +90817,7 @@
       "city": "Nashik",
       "month": "2026-07",
       "tier": "Silver",
-      "pop": 5,
+      "pop": 6,
       "act": 1,
       "repeat_act": 0,
       "prior_tier": "Silver"
@@ -90857,7 +90867,7 @@
       "city": "Ahmedabad",
       "month": "2026-07",
       "tier": "Sticks",
-      "pop": 97,
+      "pop": 98,
       "act": 1,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -91057,7 +91067,7 @@
       "city": "Pune",
       "month": "2026-07",
       "tier": "Sticks",
-      "pop": 506,
+      "pop": 507,
       "act": 13,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -91177,7 +91187,7 @@
       "city": "Bhopal",
       "month": "2026-07",
       "tier": "Stones",
-      "pop": 137,
+      "pop": 136,
       "act": 9,
       "repeat_act": 2,
       "prior_tier": "Stones"
@@ -91517,7 +91527,7 @@
       "city": "Ahmedabad",
       "month": "2026-08",
       "tier": "Bronze",
-      "pop": 33,
+      "pop": 32,
       "act": 2,
       "repeat_act": 1,
       "prior_tier": "Bronze"
@@ -91607,7 +91617,7 @@
       "city": "Bhopal",
       "month": "2026-08",
       "tier": "Bronze",
-      "pop": 76,
+      "pop": 77,
       "act": 4,
       "repeat_act": 2,
       "prior_tier": "Bronze"
@@ -91897,7 +91907,7 @@
       "city": "Nashik",
       "month": "2026-08",
       "tier": "Bronze",
-      "pop": 60,
+      "pop": 59,
       "act": 2,
       "repeat_act": 1,
       "prior_tier": "Bronze"
@@ -91947,7 +91957,7 @@
       "city": "Pune",
       "month": "2026-08",
       "tier": "Bronze",
-      "pop": 228,
+      "pop": 227,
       "act": 9,
       "repeat_act": 3,
       "prior_tier": "Bronze"
@@ -92297,7 +92307,7 @@
       "city": "Nashik",
       "month": "2026-08",
       "tier": "Silver",
-      "pop": 7,
+      "pop": 8,
       "act": 1,
       "repeat_act": 1,
       "prior_tier": "Silver"
@@ -92357,7 +92367,7 @@
       "city": "Ahmedabad",
       "month": "2026-08",
       "tier": "Sticks",
-      "pop": 96,
+      "pop": 97,
       "act": 2,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -92557,7 +92567,7 @@
       "city": "Pune",
       "month": "2026-08",
       "tier": "Sticks",
-      "pop": 493,
+      "pop": 494,
       "act": 15,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -92647,7 +92657,7 @@
       "city": "Bhopal",
       "month": "2026-08",
       "tier": "Stones",
-      "pop": 137,
+      "pop": 136,
       "act": 11,
       "repeat_act": 2,
       "prior_tier": "Stones"
@@ -94787,9 +94797,9 @@
       "city": "Lucknow",
       "month": "2026-06",
       "tier": "Bronze",
-      "pop": 7,
-      "act": 2,
-      "repeat_act": 2,
+      "pop": 6,
+      "act": 1,
+      "repeat_act": 1,
       "prior_tier": "Sticks"
     },
     {
@@ -94857,7 +94867,7 @@
       "city": "Nashik",
       "month": "2026-06",
       "tier": "Bronze",
-      "pop": 5,
+      "pop": 6,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -95407,8 +95417,8 @@
       "city": "Lucknow",
       "month": "2026-06",
       "tier": "Sticks",
-      "pop": 314,
-      "act": 18,
+      "pop": 315,
+      "act": 19,
       "repeat_act": 0,
       "prior_tier": "Sticks"
     },
@@ -95437,7 +95447,7 @@
       "city": "Nashik",
       "month": "2026-06",
       "tier": "Sticks",
-      "pop": 172,
+      "pop": 171,
       "act": 4,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -96047,7 +96057,7 @@
       "city": "Ahmedabad",
       "month": "2026-07",
       "tier": "Bronze",
-      "pop": 12,
+      "pop": 10,
       "act": 2,
       "repeat_act": 2,
       "prior_tier": "Sticks"
@@ -96547,7 +96557,7 @@
       "city": "Lucknow",
       "month": "2026-07",
       "tier": "Bronze",
-      "pop": 108,
+      "pop": 107,
       "act": 14,
       "repeat_act": 5,
       "prior_tier": "Bronze"
@@ -96637,7 +96647,7 @@
       "city": "Nashik",
       "month": "2026-07",
       "tier": "Bronze",
-      "pop": 31,
+      "pop": 32,
       "act": 3,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -96841,6 +96851,16 @@
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Silver"
+    },
+    {
+      "cohort": "Q1 FY26-27",
+      "city": "Ahmedabad",
+      "month": "2026-07",
+      "tier": "Silver",
+      "pop": 1,
+      "act": 0,
+      "repeat_act": 0,
+      "prior_tier": "Sticks"
     },
     {
       "cohort": "Q1 FY26-27",
@@ -97157,7 +97177,7 @@
       "city": "Ahmedabad",
       "month": "2026-07",
       "tier": "Sticks",
-      "pop": 183,
+      "pop": 184,
       "act": 10,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -97367,7 +97387,7 @@
       "city": "Nashik",
       "month": "2026-07",
       "tier": "Sticks",
-      "pop": 231,
+      "pop": 230,
       "act": 5,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -97558,7 +97578,7 @@
       "month": "2026-07",
       "tier": "Stones",
       "pop": 147,
-      "act": 8,
+      "act": 9,
       "repeat_act": 0,
       "prior_tier": "Stones"
     },
@@ -97797,7 +97817,7 @@
       "city": "Lucknow",
       "month": "2026-07",
       "tier": "Stones",
-      "pop": 34,
+      "pop": 35,
       "act": 3,
       "repeat_act": 3,
       "prior_tier": "Sticks"
@@ -98017,7 +98037,7 @@
       "city": "Ahmedabad",
       "month": "2026-08",
       "tier": "Bronze",
-      "pop": 43,
+      "pop": 41,
       "act": 3,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -98157,7 +98177,7 @@
       "city": "Bhopal",
       "month": "2026-08",
       "tier": "Bronze",
-      "pop": 2,
+      "pop": 3,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -98497,7 +98517,7 @@
       "city": "Lucknow",
       "month": "2026-08",
       "tier": "Bronze",
-      "pop": 125,
+      "pop": 124,
       "act": 6,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -98577,7 +98597,7 @@
       "city": "Nashik",
       "month": "2026-08",
       "tier": "Bronze",
-      "pop": 40,
+      "pop": 41,
       "act": 1,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -98767,7 +98787,7 @@
       "city": "Ahmedabad",
       "month": "2026-08",
       "tier": "Silver",
-      "pop": 2,
+      "pop": 3,
       "act": 1,
       "repeat_act": 1,
       "prior_tier": "Silver"
@@ -99097,7 +99117,7 @@
       "city": "Ahmedabad",
       "month": "2026-08",
       "tier": "Sticks",
-      "pop": 173,
+      "pop": 174,
       "act": 5,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -99307,7 +99327,7 @@
       "city": "Nashik",
       "month": "2026-08",
       "tier": "Sticks",
-      "pop": 226,
+      "pop": 225,
       "act": 4,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -99497,7 +99517,7 @@
       "city": "Bhopal",
       "month": "2026-08",
       "tier": "Stones",
-      "pop": 161,
+      "pop": 160,
       "act": 6,
       "repeat_act": 2,
       "prior_tier": "Stones"
@@ -99747,7 +99767,7 @@
       "city": "Lucknow",
       "month": "2026-08",
       "tier": "Stones",
-      "pop": 149,
+      "pop": 150,
       "act": 9,
       "repeat_act": 2,
       "prior_tier": "Stones"
