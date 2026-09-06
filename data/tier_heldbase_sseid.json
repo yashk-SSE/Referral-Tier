@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-05T08:54:41Z",
+    "generated_at": "2026-09-06T00:38:46Z",
     "prev_end": "2026-07-31",
     "curr_end": "2026-08-31",
     "prev_label": "Jul '26",
@@ -483006,11 +483006,11 @@
       "sseid": "SSEMH0379",
       "city": "Pune",
       "leads_prev": 23,
-      "orders_prev": 2,
-      "tier_prev": "Bronze",
+      "orders_prev": 3,
+      "tier_prev": "Silver",
       "leads_curr": 23,
-      "orders_curr": 2,
-      "tier_curr": "Bronze"
+      "orders_curr": 3,
+      "tier_curr": "Silver"
     },
     {
       "sseid": "SSEMH0380",

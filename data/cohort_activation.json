@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-05T08:53:04Z",
+    "generated_at": "2026-09-06T00:36:30Z",
     "as_of_date": "2026-08-31",
     "cohorts": [
       "Q3 FY20-21",
@@ -7367,8 +7367,8 @@
       "city": "Pune",
       "month": "2026-03",
       "tier": "Bronze",
-      "pop": 12,
-      "act": 1,
+      "pop": 11,
+      "act": 0,
       "repeat_act": 0,
       "prior_tier": "Bronze"
     },
@@ -7379,6 +7379,16 @@
       "tier": "Silver",
       "pop": 1,
       "act": 0,
+      "repeat_act": 0,
+      "prior_tier": "Silver"
+    },
+    {
+      "cohort": "Q2 FY22-23",
+      "city": "Pune",
+      "month": "2026-03",
+      "tier": "Silver",
+      "pop": 1,
+      "act": 1,
       "repeat_act": 0,
       "prior_tier": "Silver"
     },
@@ -7717,7 +7727,7 @@
       "city": "Pune",
       "month": "2026-04",
       "tier": "Bronze",
-      "pop": 12,
+      "pop": 11,
       "act": 2,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -7735,6 +7745,16 @@
     {
       "cohort": "Q2 FY22-23",
       "city": "Nashik",
+      "month": "2026-04",
+      "tier": "Silver",
+      "pop": 1,
+      "act": 0,
+      "repeat_act": 0,
+      "prior_tier": "Silver"
+    },
+    {
+      "cohort": "Q2 FY22-23",
+      "city": "Pune",
       "month": "2026-04",
       "tier": "Silver",
       "pop": 1,
@@ -8087,7 +8107,7 @@
       "city": "Pune",
       "month": "2026-05",
       "tier": "Bronze",
-      "pop": 12,
+      "pop": 11,
       "act": 1,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -8119,6 +8139,16 @@
       "tier": "Silver",
       "pop": 1,
       "act": 1,
+      "repeat_act": 0,
+      "prior_tier": "Silver"
+    },
+    {
+      "cohort": "Q2 FY22-23",
+      "city": "Pune",
+      "month": "2026-05",
+      "tier": "Silver",
+      "pop": 1,
+      "act": 0,
       "repeat_act": 0,
       "prior_tier": "Silver"
     },
@@ -8467,7 +8497,7 @@
       "city": "Pune",
       "month": "2026-06",
       "tier": "Bronze",
-      "pop": 13,
+      "pop": 12,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -8490,6 +8520,16 @@
       "pop": 1,
       "act": 1,
       "repeat_act": 1,
+      "prior_tier": "Silver"
+    },
+    {
+      "cohort": "Q2 FY22-23",
+      "city": "Pune",
+      "month": "2026-06",
+      "tier": "Silver",
+      "pop": 1,
+      "act": 0,
+      "repeat_act": 0,
       "prior_tier": "Silver"
     },
     {
@@ -8837,7 +8877,7 @@
       "city": "Pune",
       "month": "2026-07",
       "tier": "Bronze",
-      "pop": 13,
+      "pop": 12,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -8865,6 +8905,16 @@
     {
       "cohort": "Q2 FY22-23",
       "city": "Nashik",
+      "month": "2026-07",
+      "tier": "Silver",
+      "pop": 1,
+      "act": 0,
+      "repeat_act": 0,
+      "prior_tier": "Silver"
+    },
+    {
+      "cohort": "Q2 FY22-23",
+      "city": "Pune",
       "month": "2026-07",
       "tier": "Silver",
       "pop": 1,
@@ -9207,7 +9257,7 @@
       "city": "Pune",
       "month": "2026-08",
       "tier": "Bronze",
-      "pop": 14,
+      "pop": 13,
       "act": 1,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -9235,6 +9285,16 @@
     {
       "cohort": "Q2 FY22-23",
       "city": "Nashik",
+      "month": "2026-08",
+      "tier": "Silver",
+      "pop": 1,
+      "act": 0,
+      "repeat_act": 0,
+      "prior_tier": "Silver"
+    },
+    {
+      "cohort": "Q2 FY22-23",
+      "city": "Pune",
       "month": "2026-08",
       "tier": "Silver",
       "pop": 1,
