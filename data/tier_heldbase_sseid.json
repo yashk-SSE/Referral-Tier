@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-10T09:28:58Z",
+    "generated_at": "2026-09-11T00:53:54Z",
     "prev_end": "2026-07-31",
     "curr_end": "2026-08-31",
     "prev_label": "Jul '26",
@@ -47175,11 +47175,11 @@
     {
       "sseid": "RSSEMH10186",
       "city": "Nagpur",
-      "leads_prev": 4,
-      "orders_prev": 2,
+      "leads_prev": 3,
+      "orders_prev": 1,
       "tier_prev": "Bronze",
-      "leads_curr": 4,
-      "orders_curr": 2,
+      "leads_curr": 3,
+      "orders_curr": 1,
       "tier_curr": "Bronze"
     },
     {
@@ -50495,12 +50495,12 @@
     {
       "sseid": "RSSEMH10611",
       "city": "Nagpur",
-      "leads_prev": 11,
-      "orders_prev": 3,
-      "tier_prev": "Silver",
-      "leads_curr": 11,
-      "orders_curr": 3,
-      "tier_curr": "Silver"
+      "leads_prev": 10,
+      "orders_prev": 2,
+      "tier_prev": "Bronze",
+      "leads_curr": 10,
+      "orders_curr": 2,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMH10612",
@@ -76036,10 +76036,10 @@
       "sseid": "RSSEMH13781",
       "city": "Nashik",
       "leads_prev": 8,
-      "orders_prev": 5,
+      "orders_prev": 6,
       "tier_prev": "Silver",
       "leads_curr": 8,
-      "orders_curr": 5,
+      "orders_curr": 6,
       "tier_curr": "Silver"
     },
     {
@@ -79399,7 +79399,7 @@
       "orders_prev": 1,
       "tier_prev": "Bronze",
       "leads_curr": 5,
-      "orders_curr": 1,
+      "orders_curr": 2,
       "tier_curr": "Bronze"
     },
     {
@@ -79965,12 +79965,12 @@
     {
       "sseid": "RSSEMH14284",
       "city": "Nagpur",
-      "leads_prev": 9,
-      "orders_prev": 2,
-      "tier_prev": "Bronze",
-      "leads_curr": 9,
-      "orders_curr": 2,
-      "tier_curr": "Bronze"
+      "leads_prev": 10,
+      "orders_prev": 3,
+      "tier_prev": "Silver",
+      "leads_curr": 10,
+      "orders_curr": 3,
+      "tier_curr": "Silver"
     },
     {
       "sseid": "RSSEMH14285",
@@ -89816,11 +89816,11 @@
       "sseid": "RSSEMH15502",
       "city": "Nagpur",
       "leads_prev": 1,
-      "orders_prev": 0,
-      "tier_prev": "Stones",
+      "orders_prev": 1,
+      "tier_prev": "Bronze",
       "leads_curr": 1,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMH15503",
@@ -93775,11 +93775,11 @@
     {
       "sseid": "RSSEMH16005",
       "city": "Nagpur",
-      "leads_prev": 8,
-      "orders_prev": 5,
+      "leads_prev": 9,
+      "orders_prev": 6,
       "tier_prev": "Silver",
-      "leads_curr": 8,
-      "orders_curr": 5,
+      "leads_curr": 9,
+      "orders_curr": 6,
       "tier_curr": "Silver"
     },
     {
@@ -141259,8 +141259,8 @@
       "orders_prev": 0,
       "tier_prev": "Sticks",
       "leads_curr": 1,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMH22536",
@@ -221345,11 +221345,11 @@
     {
       "sseid": "RSSEMH7790",
       "city": "Pune",
-      "leads_prev": 19,
-      "orders_prev": 9,
+      "leads_prev": 20,
+      "orders_prev": 10,
       "tier_prev": "Gold",
-      "leads_curr": 19,
-      "orders_curr": 9,
+      "leads_curr": 20,
+      "orders_curr": 10,
       "tier_curr": "Gold"
     },
     {
@@ -263576,11 +263576,11 @@
       "sseid": "RSSEMP12878",
       "city": "Bhopal",
       "leads_prev": 1,
-      "orders_prev": 0,
-      "tier_prev": "Stones",
+      "orders_prev": 1,
+      "tier_prev": "Bronze",
       "leads_curr": 1,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMP12879",
@@ -278845,12 +278845,12 @@
     {
       "sseid": "RSSEMP14874",
       "city": "Jabalpur",
-      "leads_prev": 0,
-      "orders_prev": 0,
-      "tier_prev": "Sticks",
-      "leads_curr": 0,
-      "orders_curr": 0,
-      "tier_curr": "Sticks"
+      "leads_prev": 1,
+      "orders_prev": 1,
+      "tier_prev": "Bronze",
+      "leads_curr": 1,
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMP14876",
@@ -401146,11 +401146,11 @@
       "sseid": "RSSEUP3488",
       "city": "Lucknow",
       "leads_prev": 1,
-      "orders_prev": 0,
-      "tier_prev": "Stones",
+      "orders_prev": 1,
+      "tier_prev": "Bronze",
       "leads_curr": 1,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEUP3489",
@@ -414065,11 +414065,11 @@
     {
       "sseid": "RSSEUP5157",
       "city": "Kanpur",
-      "leads_prev": 1,
-      "orders_prev": 1,
+      "leads_prev": 2,
+      "orders_prev": 2,
       "tier_prev": "Bronze",
-      "leads_curr": 1,
-      "orders_curr": 1,
+      "leads_curr": 2,
+      "orders_curr": 2,
       "tier_curr": "Bronze"
     },
     {
