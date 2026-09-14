@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-14T00:45:32Z",
+    "generated_at": "2026-09-14T10:23:26Z",
     "tiers": [
       "Platinum",
       "Gold",
@@ -36,9 +36,9 @@
         "Platinum": 9,
         "Gold": 71,
         "Silver": 1358,
-        "Bronze": 11827,
-        "Stones": 15023,
-        "Sticks": 25933
+        "Bronze": 11828,
+        "Stones": 15025,
+        "Sticks": 25930
       },
       "by_cluster_tier_prev": {
         "Vijayawada|Sticks": 19,
@@ -226,11 +226,11 @@
         "Pune|Sticks": 3474,
         "Pune|Stones": 1647,
         "Kolhapur|Bronze": 194,
-        "Nagpur|Sticks": 5334,
+        "Nagpur|Sticks": 5333,
         "Nagpur|Silver": 312,
         "Nashik|Bronze": 554,
         "Amravati|Bronze": 207,
-        "Nagpur|Stones": 1960,
+        "Nagpur|Stones": 1961,
         "Nashik|Sticks": 1238,
         "Kolhapur|Sticks": 363,
         "Aurangabad|Sticks": 674,
@@ -281,8 +281,8 @@
         "Bhopal|Gold": 2,
         "Gwalior|Gold": 2,
         "Jabalpur|Gold": 4,
-        "Jaipur|Stones": 424,
-        "Jaipur|Sticks": 527,
+        "Jaipur|Stones": 425,
+        "Jaipur|Sticks": 526,
         "Jaipur|Bronze": 272,
         "Ajmer|Bronze": 7,
         "Ajmer|Stones": 47,
@@ -308,13 +308,13 @@
         "Chennai|Gold": 1,
         "Salem|Stones": 1,
         "Varanasi|Stones": 114,
-        "Lucknow|Sticks": 1874,
-        "Lucknow|Stones": 1056,
+        "Lucknow|Sticks": 1873,
+        "Lucknow|Stones": 1057,
         "Lucknow|Bronze": 762,
         "Kanpur|Sticks": 1024,
         "Noida|Stones": 222,
-        "Kanpur|Stones": 403,
-        "Kanpur|Bronze": 485,
+        "Kanpur|Stones": 402,
+        "Kanpur|Bronze": 486,
         "Kanpur|Silver": 62,
         "Lucknow|Silver": 72,
         "Lucknow|Gold": 6,
@@ -351,12 +351,12 @@
         "Gold": 0.0,
         "Silver": 0.07,
         "Bronze": 0.25,
-        "Stones": 0.33,
-        "Sticks": -0.65
+        "Stones": 0.34,
+        "Sticks": -0.66
       }
     },
-    "leads_given": 1371,
-    "orders_given": 342,
-    "new_to_base": 1509
+    "leads_given": 1386,
+    "orders_given": 344,
+    "new_to_base": 1534
   }
 }
