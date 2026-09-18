@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-17T09:59:45Z",
+    "generated_at": "2026-09-18T09:29:30Z",
     "prev_end": "2026-07-31",
     "curr_end": "2026-08-31",
     "prev_label": "Jul '26",
@@ -27344,7 +27344,7 @@
     },
     {
       "sseid": "RSSEHR0126",
-      "city": "Delhi",
+      "city": "Gurgaon",
       "leads_prev": 1,
       "orders_prev": 0,
       "tier_prev": "Stones",
@@ -132945,12 +132945,12 @@
     {
       "sseid": "RSSEMH21468",
       "city": "Nagpur",
-      "leads_prev": 0,
-      "orders_prev": 0,
-      "tier_prev": "Sticks",
-      "leads_curr": 0,
-      "orders_curr": 0,
-      "tier_curr": "Sticks"
+      "leads_prev": 2,
+      "orders_prev": 2,
+      "tier_prev": "Bronze",
+      "leads_curr": 2,
+      "orders_curr": 2,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMH21469",
@@ -165055,12 +165055,12 @@
     {
       "sseid": "RSSEMH25800",
       "city": "Nagpur",
-      "leads_prev": 0,
-      "orders_prev": 0,
-      "tier_prev": "Sticks",
-      "leads_curr": 0,
-      "orders_curr": 0,
-      "tier_curr": "Sticks"
+      "leads_prev": 1,
+      "orders_prev": 1,
+      "tier_prev": "Bronze",
+      "leads_curr": 1,
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMH25801",
@@ -288805,11 +288805,11 @@
     {
       "sseid": "RSSEMP4289",
       "city": "Gwalior",
-      "leads_prev": 4,
-      "orders_prev": 1,
+      "leads_prev": 5,
+      "orders_prev": 2,
       "tier_prev": "Bronze",
-      "leads_curr": 4,
-      "orders_curr": 1,
+      "leads_curr": 5,
+      "orders_curr": 2,
       "tier_curr": "Bronze"
     },
     {
@@ -385505,11 +385505,11 @@
     {
       "sseid": "RSSEUP1626",
       "city": "Kanpur",
-      "leads_prev": 76,
-      "orders_prev": 7,
+      "leads_prev": 77,
+      "orders_prev": 8,
       "tier_prev": "Gold",
-      "leads_curr": 76,
-      "orders_curr": 7,
+      "leads_curr": 77,
+      "orders_curr": 8,
       "tier_curr": "Gold"
     },
     {
@@ -502094,7 +502094,7 @@
     },
     {
       "sseid": "SSETEST0004",
-      "city": "Indore",
+      "city": "Jalgaon",
       "leads_prev": 0,
       "orders_prev": 0,
       "tier_prev": "Sticks",

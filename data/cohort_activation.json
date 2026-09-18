@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-17T09:56:04Z",
+    "generated_at": "2026-09-18T09:27:15Z",
     "as_of_date": "2026-08-31",
     "cohorts": [
       "Q3 FY20-21",
@@ -36468,7 +36468,7 @@
       "month": "2026-04",
       "tier": "Bronze",
       "pop": 5,
-      "act": 0,
+      "act": 1,
       "repeat_act": 0,
       "prior_tier": "Bronze"
     },
@@ -53177,7 +53177,7 @@
       "city": "Indore",
       "month": "2026-03",
       "tier": "Sticks",
-      "pop": 80,
+      "pop": 79,
       "act": 2,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -53198,6 +53198,16 @@
       "month": "2026-03",
       "tier": "Sticks",
       "pop": 22,
+      "act": 0,
+      "repeat_act": 0,
+      "prior_tier": "Sticks"
+    },
+    {
+      "cohort": "Q4 FY24-25",
+      "city": "Jalgaon",
+      "month": "2026-03",
+      "tier": "Sticks",
+      "pop": 1,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -53407,7 +53417,7 @@
       "city": "Delhi",
       "month": "2026-03",
       "tier": "Stones",
-      "pop": 21,
+      "pop": 20,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -53417,7 +53427,7 @@
       "city": "Gurgaon",
       "month": "2026-03",
       "tier": "Stones",
-      "pop": 1,
+      "pop": 2,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -54397,7 +54407,7 @@
       "city": "Indore",
       "month": "2026-04",
       "tier": "Sticks",
-      "pop": 78,
+      "pop": 77,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -54418,6 +54428,16 @@
       "month": "2026-04",
       "tier": "Sticks",
       "pop": 22,
+      "act": 0,
+      "repeat_act": 0,
+      "prior_tier": "Sticks"
+    },
+    {
+      "cohort": "Q4 FY24-25",
+      "city": "Jalgaon",
+      "month": "2026-04",
+      "tier": "Sticks",
+      "pop": 1,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -54607,7 +54627,7 @@
       "city": "Delhi",
       "month": "2026-04",
       "tier": "Stones",
-      "pop": 22,
+      "pop": 21,
       "act": 3,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -54617,7 +54637,7 @@
       "city": "Gurgaon",
       "month": "2026-04",
       "tier": "Stones",
-      "pop": 1,
+      "pop": 2,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -55238,7 +55258,7 @@
       "month": "2026-05",
       "tier": "Gold",
       "pop": 1,
-      "act": 0,
+      "act": 1,
       "repeat_act": 0,
       "prior_tier": "Gold"
     },
@@ -55607,7 +55627,7 @@
       "city": "Indore",
       "month": "2026-05",
       "tier": "Sticks",
-      "pop": 78,
+      "pop": 77,
       "act": 3,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -55629,6 +55649,16 @@
       "tier": "Sticks",
       "pop": 22,
       "act": 1,
+      "repeat_act": 0,
+      "prior_tier": "Sticks"
+    },
+    {
+      "cohort": "Q4 FY24-25",
+      "city": "Jalgaon",
+      "month": "2026-05",
+      "tier": "Sticks",
+      "pop": 1,
+      "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
     },
@@ -55817,7 +55847,7 @@
       "city": "Delhi",
       "month": "2026-05",
       "tier": "Stones",
-      "pop": 24,
+      "pop": 23,
       "act": 1,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -55827,7 +55857,7 @@
       "city": "Gurgaon",
       "month": "2026-05",
       "tier": "Stones",
-      "pop": 1,
+      "pop": 2,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -56767,7 +56797,7 @@
       "city": "Indore",
       "month": "2026-06",
       "tier": "Sticks",
-      "pop": 75,
+      "pop": 74,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -56789,6 +56819,16 @@
       "tier": "Sticks",
       "pop": 21,
       "act": 1,
+      "repeat_act": 0,
+      "prior_tier": "Sticks"
+    },
+    {
+      "cohort": "Q4 FY24-25",
+      "city": "Jalgaon",
+      "month": "2026-06",
+      "tier": "Sticks",
+      "pop": 1,
+      "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
     },
@@ -56977,7 +57017,7 @@
       "city": "Delhi",
       "month": "2026-06",
       "tier": "Stones",
-      "pop": 25,
+      "pop": 24,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -56987,7 +57027,7 @@
       "city": "Gurgaon",
       "month": "2026-06",
       "tier": "Stones",
-      "pop": 1,
+      "pop": 2,
       "act": 1,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -57967,7 +58007,7 @@
       "city": "Indore",
       "month": "2026-07",
       "tier": "Sticks",
-      "pop": 75,
+      "pop": 74,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -57988,6 +58028,16 @@
       "month": "2026-07",
       "tier": "Sticks",
       "pop": 20,
+      "act": 0,
+      "repeat_act": 0,
+      "prior_tier": "Sticks"
+    },
+    {
+      "cohort": "Q4 FY24-25",
+      "city": "Jalgaon",
+      "month": "2026-07",
+      "tier": "Sticks",
+      "pop": 1,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -58197,7 +58247,7 @@
       "city": "Delhi",
       "month": "2026-07",
       "tier": "Stones",
-      "pop": 26,
+      "pop": 25,
       "act": 2,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -58207,7 +58257,7 @@
       "city": "Gurgaon",
       "month": "2026-07",
       "tier": "Stones",
-      "pop": 1,
+      "pop": 2,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -59167,7 +59217,7 @@
       "city": "Indore",
       "month": "2026-08",
       "tier": "Sticks",
-      "pop": 75,
+      "pop": 74,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -59189,6 +59239,16 @@
       "tier": "Sticks",
       "pop": 20,
       "act": 1,
+      "repeat_act": 0,
+      "prior_tier": "Sticks"
+    },
+    {
+      "cohort": "Q4 FY24-25",
+      "city": "Jalgaon",
+      "month": "2026-08",
+      "tier": "Sticks",
+      "pop": 1,
+      "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
     },
@@ -59367,7 +59427,7 @@
       "city": "Delhi",
       "month": "2026-08",
       "tier": "Stones",
-      "pop": 27,
+      "pop": 26,
       "act": 2,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -59377,7 +59437,7 @@
       "city": "Gurgaon",
       "month": "2026-08",
       "tier": "Stones",
-      "pop": 1,
+      "pop": 2,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -94887,7 +94947,7 @@
       "city": "Nagpur",
       "month": "2026-06",
       "tier": "Bronze",
-      "pop": 165,
+      "pop": 166,
       "act": 22,
       "repeat_act": 6,
       "prior_tier": "Bronze"
@@ -95497,7 +95557,7 @@
       "city": "Nagpur",
       "month": "2026-06",
       "tier": "Sticks",
-      "pop": 918,
+      "pop": 917,
       "act": 48,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -96677,7 +96737,7 @@
       "city": "Nagpur",
       "month": "2026-07",
       "tier": "Bronze",
-      "pop": 261,
+      "pop": 262,
       "act": 9,
       "repeat_act": 4,
       "prior_tier": "Bronze"
@@ -97437,7 +97497,7 @@
       "city": "Nagpur",
       "month": "2026-07",
       "tier": "Sticks",
-      "pop": 1532,
+      "pop": 1531,
       "act": 44,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -98627,7 +98687,7 @@
       "city": "Nagpur",
       "month": "2026-08",
       "tier": "Bronze",
-      "pop": 323,
+      "pop": 324,
       "act": 18,
       "repeat_act": 1,
       "prior_tier": "Bronze"
@@ -99377,7 +99437,7 @@
       "city": "Nagpur",
       "month": "2026-08",
       "tier": "Sticks",
-      "pop": 1488,
+      "pop": 1487,
       "act": 34,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -100507,7 +100567,7 @@
       "city": "Nagpur",
       "month": "2026-08",
       "tier": "Bronze",
-      "pop": 62,
+      "pop": 63,
       "act": 4,
       "repeat_act": 2,
       "prior_tier": "Bronze"
@@ -100997,7 +101057,7 @@
       "city": "Nagpur",
       "month": "2026-08",
       "tier": "Sticks",
-      "pop": 573,
+      "pop": 572,
       "act": 31,
       "repeat_act": 0,
       "prior_tier": "Sticks"
