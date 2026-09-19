@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-18T09:29:30Z",
+    "generated_at": "2026-09-19T09:20:07Z",
     "prev_end": "2026-07-31",
     "curr_end": "2026-08-31",
     "prev_label": "Jul '26",
@@ -502094,7 +502094,7 @@
     },
     {
       "sseid": "SSETEST0004",
-      "city": "Jalgaon",
+      "city": "Pune",
       "leads_prev": 0,
       "orders_prev": 0,
       "tier_prev": "Sticks",

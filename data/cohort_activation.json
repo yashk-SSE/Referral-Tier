@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-18T09:27:15Z",
+    "generated_at": "2026-09-19T09:17:22Z",
     "as_of_date": "2026-08-31",
     "cohorts": [
       "Q3 FY20-21",
@@ -53204,16 +53204,6 @@
     },
     {
       "cohort": "Q4 FY24-25",
-      "city": "Jalgaon",
-      "month": "2026-03",
-      "tier": "Sticks",
-      "pop": 1,
-      "act": 0,
-      "repeat_act": 0,
-      "prior_tier": "Sticks"
-    },
-    {
-      "cohort": "Q4 FY24-25",
       "city": "Kanpur",
       "month": "2026-03",
       "tier": "Sticks",
@@ -53277,7 +53267,7 @@
       "city": "Pune",
       "month": "2026-03",
       "tier": "Sticks",
-      "pop": 232,
+      "pop": 233,
       "act": 5,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -54434,16 +54424,6 @@
     },
     {
       "cohort": "Q4 FY24-25",
-      "city": "Jalgaon",
-      "month": "2026-04",
-      "tier": "Sticks",
-      "pop": 1,
-      "act": 0,
-      "repeat_act": 0,
-      "prior_tier": "Sticks"
-    },
-    {
-      "cohort": "Q4 FY24-25",
       "city": "Kanpur",
       "month": "2026-04",
       "tier": "Sticks",
@@ -54507,7 +54487,7 @@
       "city": "Pune",
       "month": "2026-04",
       "tier": "Sticks",
-      "pop": 227,
+      "pop": 228,
       "act": 4,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -55654,16 +55634,6 @@
     },
     {
       "cohort": "Q4 FY24-25",
-      "city": "Jalgaon",
-      "month": "2026-05",
-      "tier": "Sticks",
-      "pop": 1,
-      "act": 0,
-      "repeat_act": 0,
-      "prior_tier": "Sticks"
-    },
-    {
-      "cohort": "Q4 FY24-25",
       "city": "Kanpur",
       "month": "2026-05",
       "tier": "Sticks",
@@ -55727,7 +55697,7 @@
       "city": "Pune",
       "month": "2026-05",
       "tier": "Sticks",
-      "pop": 223,
+      "pop": 224,
       "act": 7,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -56824,16 +56794,6 @@
     },
     {
       "cohort": "Q4 FY24-25",
-      "city": "Jalgaon",
-      "month": "2026-06",
-      "tier": "Sticks",
-      "pop": 1,
-      "act": 0,
-      "repeat_act": 0,
-      "prior_tier": "Sticks"
-    },
-    {
-      "cohort": "Q4 FY24-25",
       "city": "Kanpur",
       "month": "2026-06",
       "tier": "Sticks",
@@ -56897,7 +56857,7 @@
       "city": "Pune",
       "month": "2026-06",
       "tier": "Sticks",
-      "pop": 216,
+      "pop": 217,
       "act": 1,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -58034,16 +57994,6 @@
     },
     {
       "cohort": "Q4 FY24-25",
-      "city": "Jalgaon",
-      "month": "2026-07",
-      "tier": "Sticks",
-      "pop": 1,
-      "act": 0,
-      "repeat_act": 0,
-      "prior_tier": "Sticks"
-    },
-    {
-      "cohort": "Q4 FY24-25",
       "city": "Kanpur",
       "month": "2026-07",
       "tier": "Sticks",
@@ -58107,7 +58057,7 @@
       "city": "Pune",
       "month": "2026-07",
       "tier": "Sticks",
-      "pop": 215,
+      "pop": 216,
       "act": 2,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -59244,16 +59194,6 @@
     },
     {
       "cohort": "Q4 FY24-25",
-      "city": "Jalgaon",
-      "month": "2026-08",
-      "tier": "Sticks",
-      "pop": 1,
-      "act": 0,
-      "repeat_act": 0,
-      "prior_tier": "Sticks"
-    },
-    {
-      "cohort": "Q4 FY24-25",
       "city": "Kanpur",
       "month": "2026-08",
       "tier": "Sticks",
@@ -59317,7 +59257,7 @@
       "city": "Pune",
       "month": "2026-08",
       "tier": "Sticks",
-      "pop": 213,
+      "pop": 214,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
