@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-21T10:27:59Z",
+    "generated_at": "2026-09-22T01:28:44Z",
     "tiers": [
       "Platinum",
       "Gold",
@@ -19,7 +19,7 @@
     }
   },
   "mtd": {
-    "as_of_date": "2026-09-21",
+    "as_of_date": "2026-09-22",
     "baseline_end_date": "2026-08-31",
     "baseline_label": "Aug '26",
     "held_base": {
@@ -36,9 +36,9 @@
         "Platinum": 9,
         "Gold": 78,
         "Silver": 1373,
-        "Bronze": 11905,
-        "Stones": 15129,
-        "Sticks": 25727
+        "Bronze": 11912,
+        "Stones": 15126,
+        "Sticks": 25723
       },
       "by_cluster_tier_prev": {
         "Vijayawada|Sticks": 19,
@@ -226,15 +226,15 @@
         "Pune|Sticks": 3462,
         "Pune|Stones": 1648,
         "Kolhapur|Bronze": 195,
-        "Nagpur|Sticks": 5288,
+        "Nagpur|Sticks": 5287,
         "Nagpur|Silver": 315,
         "Nashik|Bronze": 555,
         "Amravati|Bronze": 209,
-        "Nagpur|Stones": 1986,
+        "Nagpur|Stones": 1987,
         "Nashik|Sticks": 1234,
         "Kolhapur|Sticks": 358,
-        "Aurangabad|Sticks": 670,
-        "Aurangabad|Stones": 345,
+        "Aurangabad|Sticks": 669,
+        "Aurangabad|Stones": 346,
         "Amravati|Sticks": 460,
         "Kolhapur|Stones": 148,
         "Aurangabad|Bronze": 311,
@@ -281,9 +281,9 @@
         "Bhopal|Gold": 3,
         "Gwalior|Gold": 2,
         "Jabalpur|Gold": 5,
-        "Jaipur|Stones": 431,
+        "Jaipur|Stones": 430,
         "Jaipur|Sticks": 517,
-        "Jaipur|Bronze": 273,
+        "Jaipur|Bronze": 274,
         "Ajmer|Bronze": 7,
         "Ajmer|Stones": 48,
         "Ajmer|Sticks": 37,
@@ -297,9 +297,9 @@
         "Hyderabad|Bronze": 467,
         "Hyderabad|Silver": 37,
         "Hyderabad|Gold": 2,
-        "Chennai|Sticks": 553,
-        "Chennai|Bronze": 254,
-        "Chennai|Stones": 354,
+        "Chennai|Sticks": 552,
+        "Chennai|Bronze": 259,
+        "Chennai|Stones": 350,
         "Chennai|Silver": 15,
         "Coimbatore|Sticks": 29,
         "Coimbatore|Stones": 25,
@@ -308,11 +308,11 @@
         "Chennai|Gold": 1,
         "Salem|Stones": 1,
         "Varanasi|Stones": 119,
-        "Lucknow|Sticks": 1861,
-        "Lucknow|Stones": 1064,
+        "Lucknow|Sticks": 1860,
+        "Lucknow|Stones": 1065,
         "Lucknow|Bronze": 767,
         "Kanpur|Sticks": 1006,
-        "Noida|Stones": 222,
+        "Noida|Stones": 221,
         "Kanpur|Stones": 415,
         "Kanpur|Bronze": 489,
         "Kanpur|Silver": 64,
@@ -321,7 +321,7 @@
         "Kanpur|Gold": 6,
         "Noida|Silver": 16,
         "Noida|Sticks": 574,
-        "Noida|Bronze": 197,
+        "Noida|Bronze": 198,
         "Meerut|Sticks": 32,
         "Agra|Sticks": 58,
         "Varanasi|Sticks": 312,
@@ -350,13 +350,13 @@
         "Platinum": 0.0,
         "Gold": 0.02,
         "Silver": 0.1,
-        "Bronze": 0.39,
-        "Stones": 0.53,
-        "Sticks": -1.03
+        "Bronze": 0.4,
+        "Stones": 0.52,
+        "Sticks": -1.04
       }
     },
-    "leads_given": 2258,
-    "orders_given": 540,
-    "new_to_base": 2224
+    "leads_given": 2281,
+    "orders_given": 547,
+    "new_to_base": 2281
   }
 }
