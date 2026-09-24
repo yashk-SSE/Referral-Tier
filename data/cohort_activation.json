@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-24T01:10:02Z",
+    "generated_at": "2026-09-24T09:47:24Z",
     "as_of_date": "2026-08-31",
     "cohorts": [
       "Q3 FY20-21",
@@ -9657,7 +9657,7 @@
       "city": "Nagpur",
       "month": "2026-03",
       "tier": "Bronze",
-      "pop": 30,
+      "pop": 31,
       "act": 2,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -10077,7 +10077,7 @@
       "city": "Nagpur",
       "month": "2026-03",
       "tier": "Stones",
-      "pop": 51,
+      "pop": 50,
       "act": 2,
       "repeat_act": 1,
       "prior_tier": "Stones"
@@ -10217,7 +10217,7 @@
       "city": "Nagpur",
       "month": "2026-04",
       "tier": "Bronze",
-      "pop": 31,
+      "pop": 32,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -10597,7 +10597,7 @@
       "city": "Nagpur",
       "month": "2026-04",
       "tier": "Stones",
-      "pop": 51,
+      "pop": 50,
       "act": 2,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -10737,7 +10737,7 @@
       "city": "Nagpur",
       "month": "2026-05",
       "tier": "Bronze",
-      "pop": 31,
+      "pop": 32,
       "act": 1,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -11097,7 +11097,7 @@
       "city": "Nagpur",
       "month": "2026-05",
       "tier": "Stones",
-      "pop": 50,
+      "pop": 49,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -11227,7 +11227,7 @@
       "city": "Nagpur",
       "month": "2026-06",
       "tier": "Bronze",
-      "pop": 32,
+      "pop": 33,
       "act": 2,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -11627,7 +11627,7 @@
       "city": "Nagpur",
       "month": "2026-06",
       "tier": "Stones",
-      "pop": 50,
+      "pop": 49,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -11757,7 +11757,7 @@
       "city": "Nagpur",
       "month": "2026-07",
       "tier": "Bronze",
-      "pop": 32,
+      "pop": 33,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -12147,7 +12147,7 @@
       "city": "Nagpur",
       "month": "2026-07",
       "tier": "Stones",
-      "pop": 50,
+      "pop": 49,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Stones"
@@ -12247,7 +12247,7 @@
       "city": "Nagpur",
       "month": "2026-08",
       "tier": "Bronze",
-      "pop": 32,
+      "pop": 33,
       "act": 2,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -12607,7 +12607,7 @@
       "city": "Nagpur",
       "month": "2026-08",
       "tier": "Stones",
-      "pop": 50,
+      "pop": 49,
       "act": 2,
       "repeat_act": 0,
       "prior_tier": "Stones"
