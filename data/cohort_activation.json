@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-25T01:13:23Z",
+    "generated_at": "2026-09-25T10:04:23Z",
     "as_of_date": "2026-08-31",
     "cohorts": [
       "Q3 FY20-21",
@@ -53288,7 +53288,7 @@
       "city": "Pune",
       "month": "2026-03",
       "tier": "Sticks",
-      "pop": 233,
+      "pop": 232,
       "act": 5,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -53298,7 +53298,7 @@
       "city": "Pune1",
       "month": "2026-03",
       "tier": "Sticks",
-      "pop": 1,
+      "pop": 2,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -54518,7 +54518,7 @@
       "city": "Pune",
       "month": "2026-04",
       "tier": "Sticks",
-      "pop": 228,
+      "pop": 227,
       "act": 4,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -54528,7 +54528,7 @@
       "city": "Pune1",
       "month": "2026-04",
       "tier": "Sticks",
-      "pop": 1,
+      "pop": 2,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -55738,7 +55738,7 @@
       "city": "Pune",
       "month": "2026-05",
       "tier": "Sticks",
-      "pop": 224,
+      "pop": 223,
       "act": 7,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -55748,7 +55748,7 @@
       "city": "Pune1",
       "month": "2026-05",
       "tier": "Sticks",
-      "pop": 1,
+      "pop": 2,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -56908,7 +56908,7 @@
       "city": "Pune",
       "month": "2026-06",
       "tier": "Sticks",
-      "pop": 217,
+      "pop": 216,
       "act": 1,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -56918,7 +56918,7 @@
       "city": "Pune1",
       "month": "2026-06",
       "tier": "Sticks",
-      "pop": 1,
+      "pop": 2,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -58118,7 +58118,7 @@
       "city": "Pune",
       "month": "2026-07",
       "tier": "Sticks",
-      "pop": 216,
+      "pop": 215,
       "act": 2,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -58128,7 +58128,7 @@
       "city": "Pune1",
       "month": "2026-07",
       "tier": "Sticks",
-      "pop": 1,
+      "pop": 2,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -59328,7 +59328,7 @@
       "city": "Pune",
       "month": "2026-08",
       "tier": "Sticks",
-      "pop": 214,
+      "pop": 213,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -59338,7 +59338,7 @@
       "city": "Pune1",
       "month": "2026-08",
       "tier": "Sticks",
-      "pop": 1,
+      "pop": 2,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-25T01:15:02Z",
+    "generated_at": "2026-09-25T10:06:19Z",
     "months": 6,
     "clusters": [
       "Agra",
@@ -186,9 +186,9 @@
         "Pune|Gold": 10,
         "Pune|Platinum": 1,
         "Pune|Silver": 156,
-        "Pune|Sticks": 2289,
+        "Pune|Sticks": 2288,
         "Pune|Stones": 1144,
-        "Pune1|Sticks": 1,
+        "Pune1|Sticks": 2,
         "Raipur|Sticks": 5,
         "Raipur|Stones": 1,
         "Surat|Bronze": 71,
@@ -330,9 +330,9 @@
         "Pune|Gold": 13,
         "Pune|Platinum": 1,
         "Pune|Silver": 168,
-        "Pune|Sticks": 2498,
+        "Pune|Sticks": 2497,
         "Pune|Stones": 1218,
-        "Pune1|Sticks": 1,
+        "Pune1|Sticks": 2,
         "Raipur|Sticks": 5,
         "Raipur|Stones": 1,
         "Solapur|Stones": 1,
@@ -389,7 +389,7 @@
           "Bengaluru|Bronze": 216,
           "Bengaluru|Stones": 569,
           "Bengaluru|Silver": 15,
-          "Pune|Sticks": 2289,
+          "Pune|Sticks": 2288,
           "Nagpur|Stones": 1329,
           "Nagpur|Sticks": 3344,
           "Pune|Stones": 1144,
@@ -485,7 +485,7 @@
           "Kota|Stones": 11,
           "Kota|Sticks": 4,
           "Kota|Bronze": 1,
-          "Pune1|Sticks": 1,
+          "Pune1|Sticks": 2,
           "Varanasi|Gold": 1
         },
         "by_cluster_tier_curr": {
@@ -512,7 +512,7 @@
           "Bengaluru|Bronze": 231,
           "Bengaluru|Stones": 585,
           "Bengaluru|Silver": 16,
-          "Pune|Sticks": 2239,
+          "Pune|Sticks": 2238,
           "Nagpur|Bronze": 1627,
           "Nagpur|Sticks": 3257,
           "Pune|Stones": 1160,
@@ -610,7 +610,7 @@
           "Kota|Stones": 11,
           "Kota|Sticks": 4,
           "Kota|Bronze": 1,
-          "Pune1|Sticks": 1
+          "Pune1|Sticks": 2
         },
         "movement_pp": {
           "Platinum": 0.0,
@@ -757,9 +757,9 @@
         "Pune|Gold": 15,
         "Pune|Platinum": 1,
         "Pune|Silver": 191,
-        "Pune|Sticks": 2786,
+        "Pune|Sticks": 2785,
         "Pune|Stones": 1334,
-        "Pune1|Sticks": 1,
+        "Pune1|Sticks": 2,
         "Raipur|Sticks": 5,
         "Raipur|Stones": 1,
         "Solapur|Bronze": 2,
@@ -819,7 +819,7 @@
           "Bengaluru|Bronze": 239,
           "Bengaluru|Stones": 592,
           "Bengaluru|Silver": 17,
-          "Pune|Sticks": 2498,
+          "Pune|Sticks": 2497,
           "Nagpur|Bronze": 1727,
           "Nagpur|Sticks": 3778,
           "Pune|Stones": 1218,
@@ -924,7 +924,7 @@
           "Kota|Stones": 11,
           "Kota|Sticks": 4,
           "Kota|Bronze": 1,
-          "Pune1|Sticks": 1
+          "Pune1|Sticks": 2
         },
         "by_cluster_tier_curr": {
           "Delhi|Stones": 257,
@@ -954,7 +954,7 @@
           "Pune|Bronze": 1234,
           "Nagpur|Bronze": 1789,
           "Nagpur|Sticks": 3651,
-          "Pune|Sticks": 2424,
+          "Pune|Sticks": 2423,
           "Pune|Stones": 1254,
           "Kolhapur|Bronze": 133,
           "Nagpur|Silver": 235,
@@ -1058,7 +1058,7 @@
           "Kota|Stones": 11,
           "Kota|Sticks": 4,
           "Kota|Bronze": 1,
-          "Pune1|Sticks": 1
+          "Pune1|Sticks": 2
         },
         "movement_pp": {
           "Platinum": 0.0,
@@ -1208,9 +1208,9 @@
         "Pune|Gold": 17,
         "Pune|Platinum": 1,
         "Pune|Silver": 218,
-        "Pune|Sticks": 3040,
+        "Pune|Sticks": 3039,
         "Pune|Stones": 1463,
-        "Pune1|Sticks": 1,
+        "Pune1|Sticks": 2,
         "Raipur|Sticks": 5,
         "Raipur|Stones": 1,
         "Solapur|Bronze": 3,
@@ -1277,7 +1277,7 @@
           "Pune|Bronze": 1325,
           "Nagpur|Bronze": 1864,
           "Nagpur|Sticks": 4070,
-          "Pune|Sticks": 2786,
+          "Pune|Sticks": 2785,
           "Pune|Stones": 1334,
           "Kolhapur|Bronze": 150,
           "Nagpur|Silver": 237,
@@ -1389,7 +1389,7 @@
           "Kota|Stones": 11,
           "Kota|Sticks": 4,
           "Kota|Bronze": 1,
-          "Pune1|Sticks": 1
+          "Pune1|Sticks": 2
         },
         "by_cluster_tier_curr": {
           "Delhi|Stones": 280,
@@ -1420,7 +1420,7 @@
           "Pune|Bronze": 1361,
           "Nagpur|Bronze": 1949,
           "Nagpur|Sticks": 3948,
-          "Pune|Sticks": 2675,
+          "Pune|Sticks": 2674,
           "Pune|Stones": 1393,
           "Kolhapur|Bronze": 155,
           "Nagpur|Silver": 261,
@@ -1533,7 +1533,7 @@
           "Kota|Stones": 11,
           "Kota|Sticks": 4,
           "Kota|Bronze": 1,
-          "Pune1|Sticks": 1,
+          "Pune1|Sticks": 2,
           "Varanasi|Gold": 1
         },
         "movement_pp": {
@@ -1685,9 +1685,9 @@
         "Pune|Gold": 18,
         "Pune|Platinum": 2,
         "Pune|Silver": 237,
-        "Pune|Sticks": 3337,
+        "Pune|Sticks": 3336,
         "Pune|Stones": 1547,
-        "Pune1|Sticks": 1,
+        "Pune1|Sticks": 2,
         "Raipur|Sticks": 5,
         "Raipur|Stones": 1,
         "Salem|Sticks": 1,
@@ -1759,7 +1759,7 @@
           "Pune|Bronze": 1476,
           "Nagpur|Bronze": 2064,
           "Nagpur|Sticks": 4609,
-          "Pune|Sticks": 3040,
+          "Pune|Sticks": 3039,
           "Pune|Stones": 1463,
           "Kolhapur|Bronze": 161,
           "Nagpur|Silver": 265,
@@ -1873,7 +1873,7 @@
           "Kota|Stones": 11,
           "Kota|Sticks": 4,
           "Kota|Bronze": 1,
-          "Pune1|Sticks": 1,
+          "Pune1|Sticks": 2,
           "Varanasi|Gold": 1
         },
         "by_cluster_tier_curr": {
@@ -1908,7 +1908,7 @@
           "Pune|Bronze": 1527,
           "Nagpur|Bronze": 2127,
           "Nagpur|Sticks": 4509,
-          "Pune|Sticks": 2973,
+          "Pune|Sticks": 2972,
           "Pune|Stones": 1467,
           "Kolhapur|Bronze": 165,
           "Nagpur|Silver": 276,
@@ -2023,7 +2023,7 @@
           "Kota|Stones": 11,
           "Kota|Sticks": 4,
           "Kota|Bronze": 1,
-          "Pune1|Sticks": 1,
+          "Pune1|Sticks": 2,
           "Varanasi|Gold": 1
         },
         "movement_pp": {
@@ -2175,9 +2175,9 @@
         "Pune|Gold": 19,
         "Pune|Platinum": 2,
         "Pune|Silver": 262,
-        "Pune|Sticks": 3516,
+        "Pune|Sticks": 3515,
         "Pune|Stones": 1634,
-        "Pune1|Sticks": 1,
+        "Pune1|Sticks": 2,
         "Raipur|Sticks": 5,
         "Raipur|Stones": 1,
         "Salem|Sticks": 4,
@@ -2251,7 +2251,7 @@
           "Pune|Bronze": 1622,
           "Nagpur|Bronze": 2220,
           "Nagpur|Sticks": 5081,
-          "Pune|Sticks": 3337,
+          "Pune|Sticks": 3336,
           "Pune|Stones": 1547,
           "Kolhapur|Bronze": 172,
           "Nagpur|Silver": 281,
@@ -2367,7 +2367,7 @@
           "Mysuru|Sticks": 1,
           "Kota|Stones": 11,
           "Kota|Sticks": 4,
-          "Pune1|Sticks": 1,
+          "Pune1|Sticks": 2,
           "Varanasi|Gold": 1
         },
         "by_cluster_tier_curr": {
@@ -2401,7 +2401,7 @@
           "Bengaluru|Silver": 18,
           "Pune|Bronze": 1664,
           "Nagpur|Bronze": 2273,
-          "Pune|Sticks": 3240,
+          "Pune|Sticks": 3239,
           "Pune|Stones": 1582,
           "Kolhapur|Bronze": 180,
           "Nagpur|Sticks": 4970,
@@ -2519,7 +2519,7 @@
           "Mysuru|Stones": 3,
           "Kota|Stones": 11,
           "Kota|Sticks": 4,
-          "Pune1|Sticks": 1,
+          "Pune1|Sticks": 2,
           "Varanasi|Gold": 1
         },
         "movement_pp": {
