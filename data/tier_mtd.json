@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-10-01T11:26:48Z",
+    "generated_at": "2026-10-02T02:03:04Z",
     "tiers": [
       "Platinum",
       "Gold",
@@ -19,7 +19,7 @@
     }
   },
   "mtd": {
-    "as_of_date": "2026-10-01",
+    "as_of_date": "2026-10-02",
     "baseline_end_date": "2026-09-30",
     "baseline_label": "Sep '26",
     "held_base": {
@@ -37,8 +37,8 @@
         "Gold": 84,
         "Silver": 1400,
         "Bronze": 12512,
-        "Stones": 15992,
-        "Sticks": 27676
+        "Stones": 15997,
+        "Sticks": 27671
       },
       "by_cluster_tier_prev": {
         "Vijayawada|Sticks": 24,
@@ -235,14 +235,14 @@
         "Bengaluru|Silver": 19,
         "Pune|Bronze": 1888,
         "Nagpur|Bronze": 2481,
-        "Pune|Sticks": 3731,
-        "Pune|Stones": 1723,
+        "Pune|Sticks": 3730,
+        "Pune|Stones": 1724,
         "Kolhapur|Bronze": 212,
-        "Nagpur|Sticks": 5649,
+        "Nagpur|Sticks": 5647,
         "Nagpur|Silver": 325,
         "Nashik|Bronze": 586,
         "Amravati|Bronze": 219,
-        "Nagpur|Stones": 2076,
+        "Nagpur|Stones": 2078,
         "Nashik|Sticks": 1384,
         "Kolhapur|Sticks": 406,
         "Aurangabad|Sticks": 691,
@@ -304,14 +304,14 @@
         "Kota|Sticks": 12,
         "Kota|Stones": 15,
         "Kota|Bronze": 3,
-        "Hyderabad|Stones": 754,
-        "Hyderabad|Sticks": 1092,
+        "Hyderabad|Stones": 755,
+        "Hyderabad|Sticks": 1091,
         "Hyderabad|Bronze": 487,
         "Hyderabad|Silver": 42,
         "Hyderabad|Gold": 2,
-        "Chennai|Sticks": 627,
+        "Chennai|Sticks": 626,
         "Chennai|Bronze": 295,
-        "Chennai|Stones": 402,
+        "Chennai|Stones": 403,
         "Chennai|Silver": 17,
         "Coimbatore|Sticks": 33,
         "Coimbatore|Stones": 40,
@@ -363,12 +363,12 @@
         "Gold": 0.0,
         "Silver": 0.0,
         "Bronze": 0.0,
-        "Stones": 0.03,
-        "Sticks": -0.03
+        "Stones": 0.04,
+        "Sticks": -0.04
       }
     },
-    "leads_given": 54,
+    "leads_given": 78,
     "orders_given": 3,
-    "new_to_base": 67
+    "new_to_base": 97
   }
 }
