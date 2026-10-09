@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-10-08T11:53:52Z",
+    "generated_at": "2026-10-09T02:52:26Z",
     "prev_end": "2026-08-31",
     "curr_end": "2026-09-30",
     "prev_label": "Aug '26",
@@ -69336,11 +69336,11 @@
     {
       "sseid": "RSSEMH12590",
       "city": "Nagpur",
-      "leads_prev": 10,
-      "orders_prev": 5,
+      "leads_prev": 11,
+      "orders_prev": 6,
       "tier_prev": "Silver",
-      "leads_curr": 10,
-      "orders_curr": 5,
+      "leads_curr": 11,
+      "orders_curr": 6,
       "tier_curr": "Silver"
     },
     {
