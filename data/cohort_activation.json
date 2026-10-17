@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-10-15T01:17:23Z",
+    "generated_at": "2026-10-17T01:10:46Z",
     "as_of_date": "2026-09-30",
     "cohorts": [
       "Q3 FY20-21",
@@ -37729,7 +37729,7 @@
       "month": "2026-06",
       "tier": "Silver",
       "pop": 9,
-      "act": 1,
+      "act": 2,
       "repeat_act": 0,
       "prior_tier": "Silver"
     },
