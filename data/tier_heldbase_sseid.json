@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-10-20T09:54:57Z",
+    "generated_at": "2026-10-24T01:27:43Z",
     "prev_end": "2026-08-31",
     "curr_end": "2026-09-30",
     "prev_label": "Aug '26",
@@ -115226,11 +115226,11 @@
     {
       "sseid": "RSSEMH18522",
       "city": "Nashik",
-      "leads_prev": 0,
-      "orders_prev": 0,
-      "tier_prev": "Sticks",
-      "leads_curr": 1,
-      "orders_curr": 1,
+      "leads_prev": 1,
+      "orders_prev": 1,
+      "tier_prev": "Bronze",
+      "leads_curr": 2,
+      "orders_curr": 2,
       "tier_curr": "Bronze"
     },
     {
@@ -176899,9 +176899,9 @@
       "leads_prev": 0,
       "orders_prev": 0,
       "tier_prev": "Sticks",
-      "leads_curr": 0,
-      "orders_curr": 0,
-      "tier_curr": "Sticks"
+      "leads_curr": 1,
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMH26657",

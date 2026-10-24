@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-10-20T09:52:44Z",
+    "generated_at": "2026-10-24T01:25:45Z",
     "as_of_date": "2026-09-30",
     "cohorts": [
       "Q3 FY20-21",
@@ -89349,7 +89349,7 @@
       "month": "2026-07",
       "tier": "Sticks",
       "pop": 155,
-      "act": 5,
+      "act": 6,
       "repeat_act": 0,
       "prior_tier": "Sticks"
     },
@@ -90218,7 +90218,7 @@
       "city": "Nashik",
       "month": "2026-08",
       "tier": "Bronze",
-      "pop": 1,
+      "pop": 2,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -90848,7 +90848,7 @@
       "city": "Nashik",
       "month": "2026-08",
       "tier": "Sticks",
-      "pop": 150,
+      "pop": 149,
       "act": 4,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -91688,8 +91688,8 @@
       "city": "Nashik",
       "month": "2026-09",
       "tier": "Bronze",
-      "pop": 60,
-      "act": 2,
+      "pop": 61,
+      "act": 3,
       "repeat_act": 0,
       "prior_tier": "Bronze"
     },
@@ -92368,8 +92368,8 @@
       "city": "Nashik",
       "month": "2026-09",
       "tier": "Sticks",
-      "pop": 146,
-      "act": 4,
+      "pop": 145,
+      "act": 3,
       "repeat_act": 0,
       "prior_tier": "Sticks"
     },
@@ -101049,7 +101049,7 @@
       "month": "2026-09",
       "tier": "Sticks",
       "pop": 1452,
-      "act": 43,
+      "act": 44,
       "repeat_act": 0,
       "prior_tier": "Sticks"
     },
