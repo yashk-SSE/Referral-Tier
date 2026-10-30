@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-10-24T09:26:02Z",
+    "generated_at": "2026-10-30T02:30:10Z",
     "prev_end": "2026-08-31",
     "curr_end": "2026-09-30",
     "prev_label": "Aug '26",
@@ -143516,12 +143516,12 @@
     {
       "sseid": "RSSEMH22401",
       "city": "Nagpur",
-      "leads_prev": 2,
-      "orders_prev": 2,
-      "tier_prev": "Bronze",
-      "leads_curr": 2,
-      "orders_curr": 2,
-      "tier_curr": "Bronze"
+      "leads_prev": 3,
+      "orders_prev": 3,
+      "tier_prev": "Silver",
+      "leads_curr": 3,
+      "orders_curr": 3,
+      "tier_curr": "Silver"
     },
     {
       "sseid": "RSSEMH22402",
@@ -157936,12 +157936,12 @@
     {
       "sseid": "RSSEMH24319",
       "city": "Pune",
-      "leads_prev": 0,
-      "orders_prev": 0,
-      "tier_prev": "Sticks",
-      "leads_curr": 0,
-      "orders_curr": 0,
-      "tier_curr": "Sticks"
+      "leads_prev": 1,
+      "orders_prev": 1,
+      "tier_prev": "Bronze",
+      "leads_curr": 1,
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMH24320",
@@ -195136,12 +195136,12 @@
     {
       "sseid": "RSSEMH29436",
       "city": "Nagpur",
-      "leads_prev": 0,
-      "orders_prev": 0,
-      "tier_prev": "Sticks",
-      "leads_curr": 0,
-      "orders_curr": 0,
-      "tier_curr": "Sticks"
+      "leads_prev": 1,
+      "orders_prev": 1,
+      "tier_prev": "Bronze",
+      "leads_curr": 1,
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEMH29438",
@@ -458036,12 +458036,12 @@
     {
       "sseid": "RSSEUP7438",
       "city": "Lucknow",
-      "leads_prev": 0,
+      "leads_prev": 1,
       "orders_prev": 0,
-      "tier_prev": "Sticks",
-      "leads_curr": 0,
-      "orders_curr": 0,
-      "tier_curr": "Sticks"
+      "tier_prev": "Stones",
+      "leads_curr": 1,
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEUP7439",
@@ -516177,10 +516177,10 @@
       "sseid": "SSEMH0541",
       "city": "Pune",
       "leads_prev": 19,
-      "orders_prev": 1,
+      "orders_prev": 2,
       "tier_prev": "Bronze",
       "leads_curr": 19,
-      "orders_curr": 1,
+      "orders_curr": 2,
       "tier_curr": "Bronze"
     },
     {
