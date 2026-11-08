@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-11-03T03:56:22Z",
+    "generated_at": "2026-11-08T11:50:10Z",
     "as_of_date": "2026-10-31",
     "cohorts": [
       "Q3 FY20-21",
@@ -27997,6 +27997,16 @@
     },
     {
       "cohort": "Q3 FY23-24",
+      "city": "Bengaluru",
+      "month": "2026-08",
+      "tier": "Bronze",
+      "pop": 1,
+      "act": 0,
+      "repeat_act": 0,
+      "prior_tier": "Sticks"
+    },
+    {
+      "cohort": "Q3 FY23-24",
       "city": "Bhopal",
       "month": "2026-08",
       "tier": "Bronze",
@@ -28390,7 +28400,7 @@
       "city": "Bengaluru",
       "month": "2026-08",
       "tier": "Sticks",
-      "pop": 33,
+      "pop": 32,
       "act": 1,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -28830,7 +28840,7 @@
       "city": "Bengaluru",
       "month": "2026-09",
       "tier": "Bronze",
-      "pop": 11,
+      "pop": 12,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -29220,7 +29230,7 @@
       "city": "Bengaluru",
       "month": "2026-09",
       "tier": "Sticks",
-      "pop": 32,
+      "pop": 31,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -29700,7 +29710,7 @@
       "city": "Bengaluru",
       "month": "2026-10",
       "tier": "Bronze",
-      "pop": 11,
+      "pop": 12,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Bronze"
@@ -30070,7 +30080,7 @@
       "city": "Bengaluru",
       "month": "2026-10",
       "tier": "Sticks",
-      "pop": 32,
+      "pop": 31,
       "act": 0,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -44100,9 +44110,9 @@
       "city": "Nagpur",
       "month": "2026-09",
       "tier": "Bronze",
-      "pop": 62,
-      "act": 3,
-      "repeat_act": 1,
+      "pop": 61,
+      "act": 2,
+      "repeat_act": 0,
       "prior_tier": "Bronze"
     },
     {
@@ -44330,9 +44340,9 @@
       "city": "Nagpur",
       "month": "2026-09",
       "tier": "Silver",
-      "pop": 1,
-      "act": 0,
-      "repeat_act": 0,
+      "pop": 2,
+      "act": 1,
+      "repeat_act": 1,
       "prior_tier": "Bronze"
     },
     {
@@ -45190,17 +45200,7 @@
       "city": "Nagpur",
       "month": "2026-10",
       "tier": "Silver",
-      "pop": 1,
-      "act": 0,
-      "repeat_act": 0,
-      "prior_tier": "Bronze"
-    },
-    {
-      "cohort": "Q2 FY24-25",
-      "city": "Nagpur",
-      "month": "2026-10",
-      "tier": "Silver",
-      "pop": 13,
+      "pop": 14,
       "act": 2,
       "repeat_act": 1,
       "prior_tier": "Silver"
@@ -56901,7 +56901,7 @@
       "month": "2026-09",
       "tier": "Bronze",
       "pop": 47,
-      "act": 0,
+      "act": 1,
       "repeat_act": 0,
       "prior_tier": "Bronze"
     },
@@ -93620,7 +93620,7 @@
       "city": "Nagpur",
       "month": "2026-06",
       "tier": "Bronze",
-      "pop": 166,
+      "pop": 167,
       "act": 22,
       "repeat_act": 6,
       "prior_tier": "Bronze"
@@ -94230,7 +94230,7 @@
       "city": "Nagpur",
       "month": "2026-06",
       "tier": "Sticks",
-      "pop": 917,
+      "pop": 916,
       "act": 48,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -95410,7 +95410,7 @@
       "city": "Nagpur",
       "month": "2026-07",
       "tier": "Bronze",
-      "pop": 263,
+      "pop": 264,
       "act": 9,
       "repeat_act": 4,
       "prior_tier": "Bronze"
@@ -96170,7 +96170,7 @@
       "city": "Nagpur",
       "month": "2026-07",
       "tier": "Sticks",
-      "pop": 1529,
+      "pop": 1528,
       "act": 43,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -97360,7 +97360,7 @@
       "city": "Nagpur",
       "month": "2026-08",
       "tier": "Bronze",
-      "pop": 326,
+      "pop": 327,
       "act": 19,
       "repeat_act": 2,
       "prior_tier": "Bronze"
@@ -98110,7 +98110,7 @@
       "city": "Nagpur",
       "month": "2026-08",
       "tier": "Sticks",
-      "pop": 1486,
+      "pop": 1485,
       "act": 34,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -99210,7 +99210,7 @@
       "city": "Nagpur",
       "month": "2026-09",
       "tier": "Bronze",
-      "pop": 354,
+      "pop": 355,
       "act": 24,
       "repeat_act": 6,
       "prior_tier": "Bronze"
@@ -99960,7 +99960,7 @@
       "city": "Nagpur",
       "month": "2026-09",
       "tier": "Sticks",
-      "pop": 1452,
+      "pop": 1451,
       "act": 44,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -101050,7 +101050,7 @@
       "city": "Nagpur",
       "month": "2026-10",
       "tier": "Bronze",
-      "pop": 374,
+      "pop": 375,
       "act": 29,
       "repeat_act": 8,
       "prior_tier": "Bronze"
@@ -101840,7 +101840,7 @@
       "city": "Nagpur",
       "month": "2026-10",
       "tier": "Sticks",
-      "pop": 1408,
+      "pop": 1407,
       "act": 42,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -104550,7 +104550,7 @@
       "city": "Nagpur",
       "month": "2026-09",
       "tier": "Bronze",
-      "pop": 32,
+      "pop": 33,
       "act": 10,
       "repeat_act": 10,
       "prior_tier": "Sticks"
@@ -105140,7 +105140,7 @@
       "city": "Nagpur",
       "month": "2026-09",
       "tier": "Sticks",
-      "pop": 959,
+      "pop": 958,
       "act": 68,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -105850,7 +105850,7 @@
       "city": "Aurangabad",
       "month": "2026-10",
       "tier": "Bronze",
-      "pop": 1,
+      "pop": 2,
       "act": 1,
       "repeat_act": 1,
       "prior_tier": "Sticks"
@@ -106370,7 +106370,7 @@
       "city": "Nagpur",
       "month": "2026-10",
       "tier": "Bronze",
-      "pop": 233,
+      "pop": 234,
       "act": 24,
       "repeat_act": 11,
       "prior_tier": "Bronze"
@@ -107100,7 +107100,7 @@
       "city": "Nagpur",
       "month": "2026-10",
       "tier": "Sticks",
-      "pop": 1311,
+      "pop": 1310,
       "act": 92,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -107250,7 +107250,7 @@
       "city": "Aurangabad",
       "month": "2026-10",
       "tier": "Stones",
-      "pop": 22,
+      "pop": 21,
       "act": 4,
       "repeat_act": 4,
       "prior_tier": "Sticks"

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-11-03T03:58:37Z",
+    "generated_at": "2026-11-08T11:53:15Z",
     "prev_end": "2026-09-30",
     "curr_end": "2026-10-31",
     "prev_label": "Sep '26",
@@ -448288,11 +448288,11 @@
     {
       "sseid": "RSSEUP1813",
       "city": "Lucknow",
-      "leads_prev": 3,
-      "orders_prev": 1,
+      "leads_prev": 4,
+      "orders_prev": 2,
       "tier_prev": "Bronze",
-      "leads_curr": 3,
-      "orders_curr": 1,
+      "leads_curr": 4,
+      "orders_curr": 2,
       "tier_curr": "Bronze"
     },
     {
