@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-11-09T02:28:12Z",
+    "generated_at": "2026-11-18T13:46:33Z",
     "prev_end": "2026-09-30",
     "curr_end": "2026-10-31",
     "prev_label": "Sep '26",
@@ -425948,12 +425948,12 @@
     {
       "sseid": "RSSETN1310",
       "city": "Chennai",
-      "leads_prev": 1,
-      "orders_prev": 0,
-      "tier_prev": "Stones",
-      "leads_curr": 1,
-      "orders_curr": 0,
-      "tier_curr": "Stones"
+      "leads_prev": 2,
+      "orders_prev": 1,
+      "tier_prev": "Bronze",
+      "leads_curr": 2,
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSETN1311",
@@ -502538,12 +502538,12 @@
     {
       "sseid": "RSSEUP9183",
       "city": "Agra",
-      "leads_prev": 0,
-      "orders_prev": 0,
-      "tier_prev": "Sticks",
-      "leads_curr": 0,
-      "orders_curr": 0,
-      "tier_curr": "Sticks"
+      "leads_prev": 1,
+      "orders_prev": 1,
+      "tier_prev": "Bronze",
+      "leads_curr": 1,
+      "orders_curr": 1,
+      "tier_curr": "Bronze"
     },
     {
       "sseid": "RSSEUP9184",
