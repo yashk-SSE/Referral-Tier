@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-11-18T13:44:25Z",
+    "generated_at": "2026-11-20T03:57:14Z",
     "as_of_date": "2026-10-31",
     "cohorts": [
       "Q3 FY20-21",
@@ -82950,7 +82950,7 @@
       "city": "Nagpur",
       "month": "2026-05",
       "tier": "Bronze",
-      "pop": 207,
+      "pop": 208,
       "act": 22,
       "repeat_act": 3,
       "prior_tier": "Bronze"
@@ -83600,7 +83600,7 @@
       "city": "Nagpur",
       "month": "2026-05",
       "tier": "Sticks",
-      "pop": 758,
+      "pop": 757,
       "act": 30,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -84500,7 +84500,7 @@
       "city": "Nagpur",
       "month": "2026-06",
       "tier": "Bronze",
-      "pop": 216,
+      "pop": 217,
       "act": 18,
       "repeat_act": 4,
       "prior_tier": "Bronze"
@@ -85160,7 +85160,7 @@
       "city": "Nagpur",
       "month": "2026-06",
       "tier": "Sticks",
-      "pop": 728,
+      "pop": 727,
       "act": 19,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -86060,7 +86060,7 @@
       "city": "Nagpur",
       "month": "2026-07",
       "tier": "Bronze",
-      "pop": 233,
+      "pop": 234,
       "act": 9,
       "repeat_act": 3,
       "prior_tier": "Bronze"
@@ -86730,7 +86730,7 @@
       "city": "Nagpur",
       "month": "2026-07",
       "tier": "Sticks",
-      "pop": 709,
+      "pop": 708,
       "act": 17,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -87570,7 +87570,7 @@
       "city": "Nagpur",
       "month": "2026-08",
       "tier": "Bronze",
-      "pop": 254,
+      "pop": 255,
       "act": 17,
       "repeat_act": 4,
       "prior_tier": "Bronze"
@@ -88230,7 +88230,7 @@
       "city": "Nagpur",
       "month": "2026-08",
       "tier": "Sticks",
-      "pop": 692,
+      "pop": 691,
       "act": 19,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -89050,7 +89050,7 @@
       "city": "Nagpur",
       "month": "2026-09",
       "tier": "Bronze",
-      "pop": 262,
+      "pop": 263,
       "act": 11,
       "repeat_act": 2,
       "prior_tier": "Bronze"
@@ -89750,7 +89750,7 @@
       "city": "Nagpur",
       "month": "2026-09",
       "tier": "Sticks",
-      "pop": 673,
+      "pop": 672,
       "act": 17,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -90590,7 +90590,7 @@
       "city": "Nagpur",
       "month": "2026-10",
       "tier": "Bronze",
-      "pop": 269,
+      "pop": 270,
       "act": 13,
       "repeat_act": 2,
       "prior_tier": "Bronze"
@@ -91280,7 +91280,7 @@
       "city": "Nagpur",
       "month": "2026-10",
       "tier": "Sticks",
-      "pop": 656,
+      "pop": 655,
       "act": 9,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -95510,8 +95510,8 @@
       "city": "Pune",
       "month": "2026-07",
       "tier": "Bronze",
-      "pop": 264,
-      "act": 24,
+      "pop": 265,
+      "act": 25,
       "repeat_act": 7,
       "prior_tier": "Bronze"
     },
@@ -96210,8 +96210,8 @@
       "city": "Pune",
       "month": "2026-07",
       "tier": "Sticks",
-      "pop": 922,
-      "act": 43,
+      "pop": 921,
+      "act": 42,
       "repeat_act": 0,
       "prior_tier": "Sticks"
     },
@@ -97460,7 +97460,7 @@
       "city": "Pune",
       "month": "2026-08",
       "tier": "Bronze",
-      "pop": 313,
+      "pop": 314,
       "act": 20,
       "repeat_act": 7,
       "prior_tier": "Bronze"
@@ -98660,7 +98660,7 @@
       "city": "Pune",
       "month": "2026-08",
       "tier": "Stones",
-      "pop": 28,
+      "pop": 27,
       "act": 4,
       "repeat_act": 4,
       "prior_tier": "Sticks"
@@ -99280,7 +99280,7 @@
       "city": "Pune",
       "month": "2026-09",
       "tier": "Bronze",
-      "pop": 335,
+      "pop": 336,
       "act": 26,
       "repeat_act": 1,
       "prior_tier": "Bronze"
@@ -100510,7 +100510,7 @@
       "city": "Pune",
       "month": "2026-09",
       "tier": "Stones",
-      "pop": 250,
+      "pop": 249,
       "act": 17,
       "repeat_act": 2,
       "prior_tier": "Stones"
@@ -101140,7 +101140,7 @@
       "city": "Pune",
       "month": "2026-10",
       "tier": "Bronze",
-      "pop": 350,
+      "pop": 351,
       "act": 30,
       "repeat_act": 3,
       "prior_tier": "Bronze"
@@ -102370,7 +102370,7 @@
       "city": "Pune",
       "month": "2026-10",
       "tier": "Stones",
-      "pop": 264,
+      "pop": 263,
       "act": 23,
       "repeat_act": 5,
       "prior_tier": "Stones"
@@ -104630,7 +104630,7 @@
       "city": "Pune",
       "month": "2026-09",
       "tier": "Bronze",
-      "pop": 160,
+      "pop": 161,
       "act": 26,
       "repeat_act": 7,
       "prior_tier": "Bronze"
@@ -105180,7 +105180,7 @@
       "city": "Pune",
       "month": "2026-09",
       "tier": "Sticks",
-      "pop": 610,
+      "pop": 609,
       "act": 31,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -105940,7 +105940,7 @@
       "city": "Bhopal",
       "month": "2026-10",
       "tier": "Bronze",
-      "pop": 58,
+      "pop": 59,
       "act": 9,
       "repeat_act": 2,
       "prior_tier": "Bronze"
@@ -106470,7 +106470,7 @@
       "city": "Pune",
       "month": "2026-10",
       "tier": "Bronze",
-      "pop": 259,
+      "pop": 260,
       "act": 38,
       "repeat_act": 15,
       "prior_tier": "Bronze"
@@ -107140,7 +107140,7 @@
       "city": "Pune",
       "month": "2026-10",
       "tier": "Sticks",
-      "pop": 882,
+      "pop": 881,
       "act": 64,
       "repeat_act": 0,
       "prior_tier": "Sticks"
@@ -107330,7 +107330,7 @@
       "city": "Bhopal",
       "month": "2026-10",
       "tier": "Stones",
-      "pop": 193,
+      "pop": 192,
       "act": 18,
       "repeat_act": 8,
       "prior_tier": "Stones"
